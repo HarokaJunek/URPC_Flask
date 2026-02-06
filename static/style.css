@@ -1,0 +1,668 @@
+/* ============================================================================
+   БАЗОВЫЕ СТИЛИ
+   ============================================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: rgb(77, 195, 240);
+    --secondary-color: rgba(81, 81, 82, 1);
+    --light-color: #f8f9fa;
+    --dark-color: #333;
+    --text-color: #333;
+    --text-light: #666;
+    --border-color: #e0e0e0;
+    --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --shadow-heavy: 0 15px 40px rgba(0, 0, 0, 0.15);
+    --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    background-color: white;
+    line-height: 1.6;
+    color: var(--text-color);
+}
+
+/* ============================================================================
+   ШАПКА И НАВИГАЦИЯ (ВАШ СТИЛЬ С ИКОНКАМИ)
+   ============================================================================ */
+
+.navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 200px 10px 200px;
+    background: rgba(81, 81, 82, 1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.navbar img {
+    width: 185px;
+    height: 69px;
+    object-fit: contain;
+    transition: var(--transition);
+}
+
+.navbar img:hover {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+}
+
+.nav-menu {
+    font-size: 120%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Навигационные ссылки - ваш стиль с иконками */
+.nav-link {
+    color: white;
+    text-decoration: none;
+    position: relative;
+    padding: 5px 0;
+    margin: 0 15px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link i {
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -3px;
+    left: 0;
+    background-color: rgb(77, 195, 240);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+    color: rgb(77, 195, 240);
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.nav-link:hover i {
+    transform: translateX(3px);
+}
+
+/* ============================================================================
+   ОСНОВНОЙ КОНТЕНТ
+   ============================================================================ */
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    gap: 60px;
+    padding: 50px 200px 10px 200px;
+    align-items: flex-start;
+    margin: 0 auto;
+}
+
+.blocks {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 40px;
+    border-radius: 13px;
+    box-shadow: 4px 4px 50px -10px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 1);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.blocks:hover {
+    transform: translateY(-5px);
+    box-shadow: 8px 8px 60px -10px rgba(0, 0, 0, 0.3);
+}
+
+.blocks::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--primary-color), #2a8eb5);
+    border-radius: 13px 0 0 13px;
+}
+
+h1 {
+    color: rgba(0, 0, 0, 1);
+    font-family: Montserrat;
+    font-style: SemiBold;
+    font-size: 160%;
+    font-weight: 600;
+    line-height: 44px;
+    letter-spacing: 0px;
+    text-align: left;
+    margin-bottom: 30px;
+    position: relative;
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(to right, var(--primary-color), transparent);
+    border-radius: 2px;
+}
+
+h1 i {
+    color: var(--primary-color);
+}
+
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 10px 0px 10px 0px;
+}
+
+.form-group {
+    position: relative;
+    width: 100%;
+}
+
+/* ============================================================================
+   СТИЛИ ДЛЯ ФОРМ (ЭРГОНОМИКА)
+   ============================================================================ */
+
+form label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+form label.required::after {
+    content: '*';
+    color: #e74c3c;
+    margin-left: 4px;
+}
+
+form label i {
+    color: var(--primary-color);
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+}
+
+/* Подсказки под полями ввода */
+.form-hint {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 4px;
+    display: block;
+    transition: color 0.3s ease;
+}
+
+.form-group:focus-within .form-hint {
+    color: var(--primary-color);
+}
+
+/* Обертка для пароля с кнопкой показа - ИСПРАВЛЕНО */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 45px !important; /* Место для кнопки */
+}
+
+/* Две колонки для паролей в регистрации */
+.password-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+}
+
+/* Чекбоксы */
+.checkbox-container {
+    display: block;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-color);
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 12px;
+    user-select: none;
+    align-content: center;
+
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    height: 18px;
+    width: 18px;
+    background-color: white;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    border-color: var(--primary-color);
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Дополнительные опции формы */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.forgot-password {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+    color: #2a8eb5;
+}
+
+/* Ссылка на вход */
+.login-link {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.login-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================================
+   ПОЛЯ ВВОДА
+   ============================================================================ */
+
+form input {
+    font-size: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(236, 235, 235, 1);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 1);
+    width: 100%;
+    padding: 16px;
+    font-family: 'Montserrat', sans-serif;
+    transition: var(--transition);
+    color: var(--text-color);
+}
+
+form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(77, 195, 240, 0.1);
+}
+
+form input::placeholder {
+    color: #aaa;
+    font-weight: 300;
+}
+
+/* Стили для поля телефона */
+#phone {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23777' viewBox='0 0 16 16'%3E%3Cpath d='M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 20px center;
+    padding-left: 50px;
+}
+
+/* ============================================================================
+   КНОПКИ (ВАШ ОРИГИНАЛЬНЫЙ СТИЛЬ)
+   ============================================================================ */
+
+form button {
+    width: 100%;
+    margin-top: 30px;
+    border-radius: 7px;
+    background: rgba(81, 81, 82, 1);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-family: 'Montserrat', sans-serif;
+}
+
+form button:hover {
+    background: rgb(77, 195, 240);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+form button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Опционально: если нужно чтобы текст при наведении был белым */
+form button:hover {
+    color: white;
+}
+
+/* ============================================================================
+   ПОДВАЛ (УЛУЧШЕННЫЙ)
+   ============================================================================ */
+
+footer {
+    text-align: center;
+    margin-top: 80px;
+    padding: 40px 0 20px;
+    color: rgba(81, 81, 82, 1);
+    border-top: 1px solid #e0e0e0;
+    background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+}
+
+.footer-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.footer-logo img {
+    width: 60px;
+    height: auto;
+    filter: grayscale(1);
+    opacity: 0.7;
+    transition: var(--transition);
+}
+
+.footer-logo img:hover {
+    filter: grayscale(0);
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+.footer-info {
+    flex: 1;
+    text-align: center;
+}
+
+.footer-info p {
+    margin-bottom: 5px;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.footer-info .copyright {
+    font-size: 12px;
+    color: #999;
+}
+
+/* ============================================================================
+   АДАПТИВНОСТЬ
+   ============================================================================ */
+
+@media (max-width: 1500px) {
+    .container {
+        flex-direction: column;
+        padding: 50px 100px 10px 100px;
+    }
+
+    .navbar {
+        padding: 10px 100px;
+    }
+
+    .footer-content {
+        padding: 0 100px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .container {
+        padding: 50px 50px 10px 50px;
+    }
+
+    .navbar {
+        padding: 10px 50px;
+    }
+
+    .footer-content {
+        padding: 0 50px;
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .password-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 30px 20px 10px 20px;
+        gap: 30px;
+    }
+
+    .navbar {
+        padding: 10px 20px;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .nav-menu {
+        width: 100%;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .nav-link {
+        padding: 10px 15px;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .blocks {
+        padding: 30px;
+    }
+
+    h1 {
+        font-size: 140%;
+        line-height: 36px;
+    }
+
+    form button {
+        padding: 14px;
+        font-size: 15px;
+    }
+
+    .footer-content {
+        padding: 0 20px;
+    }
+
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    form input {
+        font-size: 16px; /* Предотвращает зум на iOS */
+    }
+
+    .password-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-menu {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .nav-link {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .blocks {
+        padding: 25px;
+    }
+
+    h1 {
+        font-size: 130%;
+        line-height: 32px;
+    }
+
+    form input {
+        padding: 14px;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+/* ============================================================================
+   АНИМАЦИИ И ЭФФЕКТЫ
+   ============================================================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.blocks {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.blocks:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+/* Эффект при фокусе на поле */
+.form-group:focus-within label {
+    color: var(--primary-color);
+}

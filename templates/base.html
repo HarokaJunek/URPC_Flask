@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}URPC{% endblock %}</title>
+    <!-- Подключение шрифта Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Иконки Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Навигационное меню -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img style="width: 185px; height: 69px;" src="{{ url_for ('static', filename='img/logo.png')}}">
+        </div>
+        <!-- Неавторизованный пользователь -->
+        <div class="nav-menu">
+            <a href="#login" class="nav-link active">
+                <i class="fas fa-sign-in-alt"></i> Войти в систему
+            </a>
+            <a href="#register" class="nav-link">
+                <i class="fas fa-user-plus"></i> Регистрация
+            </a>
+        </div>
+    </nav>
+
+    <!-- Основное содержимое страницы -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Подвал -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="{{ url_for('static', filename='img/logo.png')}}" alt="URPC Логотип">
+            </div>
+            <div class="footer-info">
+                <p>ГАПОУ СО "Уральский политехнический колледж - МЦК"</p>
+                <p class="copyright">© 2026 Все права защищены</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Подсветка активной ссылки в навигации
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+
+                        // Плавная прокрутка к якорю
+                        const targetId = this.getAttribute('href');
+                        if(targetId !== '#') {
+                            const targetElement = document.querySelector(targetId);
+                            if(targetElement) {
+                                targetElement.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
