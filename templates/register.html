@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="blocks">
+    <h1><i class="fas fa-user-plus"></i> Регистрация</h1>
+    <form>
+        <div class="form-group">
+            <label for="regUsername" class="required">
+                <i class="fas fa-user"></i> Логин
+            </label>
+            <input type="text" id="regUsername" name="username" placeholder="Придумайте логин">
+            <div class="form-hint">Только латинские буквы и цифры</div>
+        </div>
+
+        <!-- Поля паролей в одну строку -->
+        <div class="password-row">
+            <div class="form-group">
+                <label for="regPassword" class="required">
+                    <i class="fas fa-lock"></i> Пароль
+                </label>
+                <div class="password-wrapper">
+                    <input type="password" id="regPassword" name="password" placeholder="Придумайте пароль">
+                </div>
+                <div class="form-hint">Минимум 6 символов</div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword" class="required">
+                    <i class="fas fa-lock"></i> Повторите пароль
+                </label>
+                <div class="password-wrapper">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Повторите пароль">
+                </div>
+                <div class="form-hint">Пароли должны совпадать</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="email" class="required">
+                <i class="fas fa-envelope"></i> Электронная почта
+            </label>
+            <input type="email" id="email" name="email" placeholder="example@mail.ru">
+            <div class="form-hint">На эту почту придет подтверждение</div>
+        </div>
+
+        <div class="form-group">
+            <label for="fullName" class="required">
+                <i class="fas fa-user-circle"></i> ФИО
+            </label>
+            <input type="text" id="fullName" name="fullName" placeholder="Иванов Иван Иванович">
+            <div class="form-hint">Введите полностью фамилию, имя и отчество</div>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">
+                <i class="fas fa-phone"></i> Номер телефона
+            </label>
+            <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__" maxlength="18">
+            <div class="form-hint">Необязательное поле</div>
+        </div>
+
+        <div class="form-options">
+            <label class="checkbox-container">
+                <input type="checkbox" name="agree">
+                <span class="checkmark"></span>
+                Я согласен с <a href="#">правилами</a> и <a href="#">политикой конфиденциальности</a>
+            </label>
+
+        </div>
+
+        <button type="button">Зарегистрироваться</button>
+    </form>
+</div>
+
+<script>
+    // Маска для телефона
+    document.addEventListener('DOMContentLoaded', function() {
+        const phoneInput = document.getElementById('phone');
+
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+
+                if (value.startsWith('7') || value.startsWith('8')) {
+                    value = value.substring(1);
+                }
+
+                value = value.substring(0, 10);
+
+                let formattedValue = '+7';
+                if (value.length > 0) {
+                    formattedValue += ' (' + value.substring(0, 3);
+                }
+                if (value.length > 3) {
+                    formattedValue += ') ' + value.substring(3, 6);
+                }
+                if (value.length > 6) {
+                    formattedValue += '-' + value.substring(6, 8);
+                }
+                if (value.length > 8) {
+                    formattedValue += '-' + value.substring(8, 10);
+                }
+
+                if (value.length <= 3 && formattedValue.endsWith('(')) {
+                    formattedValue = formattedValue.slice(0, -2);
+                }
+
+                e.target.value = formattedValue;
+            });
+        }
+    });
+</script>
+{% endblock %}

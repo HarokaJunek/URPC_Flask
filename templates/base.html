@@ -19,14 +19,33 @@
         </div>
         <!-- Неавторизованный пользователь -->
         <div class="nav-menu">
+            {% if session.user_id %}
+            <p>Привет</p>
+            {% else %}
             <a href="#login" class="nav-link active">
                 <i class="fas fa-sign-in-alt"></i> Войти в систему
             </a>
             <a href="#register" class="nav-link">
                 <i class="fas fa-user-plus"></i> Регистрация
             </a>
+            {% endif %}
         </div>
     </nav>
+
+
+        <!-- Уведомления (flash messages) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                </div>
+        {% endif %}
+    {% endwith %}
+
 
     <!-- Основное содержимое страницы -->
     <main class="container">
