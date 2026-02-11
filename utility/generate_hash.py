@@ -19,3 +19,7 @@ def main():
     print("\n✅ Результат:")
     print(f"Пароль: {password}")
     print(f"Хеш: {hashed}")
+
+
+if __name__ == "__main__":
+    main()
