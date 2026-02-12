@@ -20,7 +20,9 @@
         <!-- Неавторизованный пользователь -->
         <div class="nav-menu">
             {% if session.user_id %}
-            <p>Привет</p>
+            <a href="{{ url_for('logout') }}" class="nav-link">Вход
+                <i class="fas fa-sign-out"></i>
+            </a>
             {% else %}
             <a href="#login" class="nav-link active">
                 <i class="fas fa-sign-in-alt"></i> Войти в систему

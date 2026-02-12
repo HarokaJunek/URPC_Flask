@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/nagruzka_DEMO.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="nagruzka_DEMO [2]" uuid="7e29466f-bd81-4963-b963-54f2d0f3d9ee">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/instance/nagruzka_DEMO.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

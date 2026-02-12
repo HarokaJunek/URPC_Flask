@@ -63,28 +63,28 @@ def index():
         if not password:
             errors.append('Введите пароль')
 
-            # ============================================
-            # 3. ПОИСК ПОЛЬЗОВАТЕЛЯ В БАЗЕ ДАННЫХ
-            # ============================================
+        # ============================================
+        # 3. ПОИСК ПОЛЬЗОВАТЕЛЯ В БАЗЕ ДАННЫХ
+        # ============================================
 
-            # Устанавливаем соединение с БД
+        # Устанавливаем соединение с БД
         conn = get_db_connection()
 
         try:
             # Ищем пользователя по username ИЛИ email
             # Пользователь может ввести любое из двух
             user = conn.execute('''
-                                    SELECT id_user, email, login, password, id_role
+                                    SELECT id_user, full_name, email, login, password, id_role
                                     FROM users
                                     WHERE login = ?
                                        OR email = ?
-                                    ''', (login_input, login_input)).fetchone()
+                                    ''', (login_input, login_input,)).fetchone()
 
             # Если пользователь не найден
             if not user:
                 # Не говорим точно, что не так (логин или пароль)
                 # Это стандартная практика безопасности
-                flash('Неверное имя пользователя/email или пароль1', 'danger')
+                flash('Неверное имя пользователя/email или пароль', 'danger')
                 conn.close()
                 return render_template('index.html')
 
@@ -111,6 +111,7 @@ def index():
             session['user_id'] = user['id_user']
             session['username'] = user['login']
             session['email'] = user['email']
+            session['full_name'] = user['full_name']
             session['role'] = int(user['id_role'])  # Преобразуем 0/1 в True/False
             session['login_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -129,7 +130,7 @@ def index():
                 # 7. УВЕДОМЛЕНИЕ И ПЕРЕНАПРАВЛЕНИЕ
                 # ============================================
 
-            flash(f'Добро пожаловать, {user["login"]}!', 'success')
+            flash(f'Добро пожаловать, {session['full_name']}!', 'success')
 
             # Проверяем, есть ли в запросе параметр 'next' (перенаправление после входа)
             next_page = request.args.get('next')
@@ -158,7 +159,34 @@ def index():
     # ============================================
     return render_template('index.html')
 
+@app.route('/logout')
+def logout():
+    """
+    Выход из системы - очистка сессии.
 
+    Безопасный выход включает:
+    1. Очистку всех данных сессии
+    2. Сообщение пользователю
+    3. Перенаправление на главную
+    """
+
+    # Проверяем, был ли пользователь авторизован
+    if 'user_id' in session:
+        username = session.get('username', 'Неизвестный')
+
+        # Запоминаем данные для сообщения (перед очисткой)
+        username = session.get('username', 'Пользователь')
+
+        full_name = session['full_name']
+
+        # ПОЛНАЯ очистка сессии
+        session.clear()
+
+        flash(f'Вы успешно вышли из системы. До свидания, {full_name}!', 'info')
+    else:
+        flash('Вы не были авторизованы.', 'warning')
+
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
