@@ -112,8 +112,26 @@ def index():
             session['username'] = user['login']
             session['email'] = user['email']
             session['full_name'] = user['full_name']
-            session['role'] = int(user['id_role'])  # Преобразуем 0/1 в True/False
+            match int(user['id_role']):
+                case 1:
+                    session['is_guest'] = True
+                case 2:
+                    session['is_admin'] = True
+                case 3:
+                    session['is_zav'] = True
+                case 4:
+                    session['is_prepod'] = True
+                case 5:
+                    session['is_specialist'] = True
+                case _:
+                    session['is_guest'] = False
+                    session['is_admin'] = False
+                    session['is_zav'] = False
+                    session['is_prepod'] = False
+                    session['is_specialist'] = False
+
             session['login_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
 
             print(f"✅ Пользователь найден:")
             print(f"   ID: {user['id_user']}")
