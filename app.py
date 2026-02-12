@@ -135,7 +135,7 @@ def register():
         try:
             # Проверяем, существует ли пользователь с таким username
             existing_user = conn.execute(
-                'SELECT id FROM users WHERE username = ?',
+                'SELECT id_user FROM users WHERE login = ?',
                 (username,)
             ).fetchone()
 
@@ -146,7 +146,7 @@ def register():
 
             # Проверяем, существует ли пользователь с таким email
             existing_email = conn.execute(
-                'SELECT id FROM users WHERE email = ?',
+                'SELECT id_user FROM users WHERE email = ?',
                 (email,)
             ).fetchone()
 
@@ -176,7 +176,7 @@ def register():
                 cursor = conn.cursor()
                 cursor.execute('''
                                INSERT INTO users (login, email, password, phone, full_name, created_at)
-                               VALUES (?, ?, ?, ?, ?, datetime('now'))
+                               VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
                                ''', (username, email, password_hash, phone, full_name))
                 # Подтверждаем транзакцию
                 conn.commit()
@@ -198,6 +198,7 @@ def register():
 
         except sqlite3.Error as e:
             flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
+            flash(f'Ошибка БД: {str(e)}', 'danger')
             return render_template('register.html')
 
         finally:
