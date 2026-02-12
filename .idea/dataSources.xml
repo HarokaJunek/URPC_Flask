@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="nagruzka_DEMO" uuid="18423b1d-772c-4012-b32d-a5c5afa4b145">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/nagruzka_DEMO.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="nagruzka_DEMO [2]" uuid="7e29466f-bd81-4963-b963-54f2d0f3d9ee">
+    <data-source source="LOCAL" name="nagruzka_DEMO" uuid="67f467eb-0583-4300-aade-723e97fdd562">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>

@@ -39,6 +39,183 @@ def get_db_connection():
     return conn
 
 
+
+
+
+
+
+# ============================================================================
+# 5. РЕАЛИЗАЦИЯ РЕГИСТРАЦИИ ПОЛЬЗОВАТЕЛЯ
+# ============================================================================
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """
+    Обработка регистрации нового пользователя.
+
+    GET: Показывает форму регистрации
+    POST: Принимает данные, валидирует и сохраняет в БД
+
+    Процесс:
+    1. Получение данных из формы
+    2. Валидация (проверка корректности)
+    3. Проверка уникальности в БД
+    4. Хеширование пароля
+    5. Сохранение в таблицы users и profiles
+    6. Уведомление пользователя о результате
+    """
+
+    # Если пользователь уже авторизован - перенаправляем на главную
+    if 'user_id' in session:
+        flash('Вы уже авторизованы! Для создания нового аккаунта выйдите из системы.', 'info')
+        return redirect(url_for('index'))
+
+    # ============================================
+    # ОБРАБОТКА POST-ЗАПРОСА (отправка формы)
+    # ============================================
+    if request.method == 'POST':
+
+        # 1. ПОЛУЧАЕМ ДАННЫЕ ИЗ ФОРМЫ
+        # Используем .get() для безопасного получения данных
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirmPassword', '')
+        full_name = request.form.get('fullName', '')
+        phone = request.form.get('phone', '')
+
+        # ============================================
+        # 2. ВАЛИДАЦИЯ ДАННЫХ (проверка корректности)
+        # ============================================
+        errors = []
+
+        # --- Проверка имени пользователя ---
+        if not username:
+            errors.append('Имя пользователя обязательно для заполнения')
+        elif len(username) < 3:
+            errors.append('Имя пользователя должно быть не менее 3 символов')
+        elif len(username) > 20:
+            errors.append('Имя пользователя должно быть не более 20 символов')
+        elif not username.replace('_', '').isalnum():
+            errors.append('Имя пользователя может содержать только буквы, цифры и подчеркивание')
+
+        # --- Проверка email ---
+        if not email:
+            errors.append('Email обязателен для заполнения')
+        elif '@' not in email or '.' not in email:
+            errors.append('Введите корректный email адрес')
+        elif len(email) > 100:
+            errors.append('Email слишком длинный')
+
+        # --- Проверка пароля ---
+        if not password:
+            errors.append('Пароль обязателен для заполнения')
+        elif len(password) < 6:
+            errors.append('Пароль должен быть не менее 6 символов')
+        elif password != confirm_password:
+            errors.append('Пароли не совпадают')
+
+        # --- Проверка ФИО ---
+        if not full_name:
+            errors.append('ФИО обязателен для заполнения')
+
+        # Если есть ошибки валидации - показываем их
+        if errors:
+            for error in errors:
+                flash(error, 'danger')
+            return render_template('register.html')
+
+        # ============================================
+        # 3. ПРОВЕРКА УНИКАЛЬНОСТИ В БАЗЕ ДАННЫХ
+        # ============================================
+
+        # Устанавливаем соединение с БД
+        conn = get_db_connection()
+
+        try:
+            # Проверяем, существует ли пользователь с таким username
+            existing_user = conn.execute(
+                'SELECT id FROM users WHERE username = ?',
+                (username,)
+            ).fetchone()
+
+            if existing_user:
+                flash('Пользователь с таким именем уже существует!', 'danger')
+                conn.close()
+                return render_template('register.html')
+
+            # Проверяем, существует ли пользователь с таким email
+            existing_email = conn.execute(
+                'SELECT id FROM users WHERE email = ?',
+                (email,)
+            ).fetchone()
+
+            if existing_email:
+                flash('Пользователь с таким email уже существует!', 'danger')
+                conn.close()
+                return render_template('register.html')
+
+
+            # ============================================
+            # 4. ХЕШИРОВАНИЕ ПАРОЛЯ
+            # ============================================
+
+            # Генерируем безопасный хеш пароля
+            # werkzeug.security автоматически добавляет "соль" (salt) для защиты
+            password_hash = generate_password_hash(password)
+
+            # ============================================
+            # 5. СОХРАНЕНИЕ В БАЗУ ДАННЫХ
+            # ============================================
+
+            # Начинаем транзакцию для атомарности операций
+            conn.execute('BEGIN TRANSACTION')
+
+            try:
+                # 5.1. Сохраняем в таблицу users
+                cursor = conn.cursor()
+                cursor.execute('''
+                               INSERT INTO users (login, email, password, phone, full_name, created_at)
+                               VALUES (?, ?, ?, ?, ?, datetime('now'))
+                               ''', (username, email, password_hash, phone, full_name))
+                # Подтверждаем транзакцию
+                conn.commit()
+
+                # ============================================
+                # 6. УВЕДОМЛЕНИЕ ОБ УСПЕХЕ
+                # ============================================
+                flash(f'Регистрация успешна! Добро пожаловать, {username}!', 'success')
+                flash('Теперь вы можете войти в систему.', 'info')
+
+                # Перенаправляем на страницу входа
+                return redirect(url_for('index'))
+
+            except sqlite3.Error as e:
+                # Откатываем транзакцию при ошибке
+                conn.rollback()
+                flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                return render_template('register.html')
+
+        except sqlite3.Error as e:
+            flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
+            return render_template('register.html')
+
+        finally:
+            # Всегда закрываем соединение с БД
+            conn.close()
+
+    # ============================================
+    # ОБРАБОТКА GET-ЗАПРОСА (показ формы)
+    # ============================================
+    return render_template('register.html')
+
+
+
+
+
+
+
+
 @app.route('/',methods=['GET', 'POST'])
 def index():
     # ============================================
