@@ -252,7 +252,7 @@ def index():
             # Ищем пользователя по username ИЛИ email
             # Пользователь может ввести любое из двух
             user = conn.execute('''
-                                    SELECT id_user, full_name, email, login, password, id_role
+                                    SELECT id_user, full_name, email, login, password, id_role, kol_auth
                                     FROM users
                                     WHERE login = ?
                                        OR email = ?
@@ -310,6 +310,21 @@ def index():
 
             session['login_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+
+            try:
+                # 5.1. Сохраняем в таблицу users
+                cursor = conn.cursor()
+                cursor.execute('''
+                               UPDATE users SET
+                               kol_auth = ?, last_auth = ?
+                                WHERE id_user = ?
+                               ''', (int(user['kol_auth']) + 1, session['login_time'], session['user_id']))
+                # Подтверждаем транзакцию
+                conn.commit()
+            except sqlite3.Error as e:
+                # Откатываем транзакцию при ошибке
+                conn.rollback()
+                flash(f'Ошибка базы данных: {str(e)}', 'danger')
 
             print(f"✅ Пользователь найден:")
             print(f"   ID: {user['id_user']}")
