@@ -189,10 +189,10 @@ body {
     overflow: hidden;
 }
 
-.blocks:hover {
+/*.blocks:hover {
     transform: translateY(-5px);
     box-shadow: 8px 8px 60px -10px rgba(0, 0, 0, 0.3);
-}
+}*/
 
 .blocks::before {
     content: '';
@@ -1047,3 +1047,634 @@ footer {
         justify-content: center;
     }
 }
+
+
+
+
+
+
+
+/* Добавьте этот код в ваш CSS файл */
+
+/* ============================================================================
+   ТАБЛИЦЫ ДЛЯ АДМИНИСТРАТОРА
+   ============================================================================ */
+
+.all-table-container {
+    width: 100%;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    padding: 25px;
+    margin: 20px 0;
+    animation: fadeIn 0.6s ease-out;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+/* Заголовок таблицы */
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.table-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.table-header h2 i {
+    color: var(--primary-color);
+}
+
+.table-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Кнопка добавления */
+.add-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(77, 195, 240, 0.3);
+    white-space: nowrap;
+}
+
+.add-btn:hover {
+    background: #2a8eb5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(77, 195, 240, 0.4);
+}
+
+.add-btn:active {
+    transform: translateY(0);
+}
+
+/* Поиск */
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    color: var(--text-light);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.search-box input {
+    padding: 10px 15px 10px 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 30px;
+    font-size: 14px;
+    width: 100%;
+    transition: var(--transition);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(77, 195, 240, 0.1);
+}
+
+.search-box:focus-within i {
+    color: var(--primary-color);
+}
+
+/* Обертка для горизонтального скролла */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Основная таблица */
+.all-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 900px;
+}
+
+.all-table th {
+    text-align: left;
+    padding: 15px 12px;
+    background: #f8f9fa;
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.all-table th:first-child {
+    padding-left: 20px;
+    border-radius: 8px 0 0 0;
+}
+
+.all-table th:last-child {
+    padding-right: 20px;
+    border-radius: 0 8px 0 0;
+}
+
+.all-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+    vertical-align: middle;
+}
+
+.all-table td:first-child {
+    padding-left: 20px;
+}
+
+.all-table td:last-child {
+    padding-right: 20px;
+}
+
+/* Ячейка с ID */
+.id-cell {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-family: monospace;
+}
+
+/* Информация о пользователе */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(77, 195, 240, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.user-info:hover .user-avatar {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+.user-name {
+    font-weight: 500;
+    display: none; /* Скрываем на десктопе */
+}
+
+.user-fullname {
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Бейджи ролей */
+.role-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+    transition: var(--transition);
+}
+
+.role-badge.admin {
+    background: rgba(77, 195, 240, 0.15);
+    color: #2a8eb5;
+    border: 1px solid rgba(77, 195, 240, 0.3);
+}
+
+.role-badge.zav {
+    background: rgba(255, 193, 7, 0.15);
+    color: #d39e00;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.role-badge.prepod {
+    background: rgba(40, 167, 69, 0.15);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.role-badge.specialist {
+    background: rgba(111, 66, 193, 0.15);
+    color: #6f42c1;
+    border: 1px solid rgba(111, 66, 193, 0.3);
+}
+
+.role-badge.guest {
+    background: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+/* Бейджи статуса */
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.status-badge.active {
+    background: rgba(40, 167, 69, 0.15);
+    color: #28a745;
+}
+
+.status-badge.inactive {
+    background: rgba(220, 53, 69, 0.15);
+    color: #dc3545;
+}
+
+.status-badge.pending {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+}
+
+/* Ячейка с действиями */
+.actions-cell {
+
+}
+
+.icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: white;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.icon-btn:hover {
+    transform: translateY(-2px);
+}
+
+.icon-btn.edit:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 8px rgba(77, 195, 240, 0.3);
+}
+
+.icon-btn.delete:hover {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Нижняя панель таблицы */
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.table-info {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.table-info .total-count {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+/* Кнопки экспорта */
+.export-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.export-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-color);
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.export-btn i {
+    color: var(--primary-color);
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+.export-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(77, 195, 240, 0.3);
+}
+
+.export-btn:hover i {
+    color: white;
+}
+
+/* Мобильные действия (выпадающий список) */
+.mobile-actions {
+    display: none;
+    width: 100%;
+}
+
+.mobile-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 30px;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    background: white;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+
+.mobile-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Анимация при наведении на строку */
+.all-table tbody tr {
+    transition: var(--transition);
+}
+
+.all-table tbody tr:hover {
+    background: rgba(77, 195, 240, 0.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================================================
+   АДАПТИВНОСТЬ (ВОССТАНОВЛЕННАЯ)
+   ============================================================================ */
+
+/* Планшеты и небольшие десктопы */
+@media (max-width: 1200px) {
+    .all-table-container {
+        padding: 20px;
+    }
+
+    .user-fullname {
+        font-size: 13px;
+    }
+}
+
+/* Планшеты */
+@media (max-width: 992px) {
+    .table-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .table-actions {
+        width: 100%;
+    }
+
+    .search-box {
+        flex: 1;
+    }
+
+    .export-btn span {
+        display: none; /* Прячем текст на планшетах */
+    }
+
+    .export-btn i {
+        margin: 0;
+    }
+
+    .export-btn {
+        padding: 8px 12px;
+    }
+}
+
+/* Мобильные устройства */
+@media (max-width: 768px) {
+    .all-table-container {
+        padding: 15px;
+        margin: 15px 0;
+    }
+
+    .table-header h2 {
+        font-size: 18px;
+    }
+
+    .table-header h2 i {
+        font-size: 20px;
+    }
+
+    .table-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    /* Показываем сокращенное имя на мобильных */
+    .user-name {
+        display: inline-block;
+    }
+
+    .user-fullname {
+        display: none;
+    }
+
+    /* Сокращаем email */
+    .email-cell {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Сокращаем телефон */
+    .phone-cell {
+        font-size: 12px;
+    }
+
+    /* Сокращаем дату */
+    .date-cell {
+        font-size: 12px;
+    }
+
+    /* Уменьшаем отступы */
+    .all-table th {
+        padding: 12px 8px;
+        font-size: 12px;
+    }
+
+    .all-table td {
+        padding: 12px 8px;
+    }
+
+    .all-table th:first-child,
+    .all-table td:first-child {
+        padding-left: 12px;
+    }
+
+    .all-table th:last-child,
+    .all-table td:last-child {
+        padding-right: 12px;
+    }
+
+    /* Скрываем обычные кнопки экспорта */
+    .export-buttons {
+        display: none;
+    }
+
+    /* Показываем мобильное меню действий */
+    .mobile-actions {
+        display: block;
+    }
+
+    .table-footer {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .table-info {
+        text-align: center;
+        width: 100%;
+    }
+}
+
+/* Маленькие мобильные */
+@media (max-width: 480px) {
+    .all-table-container {
+        padding: 12px;
+    }
+
+    .all-table {
+        min-width: 700px; /* Уменьшаем минимальную ширину */
+    }
+
+    .all-table th {
+        padding: 10px 6px;
+        font-size: 11px;
+    }
+
+    .all-table td {
+        padding: 10px 6px;
+        font-size: 12px;
+    }
+
+    .role-badge {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .icon-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+    }
+}
+
+/* Специально для очень маленьких экранов */
+@media (max-width: 360px) {
+    .all-table {
+        min-width: 650px;
+    }
+
+    .actions-cell {
+        gap: 4px;
+    }
+
+    .icon-btn {
+        width: 26px;
+        height: 26px;
+    }
+}
+
+
+
