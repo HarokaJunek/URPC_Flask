@@ -57,11 +57,142 @@
     {% if session.is_admin %}
         <div class="blocks">
         <h2>👋 Добро пожаловать, {{ session.full_name }}! Администратор</h2>
+
+
+            <!-- Вставьте этот код после приветственного сообщения, но до закрывающего div class="blocks" -->
+<div class="banner-grid">
+    <a href="" class="banner-card">
+        <div class="banner-icon">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="banner-content">
+            <h3>Расписание</h3>
+            <p>Просмотр актуального расписания занятий</p>
+            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+        </div>
+    </a>
+
+    <a href="" class="banner-card">
+        <div class="banner-icon">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+        <div class="banner-content">
+            <h3>Студенты</h3>
+            <p>Список студентов и успеваемость</p>
+            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+        </div>
+    </a>
+
+    <a href="" class="banner-card">
+        <div class="banner-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="banner-content">
+            <h3>Группы</h3>
+            <p>Управление учебными группами</p>
+            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+        </div>
+    </a>
+
+    <a href="" class="banner-card">
+        <div class="banner-icon">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="banner-content">
+            <h3>Отчеты</h3>
+            <p>Формирование отчетов и статистика</p>
+            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+        </div>
+    </a>
+</div>
+
+<!-- Вставьте этот код после приветственного сообщения, но до закрывающего div class="blocks" -->
+<div class="banner-squares">
+    <a href="" class="square-card">
+        <div class="square-icon">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <h3>Расписание</h3>
+        <p>Занятия и замены</p>
+        <div class="square-arrow">
+            <i class="fas fa-arrow-right"></i>
+        </div>
+    </a>
+
+    <a href="" class="square-card">
+        <div class="square-icon">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+        <h3>Студенты</h3>
+        <p>Личные дела и успеваемость</p>
+        <div class="square-arrow">
+            <i class="fas fa-arrow-right"></i>
+        </div>
+    </a>
+
+    <a href="" class="square-card">
+        <div class="square-icon">
+            <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+        <h3>Преподаватели</h3>
+        <p>Нагрузка и кафедры</p>
+        <div class="square-arrow">
+            <i class="fas fa-arrow-right"></i>
+        </div>
+    </a>
+
+    <a href="" class="square-card">
+        <div class="square-icon">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <h3>Методичка</h3>
+        <p>УМК и литература</p>
+        <div class="square-arrow">
+            <i class="fas fa-arrow-right"></i>
+        </div>
+    </a>
+</div>
+
+            <!-- Вставьте этот код после приветственного сообщения, но до закрывающего div class="blocks" -->
+<div class="banner-minimal">
+    <a href="" class="minimal-card">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Рабочий стол</span>
+    </a>
+
+    <a href="" class="minimal-card">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Расписание</span>
+    </a>
+
+    <a href="" class="minimal-card">
+        <i class="fas fa-user-graduate"></i>
+        <span>Студенты</span>
+    </a>
+
+    <a href="" class="minimal-card">
+        <i class="fas fa-users"></i>
+        <span>Группы</span>
+    </a>
+
+    <a href="" class="minimal-card">
+        <i class="fas fa-book"></i>
+        <span>Дисциплины</span>
+    </a>
+
+    <a href="" class="minimal-card">
+        <i class="fas fa-chart-bar"></i>
+        <span>Отчеты</span>
+    </a>
+</div>
+
+
         </div>
     {% endif %}
     {% if session.is_zav %}
         <div class="blocks">
         <h2>👋 Добро пожаловать, {{ session.full_name }}! Заведующий отделением</h2>
+
         </div>
     {% endif %}
     {% if session.is_prepod %}
