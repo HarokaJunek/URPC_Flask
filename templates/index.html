@@ -411,6 +411,170 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+<!-- Форма редактирования записи (встроенная) -->
+<div class="edit-form-container">
+    <div class="form-header">
+        <h2><i class="fas fa-edit"></i> Редактирование записи</h2>
+        <div class="header-actions">
+            <span class="record-id">ID: 1</span>
+        </div>
+    </div>
+
+    <form class="edit-form">
+        <!-- Основная информация -->
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="fas fa-user"></i> Основная информация
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-fullname" class="required">
+                        <i class="fas fa-user"></i> ФИО
+                    </label>
+                    <input type="text" id="edit-fullname" value="Иванов Иван Иванович" placeholder="Введите ФИО полностью" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-email" class="required">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="edit-email" value="ivanov@mail.ru" placeholder="example@mail.ru" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-phone">
+                        <i class="fas fa-phone"></i> Телефон
+                    </label>
+                    <input type="tel" id="edit-phone" value="+7 (999) 123-45-67" placeholder="+7 (___) ___-__-__">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-birthdate">
+                        <i class="fas fa-birthday-cake"></i> Дата рождения
+                    </label>
+                    <input type="date" id="edit-birthdate" value="1990-05-15">
+                </div>
+            </div>
+        </div>
+
+        <!-- Роль и статус -->
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="fas fa-shield-alt"></i> Права доступа
+            </h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-role" class="required">
+                        <i class="fas fa-user-tag"></i> Роль
+                    </label>
+                    <div class="select-wrapper">
+                        <select id="edit-role" required>
+                            <option value="" disabled>Выберите роль</option>
+                            <option value="admin" selected>Администратор</option>
+                            <option value="zav">Заведующий отделением</option>
+                            <option value="prepod">Преподаватель</option>
+                            <option value="specialist">Специалист учебной части</option>
+                            <option value="guest">Гость</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-status" class="required">
+                        <i class="fas fa-circle"></i> Статус
+                    </label>
+                    <div class="select-wrapper">
+                        <select id="edit-status" required>
+                            <option value="" disabled>Выберите статус</option>
+                            <option value="active" selected>Активен</option>
+                            <option value="inactive">Неактивен</option>
+                            <option value="pending">Ожидает подтверждения</option>
+                            <option value="blocked">Заблокирован</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Системная информация (только чтение) -->
+        <div class="form-section">
+            <h3 class="section-title">
+                <i class="fas fa-cog"></i> Системная информация
+            </h3>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Дата регистрации:</span>
+                    <span class="info-value">12.01.2025</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Последний вход:</span>
+                    <span class="info-value">13.02.2025 09:42</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Количество входов:</span>
+                    <span class="info-value">156</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">IP при регистрации:</span>
+                    <span class="info-value">192.168.1.45</span>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Кнопки действий -->
+        <div class="form-actions">
+            <button type="button" class="btn-danger" id="deleteRecord">
+                <i class="fas fa-trash-alt"></i> Удалить
+            </button>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i> Сохранить изменения
+            </button>
+        </div>
+    </form>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
     {% endif %}
     {% if session.is_zav %}
