@@ -140,7 +140,7 @@ def register():
             ).fetchone()
 
             if existing_user:
-                flash('Пользователь с таким именем уже существует!', 'danger')
+                flash('Пользователь с таким логином уже существует!', 'danger')
                 conn.close()
                 return render_template('register.html')
 
