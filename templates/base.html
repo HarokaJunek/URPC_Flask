@@ -20,7 +20,7 @@
         <!-- Неавторизованный пользователь -->
         <div class="nav-menu">
             {% if session.user_id %}
-            <a href="{{ url_for('logout') }}" class="nav-link">Вход
+            <a href="{{ url_for('logout') }}" class="nav-link">Выйти из системы
                 <i class="fas fa-sign-out"></i>
             </a>
             {% else %}
