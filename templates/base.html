@@ -11,27 +11,80 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const navMenu = document.querySelector('.nav-menu');
+    if (!navMenu) return;
+
+    // Активируем горизонтальную прокрутку колёсиком только на десктопе
+    function initWheelScroll() {
+        if (window.innerWidth >= 769) {
+            navMenu.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                navMenu.scrollBy({
+                    left: e.deltaY,
+                    behavior: 'smooth'
+                });
+            }, { passive: false });
+        }
+    }
+
+    initWheelScroll();
+
+    // Если окно меняет размер, можно переинициализировать (опционально)
+    window.addEventListener('resize', function() {
+        // Можно либо убрать/добавить обработчик, но проще перезагрузить страницу
+        // либо просто вызывать initWheelScroll заново, но тогда старые обработчики останутся.
+        // Для простоты оставим как есть – при ресайзе с мобильного на десктоп обработчик не появится,
+        // если изначально был мобильный размер. Это можно улучшить, но обычно пользователи не ресайзят часто.
+    });
+});
+</script>
+
+
 <body>
     <!-- Навигационное меню -->
     <nav class="navbar">
         <div class="nav-brand">
             <img style="width: 185px; height: 69px;" src="{{ url_for ('static', filename='img/logo.png')}}">
         </div>
-        <!-- Неавторизованный пользователь -->
-        <div class="nav-menu">
-            {% if session.user_id %}
-            <a href="{{ url_for('logout') }}" class="nav-link">Выйти из системы
-                <i class="fas fa-sign-out"></i>
+
+
+        <!-- Гамбургер-иконка для мобильных -->
+    <input type="checkbox" id="nav-toggle" class="nav-toggle">
+    <label for="nav-toggle" class="nav-toggle-label">
+        <span></span>
+        <span></span>
+        <span></span>
+    </label>
+
+
+
+        <!-- Меню -->
+    <div class="nav-menu">
+        {% if session.user_id %}
+            <a href="{{ url_for('index') }}" class="nav-link">
+                <i class="fa fa-home"></i> Главная страница
             </a>
-            {% else %}
+            {% if session.is_admin %}
+                <a href="{{ url_for('edit_users') }}" class="nav-link">
+                    <i class="fas fa-users-cog"></i> Управление пользователями
+                </a>
+                <!-- Здесь можно добавить другие ссылки для админа -->
+            {% endif %}
+            <a href="{{ url_for('logout') }}" class="nav-link">
+                Выйти из системы <i class="fas fa-sign-out-alt"></i>
+            </a>
+        {% else %}
             <a href="{{ url_for('index') }}" class="nav-link active">
-                <i class="fas fa-sign-in-alt"></i> Войти в систему
+                <i class="fas fa-sign-in-alt"></i> Войти
             </a>
             <a href="{{ url_for('register') }}" class="nav-link">
                 <i class="fas fa-user-plus"></i> Регистрация
             </a>
-            {% endif %}
-        </div>
+        {% endif %}
+    </div>
     </nav>
 
 

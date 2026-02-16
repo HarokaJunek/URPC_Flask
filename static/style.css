@@ -2211,3 +2211,164 @@ footer {
         font-size: 13px;
     }
 }
+
+
+
+/* ============================================================================
+   АДАПТИВНОЕ МЕНЮ С ГАМБУРГЕРОМ
+   ============================================================================ */
+
+/* Скрываем чекбокс */
+.nav-toggle {
+    display: none;
+}
+
+/* Стили для гамбургер-иконки (по умолчанию скрыта на десктопе) */
+.nav-toggle-label {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 21px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.nav-toggle-label span {
+    display: block;
+    height: 3px;
+    width: 100%;
+    background: white;
+    border-radius: 3px;
+    transition: var(--transition);
+}
+
+/* Анимация гамбургера при открытии */
+#nav-toggle:checked + .nav-toggle-label span:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+}
+
+#nav-toggle:checked + .nav-toggle-label span:nth-child(2) {
+    opacity: 0;
+}
+
+#nav-toggle:checked + .nav-toggle-label span:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Медиа-запрос для мобильных устройств */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 10px 20px;
+        flex-wrap: wrap;
+    }
+
+    .nav-brand {
+        flex: 1;
+    }
+
+    /* Показываем гамбургер */
+    .nav-toggle-label {
+        display: flex;
+    }
+
+    /* Меню по умолчанию скрыто */
+    .nav-menu {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 20px 0 10px 0;
+        background: rgba(81, 81, 82, 0.95);
+        backdrop-filter: blur(5px);
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        margin-top: 10px;
+    }
+
+    /* Отображаем меню, если чекбокс отмечен */
+    #nav-toggle:checked ~ .nav-menu {
+        display: flex;
+    }
+
+    /* Стили для ссылок в мобильном меню */
+    .nav-link {
+        width: 100%;
+        text-align: center;
+        padding: 12px 20px;
+        margin: 0;
+        border-radius: 8px;
+        justify-content: center;
+    }
+
+    .nav-link i {
+        margin-right: 8px;
+    }
+
+    .nav-link::after {
+        display: none; /* Убираем подчёркивание на мобильных */
+    }
+
+    .nav-link:hover {
+        background: rgba(77, 195, 240, 0.2);
+        color: white;
+    }
+
+    /* Активная ссылка */
+    .nav-link.active {
+        background: rgba(77, 195, 240, 0.3);
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    .nav-link {
+        font-size: 16px;
+        padding: 14px 20px;
+    }
+}
+
+
+/* Горизонтальный скролл для меню при переполнении */
+.nav-menu {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch; /* плавный скролл на iOS */
+    scrollbar-width: thin;              /* для Firefox */
+    scrollbar-color: var(--primary-color) rgba(255,255,255,0.2);
+    justify-content: flex-start;        /* прижимаем к левому краю при скролле */
+}
+
+/* Стилизация скроллбара для WebKit (Chrome, Safari, Edge) */
+.nav-menu::-webkit-scrollbar {
+    height: 4px;
+}
+
+.nav-menu::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.nav-menu::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+.nav-menu::-webkit-scrollbar-thumb:hover {
+    background: #2a8eb5;
+}
+
+/* Запрещаем сжатие ссылок */
+.nav-link {
+    flex-shrink: 0;
+}
+
+/* Адаптив для мобильных (поверх существующего) */
+@media (max-width: 768px) {
+    .nav-menu {
+        overflow-x: visible;  /* отключаем скролл на мобильных, там работает гамбургер */
+        white-space: normal;
+    }
+}

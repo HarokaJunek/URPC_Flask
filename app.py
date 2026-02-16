@@ -401,6 +401,21 @@ def logout():
     return redirect(url_for('index'))
 
 
+
+
+
+
+
+
+
+@app.route('/edit_users')
+def edit_users():
+    return render_template('edit_users.html')
+
+
+
+
+
 if __name__ == '__main__':
     if not os.path.exists(DATABASE):
         print("❌ Ошибка базы данных: База данных не найдена")
