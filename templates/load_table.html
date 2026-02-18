@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="blocks">
+    {% if not session.user_id %}
+
+    <H1>Ошибка 403!</H1>
+
+    {% else %}
+    <div class="all-table-container">
+        <div class="table-header">
+            <h2><i class="fas fa-database"></i> Управление записями</h2>
+            <div class="table-actions">
+                <button class="action-btn add-btn">
+                    <i class="fas fa-plus"></i> Добавить запись
+                </button>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Поиск...">
+                </div>
+            </div>
+        </div>
+        {% if funck == 'edit_users' %}
+        <div class="table-responsive">
+            <table class="all-table">
+                <thead>
+                    <tr>
+                        <th>Действия</th>
+                        <th>ID</th>
+                        <th>ФИО</th>
+                        <th>Логин</th>
+                        <th>Email</th>
+                        <th>Телефон</th>
+                        <th>Роль</th>
+                        <th>Статус</th>
+                        <th>Дата рег.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in table_info %}
+                    <tr>
+                        <td class="actions-cell">
+    <!-- Кнопка редактирования (пока не реализована) -->
+                            <button class="icon-btn edit" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <!-- Форма удаления -->
+                            <form action="{{ url_for('delete_user', id=user.id_user, funck='edit_users') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить запись?');">
+                                <button type="submit" class="icon-btn delete" title="Удалить">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </td>
+                        <td>{{ user.id_user }}</td>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <span>{{ user.full_name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ user.login }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone or '' }}</td>
+                        <td>
+                            {% if user.role_name %}
+                                <span class="role-badge
+                                    {% if user.role_name == 'Администратор' %}admin
+                                    {% elif user.role_name == 'Заведующий' %}zav
+                                    {% elif user.role_name == 'Преподаватель' %}prepod
+                                    {% elif user.role_name == 'Специалист' %}specialist
+                                    {% elif user.role_name == 'Гость' %}guest
+                                    {% endif %}">
+                                    {{ user.role_name }}
+                                </span>
+                            {% else %}
+                                <span class="role-badge">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.aktive == 1 %}
+                                <span class="status-badge active">Активен</span>
+                            {% else %}
+                                <span class="status-badge inactive">Неактивен</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.created_at %}
+                                {{ user.created_at[:10] }}  <!-- оставить только дату, если формат YYYY-MM-DD HH:MM:SS -->
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center;">Нет данных для отображения</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

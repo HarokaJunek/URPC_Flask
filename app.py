@@ -1,3 +1,5 @@
+from platform import machine
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import os
 import sqlite3
@@ -403,14 +405,84 @@ def logout():
 
 
 
+@app.route('/load_table')
+def load_table():
+    if 'user_id' not in session:
+        flash('Необходимо авторизоваться для доступа к этой странице.', 'warning')
+        return redirect(url_for('index'))
+
+    funck = request.args.get('funck')
+
+    match funck:
+        case 'edit_users':
+            if session.get('is_admin', False):
+                conn = get_db_connection()
+                query = '''
+                    SELECT 
+                        users.id_user,
+                        users.full_name,
+                        users.login,
+                        users.email,
+                        users.phone,
+                        users.aktive,
+                        users.created_at,
+                        roles.role_name
+                    FROM users
+                    LEFT JOIN roles ON users.id_role = roles.id_role
+                    WHERE users.id_user != ?
+                '''
+                table_info = conn.execute(query, (session['user_id'],)).fetchall()
+                conn.close()
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+    return render_template('load_table.html', table_info=[])
 
 
+@app.route('/delete_user/<int:id>', methods=['POST'])
+def delete_user(id):
+    """
+    Удаление пользователя по ID.
+    Доступно только администраторам. Нельзя удалить самого себя.
+    """
+    # Проверка авторизации
+    if 'user_id' not in session:
+        flash('Необходимо авторизоваться.', 'warning')
+        return redirect(url_for('index'))
 
+    # Проверка прав администратора
+    if not session.get('is_admin', False):
+        flash('У вас нет прав на удаление пользователей.', 'danger')
+        return redirect(url_for('load_table', funck='edit_users'))
 
+    # Проверка, что пользователь не пытается удалить себя
+    if session['user_id'] == id:
+        flash('Нельзя удалить самого себя.', 'danger')
+        return redirect(url_for('load_table', funck='edit_users'))
 
-@app.route('/edit_users')
-def edit_users():
-    return render_template('edit_users.html')
+    conn = get_db_connection()
+    try:
+        funck = request.args.get('funck')
+
+        match funck:
+            case 'edit_users':
+                # Вариант 1: Физическое удаление (удаление строки из таблицы)
+                conn.execute('DELETE FROM users WHERE id_user = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+    except sqlite3.IntegrityError as e:
+        # Ошибка целостности - возможно, есть связанные записи
+        conn.rollback()
+        flash(f'Невозможно удалить пользователя: есть связанные данные. Ошибка: {str(e)}', 'danger')
+    except sqlite3.Error as e:
+        conn.rollback()
+        flash(f'Ошибка базы данных: {str(e)}', 'danger')
+    finally:
+        conn.close()
+
+    return redirect(url_for('load_table', funck='edit_users'))
+
 
 
 

@@ -1339,7 +1339,20 @@ footer {
 
 /* Ячейка с действиями */
 .actions-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* расстояние между кнопками */
 
+}
+.actions-cell form {
+    display: inline-flex;  /* форма ведёт себя как строчный flex-контейнер */
+}
+
+.actions-cell button,
+.actions-cell form button {
+    /* Если кнопки внутри формы отличаются по стилям, можно их унифицировать */
+    margin: 0;
 }
 
 .icon-btn {
@@ -1559,23 +1572,6 @@ footer {
         display: none;
     }
 
-    /* Сокращаем email */
-    .email-cell {
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    /* Сокращаем телефон */
-    .phone-cell {
-        font-size: 12px;
-    }
-
-    /* Сокращаем дату */
-    .date-cell {
-        font-size: 12px;
-    }
 
     /* Уменьшаем отступы */
     .all-table th {
