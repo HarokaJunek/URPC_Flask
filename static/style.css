@@ -996,10 +996,6 @@ footer {
     padding-left: 20px;
 }
 
-.all-table td:last-child {
-    padding-right: 20px;
-}
-
 .id-cell {
     font-weight: 600;
     color: var(--primary-color);
@@ -1796,6 +1792,7 @@ footer {
     }
 
     .navbar {
+        position: relative;
         padding: 10px 20px;
         flex-direction: column;
         gap: 15px;
