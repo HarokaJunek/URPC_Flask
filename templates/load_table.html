@@ -46,6 +46,8 @@
                         <th>Роль</th>
                         <th>Статус</th>
                         <th>Дата рег.</th>
+                        <th>Посл.д.авт.</th>
+                        <th>Кол-во авт.</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -99,12 +101,9 @@
                                 <span class="status-badge inactive">Неактивен</span>
                             {% endif %}
                         </td>
-                        <td>
-                            {% if user.created_at %}
-                                {{ user.created_at[:10] }}  <!-- оставить только дату, если формат YYYY-MM-DD HH:MM:SS -->
-                            {% endif %}
-                        </td>
-
+                        <td>{{ user.created_at }}</td>
+                        <td>{{ user.last_auth }}</td>
+                        <td>{{ user.kol_auth }}</td>
                     </tr>
                     {% else %}
                     <tr>

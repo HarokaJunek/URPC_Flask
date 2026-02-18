@@ -429,7 +429,9 @@ def load_table():
                         users.phone,
                         users.aktive,
                         users.created_at,
-                        roles.role_name
+                        roles.role_name,
+                        users.last_auth,
+                        users.kol_auth
                     FROM users
                     LEFT JOIN roles ON users.id_role = roles.id_role
                     WHERE users.id_user != ?
