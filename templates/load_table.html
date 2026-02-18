@@ -17,8 +17,18 @@
                     <i class="fas fa-plus"></i> Добавить запись
                 </button>
                 <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Поиск...">
+                    <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                        <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                        <input type="hidden" name="funck" value="edit_users">
+                        <button type="submit" style="display: none;">Найти</button>
+                    </form>
+                    {% if request.args.get('search') and funck == 'edit_users' %}
+                        <a href="{{ url_for('load_table', funck='edit_users') }}" class="clear-search" title="Очистить поиск">
+                            <i class="fas fa-times-circle"></i>
+                        </a>
+                    {% else %}
+                        <i class="fas fa-search"></i>
+                    {% endif %}
                 </div>
             </div>
         </div>

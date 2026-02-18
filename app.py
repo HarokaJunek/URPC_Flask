@@ -412,11 +412,14 @@ def load_table():
         return redirect(url_for('index'))
 
     funck = request.args.get('funck')
+    # Получаем поисковый запрос из параметров URL (если есть)
+    search_query = request.args.get('search', '').strip()
 
     match funck:
         case 'edit_users':
             if session.get('is_admin', False):
                 conn = get_db_connection()
+                # Базовый запрос (исключаем текущего пользователя)
                 query = '''
                     SELECT 
                         users.id_user,
@@ -431,12 +434,26 @@ def load_table():
                     LEFT JOIN roles ON users.id_role = roles.id_role
                     WHERE users.id_user != ?
                 '''
-                table_info = conn.execute(query, (session['user_id'],)).fetchall()
+                params = [session['user_id']]
+
+                # Если передан поисковый запрос, добавляем условия фильтрации
+                if search_query:
+                    query += ''' AND (
+                        users.full_name LIKE ? OR 
+                        users.login LIKE ? OR 
+                        users.email LIKE ?
+                    )'''
+                    like_pattern = f'%{search_query}%'
+                    params.extend([like_pattern, like_pattern, like_pattern])
+
+                table_info = conn.execute(query, params).fetchall()
                 conn.close()
                 return render_template('load_table.html', table_info=table_info, funck=funck)
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
+
+    # Для всех остальных случаев (например, funck не указан или не обработан)
     return render_template('load_table.html', table_info=[])
 
 
