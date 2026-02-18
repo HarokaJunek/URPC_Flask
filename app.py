@@ -440,8 +440,8 @@ def load_table():
     return render_template('load_table.html', table_info=[])
 
 
-@app.route('/delete_user/<int:id>', methods=['POST'])
-def delete_user(id):
+@app.route('/delete_recording/<int:id>', methods=['POST'])
+def delete_recording(id):
     """
     Удаление пользователя по ID.
     Доступно только администраторам. Нельзя удалить самого себя.
