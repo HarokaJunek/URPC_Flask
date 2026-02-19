@@ -10,6 +10,7 @@
 
     {% else %}
     <div class="all-table-container">
+        {% if funck == 'edit_users' %}
         <div class="table-header">
             <h2><i class="fas fa-database"></i> Управление записями</h2>
             <div class="table-actions">
@@ -32,7 +33,7 @@
                 </div>
             </div>
         </div>
-        {% if funck == 'edit_users' %}
+
         <div class="table-responsive">
             <table class="all-table">
                 <thead>
@@ -114,6 +115,78 @@
             </table>
         </div>
         {% endif %}
+
+
+
+        {% if funck == 'edit_disciplines' %}
+        <div class="table-header">
+            <h2><i class="fas fa-database"></i> Управление записями</h2>
+            <div class="table-actions">
+                <button class="action-btn add-btn">
+                    <i class="fas fa-plus"></i> Добавить запись
+                </button>
+                <div class="search-box">
+                    <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                        <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                        <input type="hidden" name="funck" value="edit_disciplines">
+                        <button type="submit" style="display: none;">Найти</button>
+                    </form>
+                    {% if request.args.get('search') and funck == 'edit_disciplines' %}
+                        <a href="{{ url_for('load_table', funck='edit_disciplines') }}" class="clear-search" title="Очистить поиск">
+                            <i class="fas fa-times-circle"></i>
+                        </a>
+                    {% else %}
+                        <i class="fas fa-search"></i>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+<div class="table-responsive">
+    <table class="all-table">
+        <thead>
+            <tr>
+                <th>Действия</th>
+                <th>ID</th>
+                <th>Дисциплина</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for discipline in table_info %}  <!-- Изменено с user на discipline -->
+            <tr>
+                <td class="actions-cell">
+                    <!-- Кнопка редактирования -->
+                    <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать запись {{ discipline.id_discipline }}?');">
+                        <button type="submit" class="icon-btn edit" title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </form>
+                    <!-- Форма удаления -->
+                    <form action="{{ url_for('delete_recording', id=discipline.id_discipline, funck='edit_disciplines') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить запись {{ discipline.id_discipline }}?');">
+                        <button type="submit" class="icon-btn delete" title="Удалить">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </form>
+                </td>
+                <td>{{ discipline.id_discipline }}</td>
+                <td>
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-book"></i>  <!-- Изменено с user-circle на book для дисциплин -->
+                        </div>
+                        <span>{{ discipline.discipline_name }}</span>  <!-- Показываем название дисциплины -->
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" style="text-align: center;">Нет данных для отображения</td>  <!-- Изменено с 8 на 3 колонки -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
     </div>
     {% endif %}
 </div>

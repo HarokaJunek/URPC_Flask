@@ -455,11 +455,34 @@ def load_table():
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
+        case 'edit_disciplines':
+            if session.get('is_specialist', False):
+                conn = get_db_connection()
+
+                # Базовый запрос
+                query = 'SELECT * FROM disciplines'
+                params = []
+
+                # Если передан поисковый запрос, добавляем WHERE с условиями
+                if search_query:
+                    query += ' WHERE disciplines.id_discipline LIKE ? OR disciplines.discipline_name LIKE ?'
+                    like_pattern = f'%{search_query}%'
+                    params = [like_pattern, like_pattern]
+
+                cursor = conn.execute(query, params)
+                table_info = cursor.fetchall()  # Используем fetchall() вместо execute_query()
+                conn.close()
+
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+
     # Для всех остальных случаев (например, funck не указан или не обработан)
     return render_template('load_table.html', table_info=[])
 
 
-@app.route('/delete_recording/<int:id>', methods=['POST'])
+@app.route('/delete_recording/<path:id>', methods=['POST'])
 def delete_recording(id):
     """
     Удаление пользователя по ID.
@@ -471,38 +494,61 @@ def delete_recording(id):
         return redirect(url_for('index'))
 
     # Проверка прав администратора
-    if not session.get('is_admin', False):
+    #if not session.get('is_admin', False):
         flash('У вас нет прав на удаление пользователей.', 'danger')
         return redirect(url_for('load_table', funck='edit_users'))
 
+    #if not session.get('is_specialist', False):
+        flash('У вас нет прав на удаление дисциплины.', 'danger')
+        return redirect(url_for('load_table', funck='edit_disciplines'))
+
     # Проверка, что пользователь не пытается удалить себя
-    if session['user_id'] == id:
+    #if session['user_id'] == id:
         flash('Нельзя удалить самого себя.', 'danger')
         return redirect(url_for('load_table', funck='edit_users'))
 
-    conn = get_db_connection()
     try:
         funck = request.args.get('funck')
+        conn = get_db_connection()
 
         match funck:
             case 'edit_users':
+                if not session.get('is_admin', False):
+                    flash('У вас нет прав на удаление пользователей.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_users'))
+
+                if session['user_id'] == id:
+                    flash('Нельзя удалить самого себя.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_users'))
+
                 # Вариант 1: Физическое удаление (удаление строки из таблицы)
                 conn.execute('DELETE FROM users WHERE id_user = ?', (id,))
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_users'))
+
+            case 'edit_disciplines':
+                if not session.get('is_specialist', False):
+                    flash('У вас нет прав на удаление дисциплины.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_disciplines'))
+
+
+                conn.execute('DELETE FROM disciplines WHERE id_discipline = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_disciplines'))
+
     except sqlite3.IntegrityError as e:
         # Ошибка целостности - возможно, есть связанные записи
         conn.rollback()
-        flash(f'Невозможно удалить пользователя: есть связанные данные. Ошибка: {str(e)}', 'danger')
+        flash(f'Невозможно удалить запись: есть связанные данные. Ошибка: {str(e)}', 'danger')
     except sqlite3.Error as e:
         conn.rollback()
         flash(f'Ошибка базы данных: {str(e)}', 'danger')
     finally:
         conn.close()
 
-    return redirect(url_for('load_table', funck='edit_users'))
-
-
+    #return redirect(url_for('load_table', funck='edit_users'))
 
 
 
