@@ -187,6 +187,87 @@
     </table>
 </div>
 {% endif %}
+
+        {% if funck == 'edit_groups' %}
+<div class="table-responsive">
+    {% if funck == 'edit_groups' %}
+    <div class="table-header">
+        <h2><i class="fas fa-database"></i> Управление группами</h2>
+        <div class="table-actions">
+            <button class="action-btn add-btn">
+                <i class="fas fa-plus"></i> Добавить группу
+            </button>
+            <div class="search-box">
+                <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                    <input type="hidden" name="funck" value="edit_groups">
+                    <button type="submit" style="display: none;">Найти</button>
+                </form>
+                {% if request.args.get('search') and funck == 'edit_groups' %}
+                    <a href="{{ url_for('load_table', funck='edit_groups') }}" class="clear-search" title="Очистить поиск">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                {% else %}
+                    <i class="fas fa-search"></i>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="all-table">
+            <thead>
+                <tr>
+                    <th>Действия</th>
+                    <th>Группа</th>
+                    <th>Курс</th>
+                    <th>Форма обучения</th>
+                    <th>Классный руководитель</th>
+                    <th>Специальность</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for group in table_info %}  <!-- ИСПРАВЛЕНО: groups -> group -->
+                <tr>
+                    <td class="actions-cell">
+                        <!-- Кнопка редактирования -->
+                        <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать группу {{ group.id_group }}?');">
+                            <button type="submit" class="icon-btn edit" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </form>
+                        <!-- Форма удаления -->
+                        <form action="{{ url_for('delete_recording', id=group.id_group, funck='edit_groups') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить группу {{ group.id_group }}?');">
+                            <button type="submit" class="icon-btn delete" title="Удалить">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-users"></i>  <!-- ИСПРАВЛЕНО: icon для групп -->
+                            </div>
+                            <span>{{ group.id_group }}</span>
+                        </div>
+                    </td>
+                    <td>{{ group.course_number }}</td>  <!-- ДОБАВЛЕНО -->
+                    <td>{{ group.study_form }}</td>  <!-- ДОБАВЛЕНО -->
+                    <td>{{ group.teacher_name or 'Не назначен' }}</td>  <!-- ДОБАВЛЕНО -->
+                    <td>{{ group.specialty_name or 'Не указана' }}</td>  <!-- ДОБАВЛЕНО -->
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center;">Нет данных для отображения</td>  <!-- ИСПРАВЛЕНО: 3 -> 6 колонок -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+</div>
+{% endif %}
+
     </div>
     {% endif %}
 </div>

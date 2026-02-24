@@ -478,8 +478,33 @@ def load_table():
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
-    # Для всех остальных случаев (например, funck не указан или не обработан)
-    return render_template('load_table.html', table_info=[])
+        case 'edit_groups':
+            if session.get('is_specialist', False):
+                conn = get_db_connection()
+
+                # Базовый запрос - ИСПРАВЛЕНО: добавлены пробелы
+                query = ('SELECT groups.id_group, groups.course_number, groups.study_form, '
+                         'users.id_user as class_teacher_id, users.full_name as teacher_name, '
+                         'specialties.id_specialty as specialty_name '
+                         'FROM groups '
+                         'LEFT JOIN users ON groups.id_class_teacher = users.id_user '
+                         'LEFT JOIN specialties ON groups.id_specialty = specialties.id_specialty')
+                params = []
+
+                # Если передан поисковый запрос, добавляем WHERE с условиями
+                if search_query:
+                    query += ' WHERE groups.id_group LIKE ? OR groups.course_number LIKE ? OR groups.study_form LIKE ? OR users.full_name LIKE ? OR specialties.name_specialty LIKE ?'
+                    like_pattern = f'%{search_query}%'
+                    params = [like_pattern, like_pattern, like_pattern, like_pattern, like_pattern]
+
+                cursor = conn.execute(query, params)
+                table_info = cursor.fetchall()
+                conn.close()
+
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
 
 
 @app.route('/delete_recording/<path:id>', methods=['POST'])
@@ -537,6 +562,17 @@ def delete_recording(id):
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_disciplines'))
+
+            case 'edit_groups':
+                if not session.get('is_specialist', False):
+                    flash('У вас нет прав на удаление группы.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_groups'))
+
+                # ИСПРАВЛЕНО: groups -> id_group (название колонки)
+                conn.execute('DELETE FROM groups WHERE id_group = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_groups'))
 
     except sqlite3.IntegrityError as e:
         # Ошибка целостности - возможно, есть связанные записи
