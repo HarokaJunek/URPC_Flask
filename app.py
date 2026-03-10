@@ -434,8 +434,7 @@ def load_table():
                         users.kol_auth
                     FROM users
                     LEFT JOIN roles ON users.id_role = roles.id_role
-                    WHERE users.id_user != ?
-                '''
+                    WHERE users.id_user != ?                '''
                 params = [session['user_id']]
 
                 # Если передан поисковый запрос, добавляем условия фильтрации
@@ -587,6 +586,9 @@ def delete_recording(id):
     #return redirect(url_for('load_table', funck='edit_users'))
 
 
+@app.route('/add_info')
+def add_info():
+    return render_template('add_info.html')
 
 
 if __name__ == '__main__':
