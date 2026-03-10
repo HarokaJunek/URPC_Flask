@@ -487,8 +487,8 @@ def load_table():
                          'users.id_user as class_teacher_id, users.full_name as teacher_name, '
                          'specialties.id_specialty as specialty_name '
                          'FROM groups '
-                         'LEFT JOIN users ON groups.id_class_teacher = users.id_user '
-                         'LEFT JOIN specialties ON groups.id_specialty = specialties.id_specialty')
+                         'INNER JOIN users ON groups.id_class_teacher = users.id_user '
+                         'INNER JOIN specialties ON groups.id_specialty = specialties.id_specialty')
                 params = []
 
                 # Если передан поисковый запрос, добавляем WHERE с условиями
