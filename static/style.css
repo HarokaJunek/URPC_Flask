@@ -1107,8 +1107,6 @@ footer {
 
 .actions-cell {
     display: flex;
-    align-items: center;
-    justify-content: center;
     gap: 8px;
 }
 
@@ -2161,4 +2159,8 @@ footer {
         width: 26px;
         height: 26px;
     }
+}
+
+td form{
+width: auto;
 }

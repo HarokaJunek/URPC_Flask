@@ -434,8 +434,7 @@ def load_table():
                         users.kol_auth
                     FROM users
                     LEFT JOIN roles ON users.id_role = roles.id_role
-                    WHERE users.id_user != ?
-                '''
+                    WHERE users.id_user != ?                '''
                 params = [session['user_id']]
 
                 # Если передан поисковый запрос, добавляем условия фильтрации
@@ -487,8 +486,8 @@ def load_table():
                          'users.id_user as class_teacher_id, users.full_name as teacher_name, '
                          'specialties.id_specialty as specialty_name '
                          'FROM groups '
-                         'LEFT JOIN users ON groups.id_class_teacher = users.id_user '
-                         'LEFT JOIN specialties ON groups.id_specialty = specialties.id_specialty')
+                         'INNER JOIN users ON groups.id_class_teacher = users.id_user '
+                         'INNER JOIN specialties ON groups.id_specialty = specialties.id_specialty')
                 params = []
 
                 # Если передан поисковый запрос, добавляем WHERE с условиями
@@ -587,6 +586,9 @@ def delete_recording(id):
     #return redirect(url_for('load_table', funck='edit_users'))
 
 
+@app.route('/add_info')
+def add_info():
+    return render_template('add_info.html')
 
 
 if __name__ == '__main__':
