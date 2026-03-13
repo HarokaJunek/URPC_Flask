@@ -2,7 +2,16 @@
 {% block title %}Добавление информации{% endblock %}
 
 {% block content %}
+{% if not session.user_id %}
 
+    <H1>Ошибка 403!</H1>
 
+{% else %}
+    {% if funck == 'edit_users' %}
 
+        <p>zxcvzxcvzxcv</p>
+
+    {% endif %}
+
+{% endif %}
 {% endblock %}

@@ -592,7 +592,9 @@ def delete_recording(id):
 
 @app.route('/add_info')
 def add_info():
-    return render_template('add_info.html')
+    funck = request.args.get('funck')
+    return render_template('add_info.html', funck=funck)
+
 
 
 if __name__ == '__main__':
