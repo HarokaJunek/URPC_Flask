@@ -7,7 +7,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # ============================================================================
-# 1. ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ!!!!!!!!!!!!!!!!!!!!!!!!RFRFIRF
+# 1. ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ!!!!!!!!!!!!!!!!!!!!!!!!RFRFIRF pipiska
 # ============================================================================
 
 app = Flask(__name__)
