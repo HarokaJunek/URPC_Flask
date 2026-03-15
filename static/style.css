@@ -993,7 +993,8 @@ footer {
 }
 
 .all-table td:first-child {
-    padding-left: 20px;
+    
+    
 }
 
 .id-cell {
@@ -1106,8 +1107,7 @@ footer {
 }
 
 .actions-cell {
-    display: flex;
-    gap: 8px;
+   
 }
 
 .actions-cell form {
@@ -1962,12 +1962,12 @@ footer {
 
     .all-table th:first-child,
     .all-table td:first-child {
-        padding-left: 12px;
+        
     }
 
     .all-table th:last-child,
     .all-table td:last-child {
-        padding-right: 12px;
+        
     }
 
     .export-buttons {
