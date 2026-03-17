@@ -526,6 +526,8 @@ def load_table():
                         statements.diplom_flag,
                         statements.creation_date,
                         statements.filling_date,
+                        statements.excused,
+                        statements.unexcused,
                         statements.status
                     FROM statements
                     INNER JOIN disciplines ON statements.id_discipline = disciplines.id_discipline
@@ -542,6 +544,8 @@ def load_table():
                         statements.diplom_flag LIKE ? OR 
                         statements.creation_date LIKE ? OR 
                         statements.filling_date LIKE ? OR 
+                        statements.excused,
+                        statements.unexcused,
                         statements.status LIKE ? OR 
                     )'''
                     like_pattern = f'%{search_query}%'

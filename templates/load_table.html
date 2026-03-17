@@ -307,6 +307,8 @@
                     <th>Флаг диплома</th>
                     <th>Дата создания</th>
                     <th>Дата заполнения</th>
+                    <th>Неявка по уважительной причине</th>
+                    <th>Неявка по неуважительной причине</th>
                     <th>Статус</th>
                 </tr>
             </thead>
@@ -341,11 +343,13 @@
                     <td>{{ statements.diplom_flag }}</td>
                     <td>{{ statements.creation_date }}</td>
                     <td>{{ statements.filling_date or 'Не указана' }}</td>
+                    <td>{{ statements.excused }}</td>
+                    <td>{{ statements.unexcused }}</td>
                     <td>{{ statements.status }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" style="text-align: center;">Нет данных для отображения</td>  <!-- ИСПРАВЛЕНО: 3 -> 6 колонок -->
+                    <td colspan="11" style="text-align: center;">Нет данных для отображения</td>  <!-- ИСПРАВЛЕНО: 3 -> 11 колонок -->
                 </tr>
                 {% endfor %}
             </tbody>
