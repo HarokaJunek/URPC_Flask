@@ -511,6 +511,50 @@ def load_table():
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
+        
+        #Ведомости
+        case 'edit_statements':
+            if (session.get('is_prepod', False) or session.get('is_zav', False)):
+                conn = get_db_connection()
+                # Базовый запрос
+                query = '''
+                    SELECT 
+                        statements.id_statement,
+                        disciplines.id_discipline,
+                        statements_types.id_type,
+                        statements.semester,
+                        statements.diplom_flag,
+                        statements.creation_date,
+                        statements.filling_date,
+                        statements.status
+                    FROM statements
+                    INNER JOIN disciplines ON statements.id_discipline = disciplines.id_discipline
+                    INNER JOIN statements_types ON statements.id_type = statements_types.id_type
+                    '''
+                params = []
+
+                # Если передан поисковый запрос, добавляем условия фильтрации
+                if search_query:
+                    query += ''' AND (
+                        disciplines.id_discipline LIKE ? OR 
+                        statements_types.id_type LIKE ? OR 
+                        statements.semester LIKE ? OR 
+                        statements.diplom_flag LIKE ? OR 
+                        statements.creation_date LIKE ? OR 
+                        statements.filling_date LIKE ? OR 
+                        statements.status LIKE ? OR 
+                    )'''
+                    like_pattern = f'%{search_query}%'
+                    params.extend([like_pattern, like_pattern, like_pattern])
+
+                table_info = conn.execute(query, params).fetchall()
+                conn.close()
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+
+            
 
 
 @app.route('/delete_recording/<path:id>', methods=['POST'])
@@ -579,6 +623,16 @@ def delete_recording(id):
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_groups'))
+            
+            case 'edit_statements':
+                if not session.get('is_zav', False):
+                    flash('У вас нет прав на удаление дисциплины.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_statements'))
+
+                conn.execute('DELETE FROM statements WHERE id_statement = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_statements'))
 
     except sqlite3.IntegrityError as e:
         # Ошибка целостности - возможно, есть связанные записи
