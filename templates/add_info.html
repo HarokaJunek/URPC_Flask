@@ -3,138 +3,153 @@
 
 {% block content %}
 {% if not session.user_id %}
-
-    <H1>Ошибка 403!</H1>
-
+    <h1>Ошибка 403!</h1>
 {% else %}
     {% if funck == 'edit_users' %}
-
         <div class="blocks">
-    <h1><i class="fas fa-user-plus"></i> Добавление пользователя в систему</h1>
-    <form method="POST" action="{{ url_for('register') }}" class="edit-form">
-        <div class="form-group">
-            <label for="username" class="required">
-                <i class="fas fa-user"></i> Логин
-            </label>
-            <input type="text" id="username" name="username" placeholder="Придумайте логин">
-            <div class="form-hint">Только латинские буквы и цифры</div>
-        </div>
+            <h1><i class="fas fa-user-plus"></i> Добавление пользователя в систему</h1>
 
-        <!-- Поля паролей в одну строку -->
-        <div class="password-row">
-            <div class="form-group">
-                <label for="password" class="required">
-                    <i class="fas fa-lock"></i> Пароль
-                </label>
-                <div class="password-wrapper">
-                    <input type="password" id="password" name="password" placeholder="Придумайте пароль">
+            {# Вывод flash-сообщений (если base.html их не показывает) #}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {# Форма отправляется с параметром funck=edit_users #}
+            <form method="POST" action="{{ url_for('add_info', funck='edit_users') }}">
+                {# Поле логина #}
+                <div class="form-group">
+                    <label for="username" class="required">
+                        <i class="fas fa-user"></i> Логин
+                    </label>
+                    <input type="text" id="username" name="username"
+                           placeholder="Придумайте логин"
+                           value="{{ form_data.get('username', '') if form_data else '' }}">
+                    <div class="form-hint">Только латинские буквы и цифры</div>
                 </div>
-                <div class="form-hint">Минимум 6 символов</div>
-            </div>
 
-            <div class="form-group">
-                <label for="confirmPassword" class="required">
-                    <i class="fas fa-lock"></i> Повторите пароль
-                </label>
-                <div class="password-wrapper">
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Повторите пароль">
+                {# Пароли #}
+                <div class="password-row">
+                    <div class="form-group">
+                        <label for="password" class="required">
+                            <i class="fas fa-lock"></i> Пароль
+                        </label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" name="password" placeholder="Придумайте пароль">
+                        </div>
+                        <div class="form-hint">Минимум 6 символов</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword" class="required">
+                            <i class="fas fa-lock"></i> Повторите пароль
+                        </label>
+                        <div class="password-wrapper">
+                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Повторите пароль">
+                        </div>
+                        <div class="form-hint">Пароли должны совпадать</div>
+                    </div>
                 </div>
-                <div class="form-hint">Пароли должны совпадать</div>
-            </div>
-        </div>
 
-        <div class="form-group">
-            <label for="email" class="required">
-                <i class="fas fa-envelope"></i> Электронная почта
-            </label>
-            <input type="email" id="email" name="email" placeholder="example@mail.ru">
-            <div class="form-hint">На эту почту придет подтверждение</div>
-        </div>
+                {# Email #}
+                <div class="form-group">
+                    <label for="email" class="required">
+                        <i class="fas fa-envelope"></i> Электронная почта
+                    </label>
+                    <input type="email" id="email" name="email" placeholder="example@mail.ru"
+                           value="{{ form_data.get('email', '') if form_data else '' }}">
+                    <div class="form-hint">На эту почту придет подтверждение</div>
+                </div>
 
-        <div class="form-group">
-            <label for="fullName" class="required">
-                <i class="fas fa-user-circle"></i> ФИО
-            </label>
-            <input type="text" id="fullName" name="fullName" placeholder="Иванов Иван Иванович">
-            <div class="form-hint">Введите полностью фамилию, имя и отчество</div>
-        </div>
+                {# ФИО #}
+                <div class="form-group">
+                    <label for="fullName" class="required">
+                        <i class="fas fa-user-circle"></i> ФИО
+                    </label>
+                    <input type="text" id="fullName" name="fullName" placeholder="Иванов Иван Иванович"
+                           value="{{ form_data.get('fullName', '') if form_data else '' }}">
+                    <div class="form-hint">Введите полностью фамилию, имя и отчество</div>
+                </div>
 
-        <div class="form-group">
-            <label for="phone">
-                <i class="fas fa-phone"></i> Номер телефона
-            </label>
-            <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__" maxlength="18">
-            <div class="form-hint">Необязательное поле</div>
-        </div>
+                {# Телефон #}
+                <div class="form-group">
+                    <label for="phone">
+                        <i class="fas fa-phone"></i> Номер телефона
+                    </label>
+                    <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__" maxlength="18"
+                           value="{{ form_data.get('phone', '') if form_data else '' }}">
+                    <div class="form-hint">Необязательное поле</div>
+                </div>
 
-        <div class="form-group ">
+                {# Роль — динамически загружается из БД #}
+                {% if session.is_admin %}
+                <div class="form-group">
                     <label for="edit-role" class="required">
                         <i class="fas fa-user-tag"></i> Роль
                     </label>
                     <div class="select-wrapper">
-                        <select id="edit-role" required>
-                            <option value="" disabled>Выберите роль</option>
-                            <option value="admin" selected>Администратор</option>
-                            <option value="zav">Заведующий отделением</option>
-                            <option value="prepod">Преподаватель</option>
-                            <option value="specialist">Специалист учебной части</option>
-                            <option value="guest">Гость</option>
+                        <select id="edit-role" name="role" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('role') %}selected{% endif %}>Выберите роль</option>
+                            {% for role in roles %}
+                                <option value="{{ role.id }}"
+                                    {% if form_data and form_data.get('role')|int == role.id %}selected{% endif %}>
+                                    {{ role.name }}
+                                </option>
+                            {% endfor %}
                         </select>
                         <i class="fas fa-chevron-down select-arrow"></i>
                     </div>
+                </div>
+                {% endif %}
+
+                {# Кнопка отправки #}
+                <button type="submit" id="submitBtn">Создать аккаунт</button>
+            </form>
         </div>
 
+        {# JavaScript для маски телефона (без изменений) #}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const phoneInput = document.getElementById('phone');
 
-        <button type="submit" id="submitBtn" disabled>
-                    Создать аккаунт
-        </button>
+                if (phoneInput) {
+                    phoneInput.addEventListener('input', function(e) {
+                        let value = e.target.value.replace(/\D/g, '');
 
+                        if (value.startsWith('7') || value.startsWith('8')) {
+                            value = value.substring(1);
+                        }
 
+                        value = value.substring(0, 10);
 
+                        let formattedValue = '+7';
+                        if (value.length > 0) {
+                            formattedValue += ' (' + value.substring(0, 3);
+                        }
+                        if (value.length > 3) {
+                            formattedValue += ') ' + value.substring(3, 6);
+                        }
+                        if (value.length > 6) {
+                            formattedValue += '-' + value.substring(6, 8);
+                        }
+                        if (value.length > 8) {
+                            formattedValue += '-' + value.substring(8, 10);
+                        }
 
-    </form>
-</div>
+                        if (value.length <= 3 && formattedValue.endsWith('(')) {
+                            formattedValue = formattedValue.slice(0, -2);
+                        }
 
-<script>
-    // Маска для телефона
-    document.addEventListener('DOMContentLoaded', function() {
-        const phoneInput = document.getElementById('phone');
-
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-
-                if (value.startsWith('7') || value.startsWith('8')) {
-                    value = value.substring(1);
+                        e.target.value = formattedValue;
+                    });
                 }
-
-                value = value.substring(0, 10);
-
-                let formattedValue = '+7';
-                if (value.length > 0) {
-                    formattedValue += ' (' + value.substring(0, 3);
-                }
-                if (value.length > 3) {
-                    formattedValue += ') ' + value.substring(3, 6);
-                }
-                if (value.length > 6) {
-                    formattedValue += '-' + value.substring(6, 8);
-                }
-                if (value.length > 8) {
-                    formattedValue += '-' + value.substring(8, 10);
-                }
-
-                if (value.length <= 3 && formattedValue.endsWith('(')) {
-                    formattedValue = formattedValue.slice(0, -2);
-                }
-
-                e.target.value = formattedValue;
             });
-        }
-    });
-</script>
-
+        </script>
     {% endif %}
-
 {% endif %}
 {% endblock %}
