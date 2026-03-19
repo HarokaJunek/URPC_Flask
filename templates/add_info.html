@@ -21,7 +21,7 @@
             {% endwith %}
 
             {# Форма отправляется с параметром funck=edit_users #}
-            <form method="POST" action="{{ url_for('add_info', funck='edit_users') }}">
+            <form method="POST" action="{{ url_for('add_info', funck='edit_users') }}" class="edit-form" style="padding: 0">
                 {# Поле логина #}
                 <div class="form-group">
                     <label for="username" class="required">
