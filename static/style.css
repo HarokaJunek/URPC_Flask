@@ -2354,5 +2354,7 @@ width: auto;
 #readable-table .double-name-table th {
         writing-mode: vertical-lr;
         transform: rotate(180deg);
+
+
 }
 
