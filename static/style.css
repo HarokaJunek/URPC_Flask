@@ -2352,8 +2352,9 @@ width: auto;
     }
 
 #readable-table .double-name-table th {
-     vertical-align: top;
-    white-space: normal;      /* разрешить перенос */
-    word-break: break-word;   /* при необходимости разрывать длинные слова */
+        writing-mode: vertical-lr;
+        transform: rotate(180deg);
+
+
 }
 
