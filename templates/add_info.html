@@ -7,21 +7,17 @@
 {% else %}
     {% if funck == 'edit_users' %}
         <div class="blocks">
-            <h1><i class="fas fa-user-plus"></i> Добавление пользователя в систему</h1>
-
-            {# Вывод flash-сообщений (если base.html их не показывает) #}
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="flash-messages">
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }}">{{ message }}</div>
-                        {% endfor %}
-                    </div>
+            <div class="edit-form-container">
+            <div class="form-header">
+                {% if session.is_admin %}
+                <h2><i class="fas fa-edit"></i> Добавление пользователя в систему</h2>
                 {% endif %}
-            {% endwith %}
-
+                {% if session.is_specialist %}
+                <h2><i class="fas fa-edit"></i> Добавление преподавателя в систему</h2>
+                {% endif %}
+            </div>
             {# Форма отправляется с параметром funck=edit_users #}
-            <form method="POST" action="{{ url_for('add_info', funck='edit_users') }}" class="edit-form" style="padding: 0">
+            <form method="POST" action="{{ url_for('add_info', funck='edit_users') }}" class="edit-form">
                 {# Поле логина #}
                 <div class="form-group">
                     <label for="username" class="required">
@@ -110,6 +106,7 @@
                 {# Кнопка отправки #}
                 <button type="submit" id="submitBtn">Создать аккаунт</button>
             </form>
+        </div>
         </div>
 
         {# JavaScript для маски телефона (без изменений) #}

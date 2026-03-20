@@ -594,6 +594,287 @@
         </div>
     </form>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h1><i class="fas fa-table"></i> Форма обучения</h1>
+
+    <div class="all-table-container">
+        <div class="table-header">
+            <h2><i class="fas fa-database"></i> Перечень дисциплин</h2>
+        </div>
+
+        <!-- Фильтры (свёрнуты по умолчанию) -->
+        <div class="filters-wrapper">
+            <input type="checkbox" id="toggle-filters" hidden>
+            <div class="filters-header">
+                <label for="toggle-filters" class="filters-toggle-btn">
+                    <i class="fas fa-filter"></i> Фильтры
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </label>
+            </div>
+            <div class="filters-panel">
+                <div class="filters-grid">
+                    <div class="filter-item">
+                        <label><i class="fas fa-calendar-alt"></i> Год обучения</label>
+                        <select class="filter-select">
+                            <option>Все</option>
+                            <option>2023-2024</option>
+                            <option>2024-2025</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label><i class="fas fa-chalkboard-teacher"></i> Преподаватель</label>
+                        <input type="text" class="filter-input" placeholder="ФИО">
+                    </div>
+                    <div class="filter-item">
+                        <label><i class="fas fa-book"></i> Дисциплина</label>
+                        <input type="text" class="filter-input" placeholder="Название">
+                    </div>
+                    <div class="filter-item">
+                        <label><i class="fas fa-users"></i> Группа</label>
+                        <select class="filter-select">
+                            <option>Все</option>
+                            <option>ИС-21</option>
+                            <option>ИС-22</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label><i class="fas fa-layer-group"></i> Семестр</label>
+                        <select class="filter-select">
+                            <option>Любой</option>
+                            <option>1</option>
+                            <option>2</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filters-actions">
+                    <button class="btn-primary apply-filters-btn">Применить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица с горизонтальным скроллом -->
+        <div class="table-responsive">
+            <table class="all-table big-schedule-table" id="readable-table">
+                <thead>
+                    <!-- Строка 1: основные группировки -->
+                    <tr>
+                        <th rowspan="3">Действия</th>
+                        <th rowspan="3">Форма</th>
+                        <th rowspan="3">Индекс</th>
+                        <th rowspan="3">Наименование циклов</th>
+                        <th rowspan="3">Группы</th>
+                        <th rowspan="3">Год обучения</th>
+                        <th colspan="22">Распределение по курсам и семестрам</th>
+                        <th rowspan="3">Нагр. препод.</th>
+                        <th rowspan="3">ФИО препод.</th>
+                        <th rowspan="3">ПЦК</th>
+                    </tr>
+                    <!-- Строка 2: Семестр 1 и Семестр 2 -->
+                    <tr>
+                        <th colspan="11">Семестр 1</th>
+                        <th colspan="11">Семестр 2</th>
+                    </tr>
+                    <!-- Строка 3: детальные колонки для каждого семестра -->
+                    <tr>
+                        <!-- Семестр 1: 11 колонок -->
+                        <th>Объём ОП</th><th>Самост.</th><th>Консульт.</th><th>С препод.</th><th>Нагр. в нед.</th>
+                        <th>Лекции</th><th>Пр. занятия</th><th>Лаб. занятия</th><th>Семинар. занятия</th><th>Курс. проектир.</th><th>Промежут. аттестация</th>
+                        <!-- Семестр 2: 11 колонок -->
+                        <th>Объём ОП</th><th>Самост.</th><th>Консульт.</th><th>С препод.</th><th>Нагр. в нед.</th>
+                        <th>Лекции</th><th>Пр. занятия</th><th>Лаб. занятия</th><th>Семинар. занятия</th><th>Курс. проектир.</th><th>Промежут. аттестация</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Строка 1: Иностранный язык -->
+                    <tr>
+                        <td class="actions-cell">
+                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
+                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                        <td>очная</td>
+                        <td class="id-cell">ОГС.04</td>
+                        <td>Иностранный язык в проф. деятельности</td>
+                        <td>23/ИС-391</td>
+                        <td>2024-2025</td>
+                        <!-- Семестр 1 -->
+                        <td>34</td><td>0</td><td>0</td><td>34</td><td>2</td><td>34</td><td>0</td><td>0</td><td>0</td><td>0</td><td>Зачёт</td>
+                        <!-- Семестр 2 -->
+                        <td>50</td><td>0</td><td>4</td><td>46</td><td>2</td><td>46</td><td>0</td><td>0</td><td>0</td><td>0</td><td>Экзамен</td>
+                        <td>120</td>
+                        <td>Шаталова Екатерина Анатольевна</td>
+                        <td>иностранных языков</td>
+                    </tr>
+                    <!-- Строка 2: Математика -->
+                    <tr>
+                        <td class="actions-cell">
+                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
+                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                        <td>очная</td>
+                        <td class="id-cell">ЕН.01</td>
+                        <td>Математика</td>
+                        <td>23/ИС-391, 23/ИС-392</td>
+                        <td>2024-2025</td>
+                        <!-- Семестр 1 -->
+                        <td>72</td><td>0</td><td>4</td><td>68</td><td>4</td><td>34</td><td>34</td><td>0</td><td>0</td><td>0</td><td>Экзамен</td>
+                        <!-- Семестр 2 -->
+                        <td>80</td><td>0</td><td>6</td><td>74</td><td>4</td><td>34</td><td>40</td><td>0</td><td>0</td><td>0</td><td>Экзамен</td>
+                        <td>140</td>
+                        <td>Петров Иван Сергеевич</td>
+                        <td>естественнонаучных дисциплин</td>
+                    </tr>
+                    <!-- Строка 3: Основы алгоритмизации -->
+                    <tr>
+                        <td class="actions-cell">
+                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
+                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                        <td>очная</td>
+                        <td class="id-cell">ОП.05</td>
+                        <td>Основы алгоритмизации и программирования</td>
+                        <td>23/ИС-391</td>
+                        <td>2024-2025</td>
+                        <!-- Семестр 1 -->
+                        <td>90</td><td>0</td><td>6</td><td>84</td><td>5</td><td>34</td><td>50</td><td>0</td><td>0</td><td>0</td><td>Зачёт</td>
+                        <!-- Семестр 2 -->
+                        <td>108</td><td>0</td><td>8</td><td>100</td><td>6</td><td>34</td><td>66</td><td>0</td><td>0</td><td>0</td><td>Экзамен</td>
+                        <td>156</td>
+                        <td>Сидоров Алексей Викторович</td>
+                        <td>информационных технологий</td>
+                    </tr>
+                    <!-- Строка 4: Веб-приложения (заочная) -->
+                    <tr>
+                        <td class="actions-cell">
+                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
+                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                        <td>заочная</td>
+                        <td class="id-cell">ПМ.02</td>
+                        <td>Разработка веб-приложений</td>
+                        <td>23/ЗИС-301</td>
+                        <td>2023-2024</td>
+                        <!-- Семестр 1 -->
+                        <td>40</td><td>0</td><td>2</td><td>38</td><td>2</td><td>20</td><td>18</td><td>0</td><td>0</td><td>0</td><td>Зачёт</td>
+                        <!-- Семестр 2 -->
+                        <td>60</td><td>0</td><td>4</td><td>56</td><td>3</td><td>20</td><td>36</td><td>0</td><td>0</td><td>0</td><td>Экзамен</td>
+                        <td>84</td>
+                        <td>Николаева Мария Игоревна</td>
+                        <td>информационных технологий</td>
+                    </tr>
+                    <!-- Строка 5: Физкультура -->
+                    <tr>
+                        <td class="actions-cell">
+                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
+                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                        <td>очная</td>
+                        <td class="id-cell">ФК.00</td>
+                        <td>Физическая культура</td>
+                        <td>23/ИС-391, 23/ИС-392</td>
+                        <td>2024-2025</td>
+                        <!-- Семестр 1 -->
+                        <td>36</td><td>0</td><td>0</td><td>36</td><td>2</td><td>0</td><td>36</td><td>0</td><td>0</td><td>0</td><td>Зачёт</td>
+                        <!-- Семестр 2 -->
+                        <td>36</td><td>0</td><td>0</td><td>36</td><td>2</td><td>0</td><td>36</td><td>0</td><td>0</td><td>0</td><td>Зачёт</td>
+                        <td>72</td>
+                        <td>Смирнов Павел Андреевич</td>
+                        <td>физического воспитания</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Подвал таблицы с экспортом -->
+        <div class="table-footer">
+            <div class="table-info">
+                Всего записей: <span class="total-count">5</span>
+            </div>
+            <div class="export-buttons">
+                <button class="export-btn"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="export-btn"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    (function() {
+        const table = document.getElementById('readable-table');
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        function clearHighlights() {
+            const highlighted = table.querySelectorAll('.highlight-row, .highlight-col, .highlight-cell');
+            highlighted.forEach(el => el.classList.remove('highlight-row', 'highlight-col', 'highlight-cell'));
+        }
+        rows.forEach(row => {
+            const cells = Array.from(row.children);
+            cells.forEach((cell, idx) => {
+                if (cell.classList && cell.classList.contains('actions-cell')) return;
+                cell.addEventListener('mouseenter', function() {
+                    clearHighlights();
+                    cells.forEach(c => {
+                        if (!c.classList || !c.classList.contains('actions-cell')) c.classList.add('highlight-row');
+                    });
+                    rows.forEach(r => {
+                        const targetCell = r.children[idx];
+                        if (targetCell && (!targetCell.classList || !targetCell.classList.contains('actions-cell'))) {
+                            targetCell.classList.add('highlight-col');
+                        }
+                    });
+                    this.classList.add('highlight-cell');
+                });
+                cell.addEventListener('mouseleave', clearHighlights);
+            });
+        });
+        table.addEventListener('mouseleave', clearHighlights);
+    })();
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
     {% endif %}
     {% if session.is_zav %}
