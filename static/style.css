@@ -2350,3 +2350,10 @@ width: auto;
             font-size: 12px;
         }
     }
+/* Увеличиваем ширину столбца "Группы" (5-й столбец) */
+#readable-table td:nth-child(5),
+#readable-table th:nth-child(5) {
+    min-width: 200px;      /* минимальная ширина */
+    width: auto;           /* может быть больше, если содержимое требует */
+    white-space: normal;   /* разрешаем перенос текста, если он длинный */
+}
