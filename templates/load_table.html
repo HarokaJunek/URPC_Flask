@@ -190,7 +190,6 @@
 
         {% if funck == 'edit_groups' %}
 <div class="table-responsive">
-    {% if funck == 'edit_groups' %}
     <div class="table-header">
         <h2><i class="fas fa-database"></i> Управление группами</h2>
         <div class="table-actions">
@@ -264,7 +263,164 @@
             </tbody>
         </table>
     </div>
+</div>
 {% endif %}
+
+       {% if funck == 'edit_years' %}
+<div class="table-responsive">
+    <div class="table-header">
+        <h2><i class="fas fa-database"></i> Управление учебными годами</h2>
+        <div class="table-actions">
+            <button class="action-btn add-btn">
+                <i class="fas fa-plus"></i> Добавить учебный год
+            </button>
+            <div class="search-box">
+                <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                    <input type="hidden" name="funck" value="edit_years">
+                    <button type="submit" style="display: none;">Найти</button>
+                </form>
+                {% if request.args.get('search') and funck == 'edit_years' %}
+                    <a href="{{ url_for('load_table', funck='edit_years') }}" class="clear-search" title="Очистить поиск">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                {% else %}
+                    <i class="fas fa-search"></i>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="all-table">
+            <thead>
+                <tr>
+                    <th>Действия</th>
+                    <th>ID</th>
+                    <th>Годы</th>  <!-- Добавлена колонка для годов -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for academic_year in table_info %}
+                <tr>
+                    <td class="actions-cell">
+                        <!-- Кнопка редактирования -->
+                        <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать учебный год {{ academic_year.id_year }}?');">
+                            <button type="submit" class="icon-btn edit" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </form>
+                        <!-- Форма удаления -->
+                        <form action="{{ url_for('delete_recording', id=academic_year.id_year, funck='edit_years') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить учебный год {{ academic_year.id_year }}?');">
+                            <button type="submit" class="icon-btn delete" title="Удалить">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-calendar-alt"></i>  <!-- Изменена иконка на календарь -->
+                            </div>
+                            <span>{{ academic_year.id_year }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-graduation-cap"></i>  <!-- Иконка для учебного года -->
+                            </div>
+                            <span>{{ academic_year.year_name }}</span>  <!-- Выводим название года -->
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center;">Нет данных для отображения</td>  <!-- Исправлено: 3 колонки -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+        {% if funck == 'edit_fgoss' %}
+<div class="table-responsive">
+    <div class="table-header">
+        <h2><i class="fas fa-database"></i> Управление ФГОСами</h2>
+        <div class="table-actions">
+            <button class="action-btn add-btn">
+                <i class="fas fa-plus"></i> Добавить ФГОС
+            </button>
+            <div class="search-box">
+                <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                    <input type="hidden" name="funck" value="edit_fgoss">
+                    <button type="submit" style="display: none;">Найти</button>
+                </form>
+                {% if request.args.get('search') and funck == 'edit_fgoss' %}
+                    <a href="{{ url_for('load_table', funck='edit_fgoss') }}" class="clear-search" title="Очистить поиск">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                {% else %}
+                    <i class="fas fa-search"></i>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="all-table">
+            <thead>
+                <tr>
+                    <th>Действия</th>
+                    <th>ID</th>
+                    <th>ФГОСы</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fgoss in table_info %}
+                <tr>
+                    <td class="actions-cell">
+                        <!-- Кнопка редактирования -->
+                        <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать ФГОС {{ fgoss.id_fgos }}?');">
+                            <button type="submit" class="icon-btn edit" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </form>
+                        <!-- Форма удаления -->
+                        <form action="{{ url_for('delete_recording', id=fgoss.id_fgos, funck='edit_fgoss') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить ФГОС {{ fgoss.id_fgos }}?');">
+                            <button type="submit" class="icon-btn delete" title="Удалить">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-id-card"></i>  <!-- Иконка для ID -->
+                            </div>
+                            <span>{{ fgoss.id_fgos }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-certificate"></i>  <!-- Иконка для ФГОС -->
+                            </div>
+                            <span>{{ fgoss.name }}</span>  <!-- Выводим название ФГОС -->
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center;">Нет данных для отображения</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endif %}
 

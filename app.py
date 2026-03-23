@@ -496,6 +496,52 @@ def load_table():
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
+        case 'edit_years':
+            if session.get('is_specialist', False):
+                conn = get_db_connection()
+
+                # Базовый запрос
+                query = 'SELECT * FROM academic_year'
+                params = []
+
+                # Если передан поисковый запрос, добавляем WHERE с условиями
+                if search_query:
+                    query += ' WHERE academic_year.id_year LIKE ? OR academic_year.year_name LIKE ?'
+                    like_pattern = f'%{search_query}%'
+                    params = [like_pattern, like_pattern]
+
+                cursor = conn.execute(query, params)
+                table_info = cursor.fetchall()  # Используем fetchall() вместо execute_query()
+                conn.close()
+
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+
+        case 'edit_fgoss':
+            if session.get('is_specialist', False):
+                conn = get_db_connection()
+
+                # Базовый запрос
+                query = 'SELECT * FROM fgoss'
+                params = []
+
+                # Если передан поисковый запрос, добавляем WHERE с условиями
+                if search_query:
+                    query += ' WHERE fgoss.id_fgos LIKE ? OR fgoss.name LIKE ?'
+                    like_pattern = f'%{search_query}%'
+                    params = [like_pattern, like_pattern]
+
+                cursor = conn.execute(query, params)
+                table_info = cursor.fetchall()  # Используем fetchall() вместо execute_query()
+                conn.close()
+
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+
         case 'edit_groups':
             if session.get('is_specialist', False):
                 conn = get_db_connection()
@@ -569,10 +615,13 @@ def load_table():
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
+
         # Обработка других значений funck (если есть)
         case _:
             flash('Неверный параметр функции', 'danger')
             return redirect(url_for('index'))
+
+
 
             
 
@@ -653,6 +702,26 @@ def delete_recording(id):
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_statements'))
+
+            case 'edit_years':
+                if not session.get('is_specialist', False):
+                    flash('У вас нет прав на удаление учебного года.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_years'))
+
+                conn.execute('DELETE FROM academic_year WHERE id_year = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_years'))
+
+            case 'edit_fgoss':
+                if not session.get('is_specialist', False):
+                    flash('У вас нет прав на удаление учебного года.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_fgoss'))
+
+                conn.execute('DELETE FROM fgoss WHERE id_fgos = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_fgoss'))
             # Обработка других значений funck (если есть)
             case _:
                 flash('Неверный параметр функции', 'danger')
@@ -678,8 +747,6 @@ def add_info():
         return redirect(url_for('index'))
 
     funck = request.args.get('funck')
-
-    
 
     match funck:
         case 'edit_users':
