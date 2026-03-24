@@ -542,6 +542,29 @@ def load_table():
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
+        case 'edit_pck':
+            if session.get('is_specialist', False):
+                conn = get_db_connection()
+
+                # Базовый запрос
+                query = 'SELECT * FROM pck'
+                params = []
+
+                # Если передан поисковый запрос, добавляем WHERE с условиями
+                if search_query:
+                    query += ' WHERE pck.id_pck LIKE ? OR pck.name_pck LIKE ?'
+                    like_pattern = f'%{search_query}%'
+                    params = [like_pattern, like_pattern]
+
+                cursor = conn.execute(query, params)
+                table_info = cursor.fetchall()  # Используем fetchall() вместо execute_query()
+                conn.close()
+
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+
         case 'edit_groups':
             if session.get('is_specialist', False):
                 conn = get_db_connection()

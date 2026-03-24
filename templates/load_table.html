@@ -345,6 +345,85 @@
 </div>
 {% endif %}
 
+        {% if funck == 'edit_pck' %}
+<div class="table-responsive">
+    <div class="table-header">
+        <h2><i class="fas fa-database"></i> Управление ПЦК</h2>
+        <div class="table-actions">
+            <button class="action-btn add-btn">
+                <i class="fas fa-plus"></i> Добавить ПЦК
+            </button>
+            <div class="search-box">
+                <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                    <input type="hidden" name="funck" value="edit_pck">
+                    <button type="submit" style="display: none;">Найти</button>
+                </form>
+                {% if request.args.get('search') and funck == 'edit_pck' %}
+                    <a href="{{ url_for('load_table', funck='edit_pck') }}" class="clear-search" title="Очистить поиск">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                {% else %}
+                    <i class="fas fa-search"></i>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="all-table">
+            <thead>
+                <tr>
+                    <th>Действия</th>
+                    <th>ID</th>
+                    <th>ПЦК</th>  <!-- Добавлена колонка для годов -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for pck in table_info %}
+                <tr>
+                    <td class="actions-cell">
+                        <!-- Кнопка редактирования -->
+                        <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать учебный год {{ pck.id_pck }}?');">
+                            <button type="submit" class="icon-btn edit" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </form>
+                        <!-- Форма удаления -->
+                        <form action="{{ url_for('delete_recording', id=pck.id_pck, funck='edit_pck') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить ПЦК {{ pck.id_pck }}?');">
+                            <button type="submit" class="icon-btn delete" title="Удалить">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-calendar-alt"></i>  <!-- Изменена иконка на календарь -->
+                            </div>
+                            <span>{{ pck.id_pck }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-graduation-cap"></i>  <!-- Иконка для учебного года -->
+                            </div>
+                            <span>{{ pck.name_pck }}</span>  <!-- Выводим название года -->
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center;">Нет данных для отображения</td>  <!-- Исправлено: 3 колонки -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
         {% if funck == 'edit_fgoss' %}
 <div class="table-responsive">
     <div class="table-header">

@@ -891,51 +891,47 @@
 
 
     {% if session.is_specialist %}
-        <div class="blocks">
-        <h2>👋 Добро пожаловать, {{ session.full_name }}! Специалист учебной части</h2>
-            <div class="banner-grid">
+<div class="blocks">
+    <h2>👋 Добро пожаловать, {{ session.full_name }}! Специалист учебной части</h2>
+
+    <div class="banner-grid">
+        <a href="{{ url_for('load_table', funck='edit_users') }}" class="banner-card">
+            <div class="banner-icon">
+                <i class="fas fa-users"></i>
             </div>
+            <div class="banner-content">
+                <h3>Пользователи</h3>
+                <p>Редактирование пользователей в системе</p>
+                <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+            </div>
+        </a>
+    </div>
 
-            <div class="banner-grid">
-    <a href="{{ url_for('load_table', funck='edit_users') }}" class="banner-card">
-        <div class="banner-icon">
-            <i class="fas fa-users"></i>
-        </div>
-        <div class="banner-content">
-            <h3>Пользователи</h3>
-            <p>Редактирование пользователей в системе</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-</div>
+    <div class="banner-grid">
+        <a href="{{ url_for('load_table', funck='edit_disciplines') }}" class="banner-card">
+            <div class="banner-icon">
+                <i class="fa fa-book" aria-hidden="true"></i>
+            </div>
+            <div class="banner-content">
+                <h3>Дисциплины</h3>
+                <p>Редактирование дисциплин в системе</p>
+                <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+            </div>
+        </a>
+    </div>
 
-
-<div class="banner-grid">
-    <a href="{{ url_for('load_table', funck='edit_disciplines') }}" class="banner-card">
-        <div class="banner-icon">
-            <i class="fa fa-book" aria-hidden="true"></i>
-        </div>
-        <div class="banner-content">
-            <h3>Дисциплины</h3>
-            <p>Редактирование дисциплин в системе</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-</div>
-
-            <div class="banner-grid">
-    <a href="{{ url_for('load_table', funck='edit_groups') }}" class="banner-card">
-        <div class="banner-icon">
-            <i class="fa fa-users" aria-hidden="true"></i>
-        </div>
-        <div class="banner-content">
-            <h3>Группы</h3>
-            <p>Редактирование групп в системе</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-</div>
-        </div>
+    <div class="banner-grid">
+        <a href="{{ url_for('load_table', funck='edit_groups') }}" class="banner-card">
+            <div class="banner-icon">
+                <i class="fa fa-users" aria-hidden="true"></i>
+            </div>
+            <div class="banner-content">
+                <h3>Группы</h3>
+                <p>Редактирование групп в системе</p>
+                <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+            </div>
+        </a>
+    </div>
 
     <div class="banner-grid">
         <a href="{{ url_for('load_table', funck='edit_years') }}" class="banner-card">
@@ -950,19 +946,34 @@
         </a>
     </div>
 
-<div class="banner-grid">
-    <a href="{{ url_for('load_table', funck='edit_fgoss') }}" class="banner-card">
-        <div class="banner-icon">
-            <i class="fas fa-users"></i><!-- ХЗЗЗЗЗЗЗЗЗЗЗЗЗ -->
-        </div>
-        <div class="banner-content">
-            <h3>ФГОС</h3>
-            <p>хз</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-</div>
-    {% endif %}
+    <div class="banner-grid">
+        <a href="{{ url_for('load_table', funck='edit_fgoss') }}" class="banner-card">
+            <div class="banner-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="banner-content">
+                <h3>ФГОС</h3>
+                <p>хз</p>
+                <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+            </div>
+        </a>
+    </div>
+
+    <div class="banner-grid">
+        <a href="{{ url_for('load_table', funck='edit_pck') }}" class="banner-card">
+            <div class="banner-icon">
+                <i class="fa fa-building" aria-hidden="true"></i>
+            </div>
+            <div class="banner-content">
+                <h3>ПЦК</h3>
+                <p>хз</p>
+                <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+            </div>
+        </a>
+    </div>
+</div>  <!-- закрываем blocks -->
 {% endif %}
+{% endif %}
+
 
 {% endblock %}
