@@ -504,95 +504,146 @@
 {% endif %}
 
 
-        {% if funck == 'edit_statements' %}
-<div class="table-responsive">
-    {% if funck == 'edit_statements' %}
-    <div class="table-header">
-        <h2><i class="fas fa-database"></i> Управление ведомостями</h2>
-        <div class="table-actions">
-            <button class="action-btn add-btn">
-                <i class="fas fa-plus"></i> Добавить ведомость
-            </button>
-            <div class="search-box">
-                <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
-                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
-                    <input type="hidden" name="funck" value="edit_statements">
-                    <button type="submit" style="display: none;">Найти</button>
-                </form>
-                {% if request.args.get('search') and funck == 'edit_statements' %}
-                    <a href="{{ url_for('load_table', funck='edit_statements') }}" class="clear-search" title="Очистить поиск">
-                        <i class="fas fa-times-circle"></i>
-                    </a>
-                {% else %}
-                    <i class="fas fa-search"></i>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+<!-- ==================== ВЕДОМОСТИ ==================== -->
 
+{% if funck == 'edit_statements' %}
+    
     <div class="table-responsive">
-        <table class="all-table">
-            <thead>
-                <tr>
-                    <th>Действия</th>
-                    <th>Номер ведомости</th>
-                    <th>Дисциплина</th>
-                    <th>Вид ведомости</th>
-                    <th>Семестр</th>
-                    <th>Флаг диплома</th>
-                    <th>Дата создания</th>
-                    <th>Дата заполнения</th>
-                    <th>Неявка по уважительной причине</th>
-                    <th>Неявка по неуважительной причине</th>
-                    <th>Статус</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for statement in table_info %}  <!-- ИСПРАВЛЕНО: groups -> group -->
-                <tr>
-                    <td class="actions-cell">
-                        <!-- Кнопка редактирования -->
-                        <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать ведомость {{ statements.id_statement }}?');">
-                            <button type="submit" class="icon-btn edit" title="Редактировать">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </form>
-                        <!-- Форма удаления -->
-                        <form action="{{ url_for('delete_recording', id=statements.id_statement, funck='edit_statements') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить ведомость {{  statements.id_statement  }}?');">
-                            <button type="submit" class="icon-btn delete" title="Удалить">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
-                    </td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-users"></i>  <!-- ИСПРАВЛЕНО: icon для групп -->
-                            </div>
-                            <span>{{  statements.id_statement  }}</span>
+
+        {% if funck == 'edit_statements' %}
+
+                <!-- ==================== ЗАГОЛОВОК ТАБЛИЦЫ ==================== -->
+                <div class="table-header">
+
+                    <!-- Заголовок с иконкой базы данных -->
+                    <h2><i class="fas fa-database"></i> Управление ведомостями</h2>
+
+                    <!-- Блок с кнопками действий над таблицей -->
+                    <div class="table-actions">
+
+                        <!-- Кнопка добавления новой ведомости -->
+                        <button class="action-btn add-btn">
+                            <i class="fas fa-plus"></i> Добавить ведомость
+                        </button>
+
+                        <!-- ==================== БЛОК ПОИСКА ==================== -->
+                        <div class="search-box">
+
+                            <!-- Форма поиска: отправляет GET-запрос на тот же маршрут -->
+                            <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+
+                                <!-- Поле ввода поискового запроса -->
+                                <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                                
+                                <!-- Скрытое поле: передаем текущий режим работы (ведомости) -->
+                                <input type="hidden" name="funck" value="edit_statements">
+                                
+                                <!-- Скрытая кнопка отправки (поиск срабатывает при нажатии Enter) -->
+                                <button type="submit" style="display: none;">Найти</button>
+                            </form>
+
+                            <!-- Иконка поиска/очистки -->
+                            {% if request.args.get('search') and funck == 'edit_statements' %}
+
+                                <!-- Если есть активный поиск - показываем крестик для очистки -->
+                                <a href="{{ url_for('load_table', funck='edit_statements') }}" class="clear-search" title="Очистить поиск">
+                                    <i class="fas fa-times-circle"></i>
+                                </a>
+                            {% else %}
+
+                                <!-- Если поиск не активен - показываем иконку лупы -->
+                                <i class="fas fa-search"></i>
+                            {% endif %}
                         </div>
-                    </td>
-                    <td>{{ statements.discipline_name or 'Не назначена' }}</td>
-                    <td>{{ statements.type_name or 'Не указана'}}</td>
-                    <td>{{ statements.semester }}</td>
-                    <td>{{ statements.diplom_flag }}</td>
-                    <td>{{ statements.creation_date }}</td>
-                    <td>{{ statements.filling_date or 'Не указана' }}</td>
-                    <td>{{ statements.excused }}</td>
-                    <td>{{ statements.unexcused }}</td>
-                    <td>{{ statements.status }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="11" style="text-align: center;">Нет данных для отображения</td>  
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+                    </div>
+
+                </div>
+
+                <!-- ==================== ОСНОВНАЯ ТАБЛИЦА ==================== -->
+                <div class="table-responsive">
+                    <table class="all-table">
+
+                        <!-- Шапка таблицы -->
+                        <thead>
+                            <tr>
+                                <th>Действия</th>
+                                <th>Номер ведомости</th>
+                                <th>Дисциплина</th>
+                                <th>Вид ведомости</th>
+                                <th>Семестр</th>
+                                <th>Флаг диплома</th>
+                                <th>Дата создания</th>
+                                <th>Дата заполнения</th>
+                                <th>Неявка по уважительной причине</th>
+                                <th>Неявка по неуважительной причине</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+
+                        <!-- ТЕЛО ТАБЛИЦЫ: выводим данные из БД -->
+                        <tbody>
+
+                            <!-- Цикл по всем записям -->
+                            {% for statement in table_info %}
+                            <tr>
+
+                                <!-- ==================== КОЛОНКА ДЕЙСТВИЙ ==================== -->
+                                <td class="actions-cell">
+
+                                    <!-- Кнопка редактирования -->
+                                    <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать ведомость {{ statements.id_statement }}?');">
+                                        <button type="submit" class="icon-btn edit" title="Редактировать">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Форма удаления -->
+                                    <form action="{{ url_for('delete_recording', id=statements.id_statement, funck='edit_statements') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить ведомость {{  statements.id_statement  }}?');">
+                                        <button type="submit" class="icon-btn delete" title="Удалить">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+
+                                <!-- ==================== КОЛОНКА: ID ==================== -->
+                                <td>
+                                    <div class="user-info">
+                                        <div class="user-avatar">
+                                            <i class="fas fa-users"></i> 
+                                        </div>
+                                        <span>{{  statement.id_statement  }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- ==================== ОСТАЛЬНЫЕ КОЛОНКИ ==================== -->
+                                <td>{{ statement.discipline_name or 'Не назначена' }}</td>
+                                <td>{{ statement.type_name or 'Не указана'}}</td>
+                                <td>{{ statement.semester }}</td>
+                                <td>{{ statement.is_diploma }}</td>
+                                <td>{{ statement.created_at }}</td>
+                                <td>{{ statement.filled_at or 'Не указана' }}</td>
+                                <td>{{ statements.excused }}</td>
+                                <td>{{ statements.unexcused }}</td>
+                                <td>{{ statements.status }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="11" style="text-align: center;">Нет данных для отображения</td>  
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+        {% endif %} <!-- Конец проверки -->
     </div>
-{% endif %}
-</div>
-{% endif %}
+{% endif %} <!-- Конец основного блока ведомостей -->
+
+
+<!-- ==================== СТУДЕНТЫ ==================== -->
+
+
+<!-- ==================== ОЦЕНКИ ==================== -->
 
 
     </div>

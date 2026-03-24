@@ -602,17 +602,17 @@ def load_table():
                     SELECT 
                         statements.id_statement,
                         disciplines.id_discipline,
-                        statements_types.id_type,
+                        statement_types.type_name,
                         statements.semester,
-                        statements.diplom_flag,
-                        statements.creation_date,
-                        statements.filling_date,
+                        statements.is_diploma,
+                        statements.created_at,
+                        statements.filled_at,
                         statements.excused,
                         statements.unexcused,
                         statements.status
                     FROM statements
                     INNER JOIN disciplines ON statements.id_discipline = disciplines.id_discipline
-                    INNER JOIN statements_types ON statements.id_type = statements_types.id_type
+                    INNER JOIN statement_types ON statements.id_type = statement_types.id_type
                     '''
                 params = []
 
@@ -620,14 +620,14 @@ def load_table():
                 if search_query:
                     query += ''' AND (
                         disciplines.id_discipline LIKE ? OR 
-                        statements_types.id_type LIKE ? OR 
+                        statement_types.type_name LIKE ? OR 
                         statements.semester LIKE ? OR 
-                        statements.diplom_flag LIKE ? OR 
-                        statements.creation_date LIKE ? OR 
-                        statements.filling_date LIKE ? OR 
-                        statements.excused,
-                        statements.unexcused,
-                        statements.status LIKE ? OR 
+                        statements.is_diploma LIKE ? OR 
+                        statements.created_at LIKE ? OR 
+                        statements.filled_at LIKE ? OR 
+                        statements.excused LIKE ? OR
+                        statements.unexcused LIKE ? OR
+                        statements.status LIKE ?
                     )'''
                     like_pattern = f'%{search_query}%'
                     params.extend([like_pattern, like_pattern, like_pattern])
