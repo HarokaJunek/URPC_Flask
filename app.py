@@ -565,22 +565,123 @@ def load_table():
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
+        
+# ============================ СТУДЕНТЫ ================================ #
+
+        case 'edit_students':
+
+             # Проверка прав доступа
+            if (session.get('is_zav', False)):
+            
+                # Установка соединения с базой данных
+                conn = get_db_connection()
+
+                # Запрос
+                query = '''
+                    SELECT 
+                        students.id_student,
+                        students.full_name,
+                        groups.id_group
+                    FROM students
+                    INNER JOIN groups ON groups.id_group = students.id_group
+                    '''
+                
+                # Список параметров для безопасной подстановки в запрос
+                params = []
+
+                # Если передан поисковый запрос, добавляем условия фильтрации
+                if search_query:
+                    query += ''' AND (
+                        students.id_student LIKE ? OR
+                        students.full_name LIKE ? OR
+                        groups.id_group LIKE ? 
+                        )'''
+
+                    # Шаблон для поиска по подстроке
+                    like_pattern = f'%{search_query}%'
+                    params.extend([like_pattern, like_pattern, like_pattern])
+
+                # Выполнение запроса с параметрами
+                table_info = conn.execute(query, params).fetchall()
+                
+                # Закрытие соединения с БД
+                conn.close()
+
+                # Отображение таблицы с полученными данными
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            
+            else:
+            
+                # Сообщение об ошибке при отсутствии прав доступа
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+
+# ============================ ТИП ВЕДОМОСТИ ================================ #
+
+        case 'edit_typesved':
+
+             # Проверка прав доступа
+            if (session.get('is_zav', False)):
+            
+                # Установка соединения с базой данных
+                conn = get_db_connection()
+
+                # Запрос
+                query = '''
+                    SELECT 
+                        statement_types.id_type,
+                        statement_types.type_name
+                    FROM statement_types
+                    '''
+                
+                # Список параметров для безопасной подстановки в запрос
+                params = []
+
+                # Если передан поисковый запрос, добавляем условия фильтрации
+                if search_query:
+                    query += ''' AND (
+                        statement_types.id_type LIKE ? OR
+                        statement_types.type_name LIKE ? 
+                        )'''
+
+                    # Шаблон для поиска по подстроке
+                    like_pattern = f'%{search_query}%'
+                    params.extend([like_pattern, like_pattern])
+
+                # Выполнение запроса с параметрами
+                table_info = conn.execute(query, params).fetchall()
+                
+                # Закрытие соединения с БД
+                conn.close()
+
+                # Отображение таблицы с полученными данными
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            
+            else:
+            
+                # Сообщение об ошибке при отсутствии прав доступа
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+
+# ============================ ГРУППЫ ================================ #
+
         case 'edit_groups':
-            if session.get('is_specialist', False):
+            if (session.get('is_specialist', False) or session.get('is_zav', False)):
                 conn = get_db_connection()
 
                 # Базовый запрос - ИСПРАВЛЕНО: добавлены пробелы
-                query = ('SELECT groups.id_group, groups.course_number, groups.study_form, '
+                query = ('SELECT groups.id_group, groups.course_number, study_form.form_name, '
                          'users.id_user as class_teacher_id, users.full_name as teacher_name, '
                          'specialties.id_specialty as specialty_name '
                          'FROM groups '
                          'INNER JOIN users ON groups.id_class_teacher = users.id_user '
-                         'INNER JOIN specialties ON groups.id_specialty = specialties.id_specialty')
+                         'INNER JOIN specialties ON groups.id_specialty = specialties.id_specialty '
+                         'INNER JOIN study_form ON groups.id_study_form = study_form.id_form')
                 params = []
 
                 # Если передан поисковый запрос, добавляем WHERE с условиями
                 if search_query:
-                    query += ' WHERE groups.id_group LIKE ? OR groups.course_number LIKE ? OR groups.study_form LIKE ? OR users.full_name LIKE ? OR specialties.name_specialty LIKE ?'
+                    query += ' WHERE groups.id_group LIKE ? OR groups.course_number LIKE ? OR study_form.id_form LIKE ? OR users.full_name LIKE ? OR specialties.name_specialty LIKE ?'
                     like_pattern = f'%{search_query}%'
                     params = [like_pattern, like_pattern, like_pattern, like_pattern, like_pattern]
 
@@ -592,60 +693,110 @@ def load_table():
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
-        
-        #Ведомости
-        case 'edit_statements':
-            if (session.get('is_prepod', False) or session.get('is_zav', False)):
+
+# ============================ ФОРМЫ ОБУЧЕНИЯ ================================ #
+
+        case 'edit_formobuch':
+
+             # Проверка прав доступа
+            if (session.get('is_zav', False)):
+            
+                # Установка соединения с базой данных
                 conn = get_db_connection()
-                # Базовый запрос
+
+                # Запрос
                 query = '''
                     SELECT 
-                        statements.id_statement,
-                        disciplines.id_discipline,
-                        statement_types.type_name,
-                        statements.semester,
-                        statements.is_diploma,
-                        statements.created_at,
-                        statements.filled_at,
-                        statements.excused,
-                        statements.unexcused,
-                        statements.status
-                    FROM statements
-                    INNER JOIN disciplines ON statements.id_discipline = disciplines.id_discipline
-                    INNER JOIN statement_types ON statements.id_type = statement_types.id_type
+                        study_form.id_form,
+                        study_form.form_name
+                    FROM study_form
                     '''
+                
+                # Список параметров для безопасной подстановки в запрос
                 params = []
 
                 # Если передан поисковый запрос, добавляем условия фильтрации
                 if search_query:
                     query += ''' AND (
-                        disciplines.id_discipline LIKE ? OR 
-                        statement_types.type_name LIKE ? OR 
-                        statements.semester LIKE ? OR 
-                        statements.is_diploma LIKE ? OR 
-                        statements.created_at LIKE ? OR 
-                        statements.filled_at LIKE ? OR 
-                        statements.excused LIKE ? OR
-                        statements.unexcused LIKE ? OR
-                        statements.status LIKE ?
-                    )'''
+                        study_form.id_form LIKE ? OR
+                        study_form.form_name LIKE ? 
+                        )'''
+
+                    # Шаблон для поиска по подстроке
+                    like_pattern = f'%{search_query}%'
+                    params.extend([like_pattern, like_pattern])
+
+                # Выполнение запроса с параметрами
+                table_info = conn.execute(query, params).fetchall()
+                
+                # Закрытие соединения с БД
+                conn.close()
+
+                # Отображение таблицы с полученными данными
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            
+            else:
+            
+                # Сообщение об ошибке при отсутствии прав доступа
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+            
+# ============================ ФОРМЫ ОБУЧЕНИЯ ================================ #
+
+        case 'edit_spec':
+
+             # Проверка прав доступа
+            if (session.get('is_zav', False)):
+            
+                # Установка соединения с базой данных
+                conn = get_db_connection()
+
+                # Запрос
+                query = '''
+                    SELECT 
+                        specialties.id_specialty,
+                        specialties.specialty_name,
+                        specialties.id_department
+                    FROM specialties
+                    INNER JOIN departments ON specialties.id_department = departments.id_department
+                    '''
+                
+                # Список параметров для безопасной подстановки в запрос
+                params = []
+
+                # Если передан поисковый запрос, добавляем условия фильтрации
+                if search_query:
+                    query += ''' AND (
+                        specialties.id_specialty LIKE ? OR
+                        specialties.specialty_name LIKE ? OR
+                        departments.department_name LIKE ?
+                        )'''
+
+                    # Шаблон для поиска по подстроке
                     like_pattern = f'%{search_query}%'
                     params.extend([like_pattern, like_pattern, like_pattern])
 
+                # Выполнение запроса с параметрами
                 table_info = conn.execute(query, params).fetchall()
+                
+                # Закрытие соединения с БД
                 conn.close()
+
+                # Отображение таблицы с полученными данными
                 return render_template('load_table.html', table_info=table_info, funck=funck)
+            
             else:
+            
+                # Сообщение об ошибке при отсутствии прав доступа
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
-
+            
         # Обработка других значений funck (если есть)
         case _:
+
+            # Обработка неизвестного параметра функции
             flash('Неверный параметр функции', 'danger')
             return redirect(url_for('index'))
-
-
-
             
 
 
@@ -704,27 +855,7 @@ def delete_recording(id):
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_disciplines'))
-
-            case 'edit_groups':
-                if not session.get('is_specialist', False):
-                    flash('У вас нет прав на удаление группы.', 'danger')
-                    return redirect(url_for('load_table', funck='edit_groups'))
-
-                # ИСПРАВЛЕНО: groups -> id_group (название колонки)
-                conn.execute('DELETE FROM groups WHERE id_group = ?', (id,))
-                conn.commit()
-                flash(f'Запись успешно удалена!', 'success')
-                return redirect(url_for('load_table', funck='edit_groups'))
             
-            case 'edit_statements':
-                if not session.get('is_zav', False):
-                    flash('У вас нет прав на удаление дисциплины.', 'danger')
-                    return redirect(url_for('load_table', funck='edit_statements'))
-
-                conn.execute('DELETE FROM statements WHERE id_statement = ?', (id,))
-                conn.commit()
-                flash(f'Запись успешно удалена!', 'success')
-                return redirect(url_for('load_table', funck='edit_statements'))
 
             case 'edit_years':
                 if not session.get('is_specialist', False):
@@ -745,6 +876,77 @@ def delete_recording(id):
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_fgoss'))
+            
+
+            # ============================ СТУДЕНТЫ ================================ #
+
+            case 'edit_students':
+                if not session.get('is_zav', False):
+                    flash('У вас нет прав на удаление студента.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_students'))
+
+                conn.execute('DELETE FROM students WHERE id_student = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_students'))
+            
+
+            # ==================== ВИДЫ ВЕДОМОСТИ ==================== #
+
+            case 'edit_typesved':
+                if not session.get('is_zav', False):
+                    flash('У вас нет прав на удаление типа ведомости.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_typesved'))
+
+                conn.execute('DELETE FROM statement_types WHERE id_type = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_typesved'))
+            
+
+            # ==================== ГРУППЫ ==================== #
+
+            case 'edit_groups':
+                if not (session.get('is_specialist', False) or session.get('is_zav', False)):
+                    flash('У вас нет прав на удаление группы.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_groups'))
+
+                # ИСПРАВЛЕНО: groups -> id_group (название колонки)
+                conn.execute('DELETE FROM groups WHERE id_group = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_groups'))
+            
+
+            # ==================== ФОРМА ОБУЧЕНИЯ ==================== #
+
+            case 'edit_formobuch':
+                if not session.get('is_zav', False):
+                    flash('У вас нет прав на формы обучения.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_formobuch'))
+
+                conn.execute('DELETE FROM study_form WHERE id_form = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_formobuch'))
+            
+
+            # ==================== СПЕЦИАЛЬНОСТЬ ==================== #
+
+            case 'edit_spec':
+                if not session.get('is_zav', False):
+                    flash('У вас нет прав на формы обучения.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_spec'))
+
+                conn.execute('DELETE FROM specialties WHERE id_specialty = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_spec'))
+
+            # ==================== ВЕДОМОСТЬ (С ОЦЕНКАМИ) ==================== #
+
+
+
             # Обработка других значений funck (если есть)
             case _:
                 flash('Неверный параметр функции', 'danger')
