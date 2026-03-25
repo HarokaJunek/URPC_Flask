@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1">
   <diagram name="Страница — 1" id="omaRTRNsPunrAsj8ovFh">
-    <mxGraphModel dx="2623" dy="4946" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="787" dy="1969" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1142,7 +1142,7 @@
         <mxCell id="X5EqLjCg6v5tsaoZGrcx-125" edge="1" parent="1" source="X5EqLjCg6v5tsaoZGrcx-123" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=ERmany;endFill=0;" target="X5EqLjCg6v5tsaoZGrcx-108">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="X5EqLjCg6v5tsaoZGrcx-126" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=14;" value="&lt;i&gt;Дисциплины&lt;/i&gt;" vertex="1">
+        <mxCell id="X5EqLjCg6v5tsaoZGrcx-126" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=14;" value="&lt;i&gt;ФГОС&lt;/i&gt;" vertex="1">
           <mxGeometry height="90" width="140" x="1458.4900000000002" y="-909" as="geometry" />
         </mxCell>
         <mxCell id="X5EqLjCg6v5tsaoZGrcx-127" parent="X5EqLjCg6v5tsaoZGrcx-126" style="text;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=14;fontStyle=1" value="# ID ФГОС" vertex="1">
@@ -1154,7 +1154,7 @@
         <mxCell id="X5EqLjCg6v5tsaoZGrcx-129" edge="1" parent="1" source="X5EqLjCg6v5tsaoZGrcx-127" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=ERmany;endFill=0;" target="X5EqLjCg6v5tsaoZGrcx-66">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="X5EqLjCg6v5tsaoZGrcx-130" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=14;" value="&lt;i&gt;Дисциплины&lt;/i&gt;" vertex="1">
+        <mxCell id="X5EqLjCg6v5tsaoZGrcx-130" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=14;" value="&lt;i&gt;Учебные года&lt;/i&gt;" vertex="1">
           <mxGeometry height="90" width="140" x="1458.4900000000002" y="-1009" as="geometry" />
         </mxCell>
         <mxCell id="X5EqLjCg6v5tsaoZGrcx-131" parent="X5EqLjCg6v5tsaoZGrcx-130" style="text;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=14;fontStyle=1" value="# ID Учебного года" vertex="1">
@@ -1181,7 +1181,7 @@
         <mxCell id="X5EqLjCg6v5tsaoZGrcx-138" edge="1" parent="1" source="X5EqLjCg6v5tsaoZGrcx-139" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=ERmany;endFill=0;" target="X5EqLjCg6v5tsaoZGrcx-53">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="X5EqLjCg6v5tsaoZGrcx-139" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=14;" value="&lt;i&gt;Формы обучения&lt;/i&gt;" vertex="1">
+        <mxCell id="X5EqLjCg6v5tsaoZGrcx-139" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=14;" value="&lt;i&gt;ПЦК&lt;/i&gt;" vertex="1">
           <mxGeometry height="90" width="146.53" x="760.19" y="-889" as="geometry" />
         </mxCell>
         <mxCell id="X5EqLjCg6v5tsaoZGrcx-140" parent="X5EqLjCg6v5tsaoZGrcx-139" style="text;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=14;fontStyle=1" value="# ID ПЦК" vertex="1">
