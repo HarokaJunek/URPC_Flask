@@ -831,7 +831,7 @@ def delete_recording(id):
 
         match funck:
             case 'edit_users':
-                if not session.get('is_admin', False):
+                if not session.get('is_admin', False) and not session.get('is_specialist', False):
                     flash('У вас нет прав на удаление пользователей.', 'danger')
                     return redirect(url_for('load_table', funck='edit_users'))
 
@@ -855,7 +855,16 @@ def delete_recording(id):
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_disciplines'))
-            
+
+            case 'edit_pck':
+                if not session.get('is_specialist', False):
+                    flash('У вас нет прав на удаление дисциплины.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_pck'))
+
+                conn.execute('DELETE FROM pck WHERE id_pck = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_pck'))
 
             case 'edit_years':
                 if not session.get('is_specialist', False):
@@ -907,7 +916,7 @@ def delete_recording(id):
             # ==================== ГРУППЫ ==================== #
 
             case 'edit_groups':
-                if not (session.get('is_specialist', False) or session.get('is_zav', False)):
+                if not (session.get('is_zav', False)):
                     flash('У вас нет прав на удаление группы.', 'danger')
                     return redirect(url_for('load_table', funck='edit_groups'))
 
