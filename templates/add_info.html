@@ -148,5 +148,63 @@
             });
         </script>
     {% endif %}
+
+    {% if funck == 'edit_disciplines' %}
+    <div class="blocks">
+        <div class="edit-form-container">
+            <div class="form-header">
+                {% if session.is_specialist %}
+                    <h2><i class="fas fa-edit"></i> Добавление дисциплины в систему</h2>
+                {% endif %}
+            </div>
+            <form method="POST" action="{{ url_for('add_info', funck='edit_disciplines') }}" class="edit-form">
+                {# Код дисциплины #}
+                <div class="form-group">
+                    <label for="id_discipline" class="required">
+                        <i class="fas fa-hashtag"></i> Код дисциплины
+                    </label>
+                    <input type="text" id="id_discipline" name="id_discipline"
+                           placeholder="Введите код дисциплины"
+                           value="{{ form_data.get('id_discipline', '') if form_data else '' }}">
+                    <div class="form-hint">Только кириллица буквы и цифры, например: ОУД.01</div>
+                </div>
+
+                {# Название дисциплины #}
+                <div class="form-group">
+                    <label for="discipline_name" class="required">
+                        <i class="fas fa-book"></i> Название дисциплины
+                    </label>
+                    <input type="text" id="discipline_name" name="discipline_name"
+                           placeholder="Введите название дисциплины"
+                           value="{{ form_data.get('discipline_name', '') if form_data else '' }}">
+                    <div class="form-hint">Полное название дисциплины</div>
+                </div>
+
+                {# ПК (учебный план) #}
+                <div class="form-group">
+                    <label for="id_pck" class="required">
+                        <i class="fas fa-graduation-cap"></i> Учебный план (ПК)
+                    </label>
+                    <div class="select-wrapper">
+                        <select id="id_pck" name="id_pck" required="required">
+                            <option value="" disabled="disabled" {% if not form_data or not form_data.get('id_pck') %}selected="selected"{% endif %}>Выберите учебный план</option>
+                            {% for pck in pck_list %}
+                                <option value="{{ pck.id_pck }}"
+                                    {% if form_data and form_data.get('id_pck')|int == pck.id_pck %}selected="selected"{% endif %}>
+                                    {{ pck.pck_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                    <div class="form-hint">Выберите ПЦК, к которой относится дисциплина</div>
+                </div>
+
+                {# Кнопка отправки #}
+                <button type="submit" id="submitBtn">Добавить дисциплину</button>
+            </form>
+        </div>
+    </div>
 {% endif %}
+    {% endif %}
 {% endblock %}

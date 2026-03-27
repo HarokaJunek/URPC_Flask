@@ -1132,6 +1132,112 @@ def add_info():
                 finally:
                     conn.close()
 
+        case 'edit_disciplines':
+            if session.get('is_specialist', False):
+                # Вспомогательная функция для загрузки учебных планов (ПК) из БД
+                def get_pck_list():
+                    conn = get_db_connection()
+                    rows = conn.execute('SELECT id_pck, pck_name FROM pck ORDER BY pck_name').fetchall()
+                    conn.close()
+                    # Преобразуем в список словарей для удобства в шаблоне
+                    return [{'id_pck': row['id_pck'], 'pck_name': row['pck_name']} for row in rows]
+
+                # GET-запрос: просто показываем форму со списком учебных планов
+                if request.method == 'GET':
+                    pck_list = get_pck_list()
+                    return render_template('add_info.html', funck=funck, pck_list=pck_list)
+
+                # POST-запрос: обработка отправленной формы
+                # 1. Получаем данные
+                id_discipline = request.form.get('id_discipline', '').strip()
+                discipline_name = request.form.get('discipline_name', '').strip()
+                id_pck = request.form.get('id_pck', '').strip()
+
+                # 2. Валидация
+                errors = []
+
+                # Код дисциплины
+                if not id_discipline:
+                    errors.append('Код дисциплины обязателен')
+                elif len(id_discipline) < 2:
+                    errors.append('Код дисциплины должен быть не менее 2 символов')
+                elif len(id_discipline) > 50:
+                    errors.append('Код дисциплины должен быть не более 50 символов')
+                elif not id_discipline.replace('_', '').isalnum():
+                    errors.append('Код дисциплины может содержать только буквы, цифры и подчёркивание')
+
+                # Название дисциплины
+                if not discipline_name:
+                    errors.append('Название дисциплины обязательно')
+                elif len(discipline_name) < 3:
+                    errors.append('Название дисциплины должно быть не менее 3 символов')
+                elif len(discipline_name) > 50:
+                    errors.append('Название дисциплины должно быть не более 50 символов')
+
+                # Учебный план (ПК)
+                if not id_pck:
+                    errors.append('Учебный план обязателен')
+                else:
+                    try:
+                        id_pck_int = int(id_pck)
+                        if id_pck_int <= 0:
+                            errors.append('Выберите корректный учебный план')
+                    except ValueError:
+                        errors.append('Неверный формат учебного плана')
+
+                # Если есть ошибки — показываем форму снова
+                if errors:
+                    for error in errors:
+                        flash(error, 'danger')
+                    pck_list = get_pck_list()
+                    return render_template(
+                        'add_info.html',
+                        funck=funck,
+                        form_data=request.form,  # передаём введённые данные для сохранения в полях
+                        pck_list=pck_list
+                    )
+
+                # 3. Проверка уникальности кода дисциплины
+                conn = get_db_connection()
+                try:
+                    existing_discipline = conn.execute(
+                        'SELECT id_discipline FROM disciplines WHERE id_discipline = ?',
+                        (id_discipline,)
+                    ).fetchone()
+                    if existing_discipline:
+                        flash('Дисциплина с таким кодом уже существует', 'danger')
+                        pck_list = get_pck_list()
+                        return render_template('add_info.html', funck=funck,
+                                               form_data=request.form, pck_list=pck_list)
+
+                    # 4. Вставка новой дисциплины
+                    conn.execute('BEGIN TRANSACTION')
+                    try:
+                        cursor = conn.cursor()
+                        cursor.execute('''
+                            INSERT INTO disciplines 
+                            (id_discipline, discipline_name, id_pck)
+                            VALUES (?, ?, ?)
+                        ''', (id_discipline, discipline_name, int(id_pck)))
+                        conn.commit()
+                        flash(f'Дисциплина "{discipline_name}" успешно добавлена!', 'success')
+
+                        return redirect(url_for('load_table', funck='edit_disciplines'))
+                    except sqlite3.Error as e:
+                        conn.rollback()
+                        flash(f'Ошибка базы данных при вставке: {str(e)}', 'danger')
+                        pck_list = get_pck_list()
+                        return render_template('add_info.html', funck=funck,
+                                               form_data=request.form, pck_list=pck_list)
+                except sqlite3.Error as e:
+                    flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
+                    pck_list = get_pck_list()
+                    return render_template('add_info.html', funck=funck,
+                                           form_data=request.form, pck_list=pck_list)
+                finally:
+                    conn.close()
+
+
         # Обработка других значений funck (если есть)
         case _:
             flash('Неверный параметр функции', 'danger')
