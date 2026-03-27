@@ -1268,6 +1268,208 @@ def add_info():
 
 
 
+
+
+
+@app.route('/edit_info', methods=['GET', 'POST'])
+def edit_info():
+    if 'user_id' not in session:
+        flash('Необходимо авторизоваться для доступа к этой странице.', 'warning')
+        return redirect(url_for('index'))
+
+    funck = request.args.get('funck')
+    match funck:
+        case 'edit_users':
+            if session.get('is_admin', False) or session.get('is_specialist', False):
+
+                def get_roles():
+                    conn = get_db_connection()
+                    rows = conn.execute('SELECT id_role, role_name FROM roles ORDER BY role_name').fetchall()
+                    conn.close()
+                    return [{'id': row['id_role'], 'name': row['role_name']} for row in rows]
+
+                def get_departments():
+                    conn = get_db_connection()
+                    rows = conn.execute('SELECT id_department, department_name FROM departments ORDER BY department_name').fetchall()
+                    conn.close()
+                    return [{'id': row['id_department'], 'name': row['department_name']} for row in rows]
+
+                # Получаем ID пользователя из аргументов
+                user_id = request.args.get('user_id', type=int)
+                if not user_id:
+                    flash('Не указан ID пользователя', 'danger')
+                    return redirect(url_for('load_table', funck='edit_users'))
+
+                conn = get_db_connection()
+                user = conn.execute('''
+                    SELECT id_user, login, email, full_name, phone, aktive,
+                           created_at, last_auth, kol_auth, id_role, id_department
+                    FROM users WHERE id_user = ?
+                ''', (user_id,)).fetchone()
+                conn.close()
+
+                if not user:
+                    flash('Пользователь не найден.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_users'))
+
+                # Специалист может редактировать только преподавателей (роль 4)
+                if session.get('is_specialist', False) and user['id_role'] != 4:
+                    flash('Вы можете редактировать только преподавателей.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_users'))
+
+                # Загружаем роли и отделения только для администратора
+                roles = get_roles() if session.get('is_admin', False) else None
+                departments = get_departments() if session.get('is_admin', False) else None
+                head_role_id = 3  # id роли "Заведующий"
+
+                # GET – показываем форму
+                if request.method == 'GET':
+                    return render_template('edit_info.html',
+                                           funck=funck,
+                                           user=user,
+                                           roles=roles,
+                                           departments=departments,
+                                           head_role_id=head_role_id,
+                                           is_admin=session.get('is_admin', False))
+
+                # POST – обрабатываем сохранение
+                full_name = request.form.get('fullName', '').strip()
+                email = request.form.get('email', '').strip().lower()
+                phone = request.form.get('phone', '').strip()
+                aktive = 1 if request.form.get('status') == 'active' else 0
+                new_password = request.form.get('password', '')
+                confirm_password = request.form.get('confirmPassword', '')
+
+                if session.get('is_admin', False):
+                    role_id = request.form.get('role')
+                    department_id = request.form.get('department')
+                else:
+                    role_id = None
+                    department_id = None
+
+                # Валидация
+                errors = []
+                if not full_name:
+                    errors.append('ФИО обязательно')
+                if not email:
+                    errors.append('Email обязателен')
+                elif '@' not in email or '.' not in email:
+                    errors.append('Введите корректный email')
+                elif len(email) > 100:
+                    errors.append('Email слишком длинный')
+
+                # Валидация пароля (если заполнен)
+                if new_password or confirm_password:
+                    if len(new_password) < 6:
+                        errors.append('Новый пароль должен быть не менее 6 символов')
+                    elif new_password != confirm_password:
+                        errors.append('Пароли не совпадают')
+
+                if session.get('is_admin', False):
+                    valid_role_ids = [str(r['id']) for r in roles]
+                    if not role_id or role_id not in valid_role_ids:
+                        errors.append('Выберите корректную роль')
+                    else:
+                        if role_id == str(head_role_id):
+                            if not department_id:
+                                errors.append('Для заведующего необходимо выбрать отделение')
+                            else:
+                                valid_dept_ids = [str(d['id']) for d in departments]
+                                if department_id not in valid_dept_ids:
+                                    errors.append('Выбрано несуществующее отделение')
+                        else:
+                            department_id = None
+
+                if errors:
+                    for error in errors:
+                        flash(error, 'danger')
+                    return render_template('edit_info.html',
+                                           funck=funck,
+                                           user=user,
+                                           roles=roles,
+                                           departments=departments,
+                                           head_role_id=head_role_id,
+                                           is_admin=session.get('is_admin', False),
+                                           form_data=request.form)
+
+                # Проверка уникальности email (исключая текущего)
+                conn = get_db_connection()
+                try:
+                    existing_email = conn.execute('''
+                        SELECT id_user FROM users WHERE email = ? AND id_user != ?
+                    ''', (email, user_id)).fetchone()
+                    if existing_email:
+                        flash('Пользователь с таким email уже существует', 'danger')
+                        conn.close()
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               user=user,
+                                               roles=roles,
+                                               departments=departments,
+                                               head_role_id=head_role_id,
+                                               is_admin=session.get('is_admin', False),
+                                               form_data=request.form)
+
+                    # Формируем запрос на обновление
+                    conn.execute('BEGIN TRANSACTION')
+                    if session.get('is_admin', False):
+                        if new_password:
+                            password_hash = generate_password_hash(new_password)
+                            conn.execute('''
+                                UPDATE users
+                                SET full_name = ?, email = ?, phone = ?, aktive = ?,
+                                    id_role = ?, id_department = ?, password = ?
+                                WHERE id_user = ?
+                            ''', (full_name, email, phone, aktive, int(role_id), department_id, password_hash, user_id))
+                        else:
+                            conn.execute('''
+                                UPDATE users
+                                SET full_name = ?, email = ?, phone = ?, aktive = ?,
+                                    id_role = ?, id_department = ?
+                                WHERE id_user = ?
+                            ''', (full_name, email, phone, aktive, int(role_id), department_id, user_id))
+                    else:  # специалист
+                        if new_password:
+                            password_hash = generate_password_hash(new_password)
+                            conn.execute('''
+                                UPDATE users
+                                SET full_name = ?, email = ?, phone = ?, aktive = ?, password = ?
+                                WHERE id_user = ?
+                            ''', (full_name, email, phone, aktive, password_hash, user_id))
+                        else:
+                            conn.execute('''
+                                UPDATE users
+                                SET full_name = ?, email = ?, phone = ?, aktive = ?
+                                WHERE id_user = ?
+                            ''', (full_name, email, phone, aktive, user_id))
+                    conn.commit()
+                    flash('Изменения успешно сохранены!', 'success')
+                    conn.close()
+                    return redirect(url_for('load_table', funck='edit_users'))
+
+                except sqlite3.Error as e:
+                    conn.rollback()
+                    flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                    conn.close()
+                    return render_template('edit_info.html',
+                                           funck=funck,
+                                           user=user,
+                                           roles=roles,
+                                           departments=departments,
+                                           head_role_id=head_role_id,
+                                           is_admin=session.get('is_admin', False),
+                                           form_data=request.form)
+
+            else:
+                flash('У вас нет прав доступа.', 'danger')
+                return redirect(url_for('index'))
+
+        # ... остальные case
+
+
+
+
+
 if __name__ == '__main__':
     if not os.path.exists(DATABASE):
         print("❌ Ошибка базы данных: База данных не найдена")
