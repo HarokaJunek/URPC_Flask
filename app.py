@@ -433,10 +433,13 @@ def load_table():
                             users.created_at,
                             roles.role_name,
                             users.last_auth,
-                            users.kol_auth
+                            users.kol_auth,
+                            departments.department_name
                         FROM users
                         LEFT JOIN roles ON users.id_role = roles.id_role
-                        WHERE users.id_user != ?                '''
+                        LEFT JOIN departments ON users.id_department = departments.id_department
+                        WHERE users.id_user != ?
+                    '''
                     params = [session['user_id']]
                 elif session.get('is_specialist', False):
                     query = '''
@@ -450,10 +453,13 @@ def load_table():
                             users.created_at,
                             roles.role_name,
                             users.last_auth,
-                            users.kol_auth
+                            users.kol_auth,
+                            departments.department_name
                         FROM users
                         LEFT JOIN roles ON users.id_role = roles.id_role
-                        WHERE users.id_user != ? AND users.id_role = 4              '''
+                        LEFT JOIN departments ON users.id_department = departments.id_department
+                        WHERE users.id_user != ? AND users.id_role = 4
+                    '''
                     params = [session['user_id']]
 
                 # Если передан поисковый запрос, добавляем условия фильтрации
@@ -461,10 +467,11 @@ def load_table():
                     query += ''' AND (
                         users.full_name LIKE ? OR 
                         users.login LIKE ? OR 
-                        users.email LIKE ?
+                        users.email LIKE ? OR
+                        departments.department_name LIKE ?
                     )'''
                     like_pattern = f'%{search_query}%'
-                    params.extend([like_pattern, like_pattern, like_pattern])
+                    params.extend([like_pattern, like_pattern, like_pattern, like_pattern])
 
                 table_info = conn.execute(query, params).fetchall()
                 conn.close()
@@ -985,34 +992,47 @@ def add_info():
     match funck:
         case 'edit_users':
             if session.get('is_admin', False) or session.get('is_specialist', False):
-                # Вспомогательная функция для загрузки ролей из БД
+
                 def get_roles():
                     conn = get_db_connection()
                     rows = conn.execute('SELECT id_role, role_name FROM roles ORDER BY role_name').fetchall()
                     conn.close()
-                    # Преобразуем в список словарей для удобства в шаблоне
                     return [{'id': row['id_role'], 'name': row['role_name']} for row in rows]
-                
-                # GET-запрос: просто показываем форму со списком ролей
-                if request.method == 'GET':
-                    roles = get_roles()
-                    return render_template('add_info.html', funck=funck, roles=roles)
 
-                # POST-запрос: обработка отправленной формы
-                # 1. Получаем данные
+                def get_departments():
+                    conn = get_db_connection()
+                    rows = conn.execute(
+                        'SELECT id_department, department_name FROM departments ORDER BY department_name').fetchall()
+                    conn.close()
+                    return [{'id': row['id_department'], 'name': row['department_name']} for row in rows]
+
+                # Загружаем роли и отделения (всегда, но специалисту они не нужны)
+                roles = get_roles()
+                departments = get_departments()
+                head_role_id = 3  # id роли "Заведующий"
+
+                if request.method == 'GET':
+                    return render_template('add_info.html',
+                                           funck=funck,
+                                           roles=roles,
+                                           departments=departments,
+                                           head_role_id=head_role_id)
+
+                # POST-обработка
                 username = request.form.get('username', '').strip()
                 email = request.form.get('email', '').strip().lower()
                 password = request.form.get('password', '')
                 confirm_password = request.form.get('confirmPassword', '')
                 full_name = request.form.get('fullName', '').strip()
                 phone = request.form.get('phone', '').strip()
-                if session.get('is_admin', False):
-                    role_id = request.form.get('role')  # строка из select
 
-                # 2. Валидация
+                if session.get('is_admin', False):
+                    role_id = request.form.get('role')
+                    department_id = request.form.get('department')  # может быть None
+
                 errors = []
 
-                # Логин
+                # Валидация логина
                 if not username:
                     errors.append('Имя пользователя обязательно')
                 elif len(username) < 3:
@@ -1042,67 +1062,71 @@ def add_info():
                 if not full_name:
                     errors.append('ФИО обязательно')
 
-                # Роль: загружаем актуальный список для проверки
+                # Проверка роли и отделения (только для админа)
                 if session.get('is_admin', False):
-                    roles = get_roles()
-                    valid_role_ids = [str(r['id']) for r in roles]  # строки для сравнения с role_id из формы
+                    valid_role_ids = [str(r['id']) for r in roles]
                     if not role_id or role_id not in valid_role_ids:
                         errors.append('Выберите корректную роль')
+                    else:
+                        # Если выбрана роль заведующего, отделение обязательно
+                        if role_id == str(head_role_id):
+                            if not department_id:
+                                errors.append('Для заведующего необходимо выбрать отделение')
+                            else:
+                                valid_dept_ids = [str(d['id']) for d in departments]
+                                if department_id not in valid_dept_ids:
+                                    errors.append('Выбрано несуществующее отделение')
+                        else:
+                            department_id = None  # для других ролей отделение не сохраняется
 
-                # Если есть ошибки — показываем форму снова
                 if errors:
                     for error in errors:
                         flash(error, 'danger')
-                    return render_template(
-                        'add_info.html',
-                        funck=funck,
-                        form_data=request.form,  # передаём введённые данные для сохранения в полях
-                        roles=roles
-                    )
+                    return render_template('add_info.html',
+                                           funck=funck,
+                                           form_data=request.form,
+                                           roles=roles,
+                                           departments=departments,
+                                           head_role_id=head_role_id)
 
-                # 3. Проверка уникальности логина и email
+                # Проверка уникальности логина и email
                 conn = get_db_connection()
                 try:
-                    existing_user = conn.execute(
-                        'SELECT id_user FROM users WHERE login = ?',
-                        (username,)
-                    ).fetchone()
+                    existing_user = conn.execute('SELECT id_user FROM users WHERE login = ?', (username,)).fetchone()
                     if existing_user:
                         flash('Пользователь с таким логином уже существует', 'danger')
-                        if session.get('is_admin', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form, roles=roles)
-                        elif session.get('is_specialist', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form)
+                        return render_template('add_info.html',
+                                               funck=funck,
+                                               form_data=request.form,
+                                               roles=roles,
+                                               departments=departments,
+                                               head_role_id=head_role_id)
 
-                    existing_email = conn.execute(
-                        'SELECT id_user FROM users WHERE email = ?',
-                        (email,)
-                    ).fetchone()
+                    existing_email = conn.execute('SELECT id_user FROM users WHERE email = ?', (email,)).fetchone()
                     if existing_email:
                         flash('Пользователь с таким email уже существует', 'danger')
-                        if session.get('is_admin', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form, roles=roles)
-                        elif session.get('is_specialist', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form)
+                        return render_template('add_info.html',
+                                               funck=funck,
+                                               form_data=request.form,
+                                               roles=roles,
+                                               departments=departments,
+                                               head_role_id=head_role_id)
 
-                    # 4. Хеширование пароля
+                    # Хеширование пароля
                     password_hash = generate_password_hash(password)
 
-                    # 5. Вставка нового пользователя
+                    # Вставка пользователя
                     conn.execute('BEGIN TRANSACTION')
                     try:
                         cursor = conn.cursor()
                         if session.get('is_admin', False):
                             cursor.execute('''
                                 INSERT INTO users 
-                                (login, email, password, phone, full_name, created_at, id_role)
-                                VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'), ?)
-                            ''', (username, email, password_hash, phone, full_name, int(role_id)))
+                                (login, email, password, phone, full_name, created_at, id_role, id_department)
+                                VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'), ?, ?)
+                            ''', (username, email, password_hash, phone, full_name, int(role_id), department_id))
                         elif session.get('is_specialist', False):
+                            # Специалист создаёт только преподавателей (id_role = 4)
                             cursor.execute('''
                                 INSERT INTO users 
                                 (login, email, password, phone, full_name, created_at, id_role)
@@ -1110,25 +1134,24 @@ def add_info():
                             ''', (username, email, password_hash, phone, full_name))
                         conn.commit()
                         flash(f'Пользователь {full_name} успешно создан!', 'success')
-        
                         return redirect(url_for('load_table', funck='edit_users'))
                     except sqlite3.Error as e:
                         conn.rollback()
                         flash(f'Ошибка базы данных при вставке: {str(e)}', 'danger')
-                        if session.get('is_admin', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form, roles=roles)
-                        elif session.get('is_specialist', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form)
+                        return render_template('add_info.html',
+                                               funck=funck,
+                                               form_data=request.form,
+                                               roles=roles,
+                                               departments=departments,
+                                               head_role_id=head_role_id)
                 except sqlite3.Error as e:
                     flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
-                    if session.get('is_admin', False):
-                        return render_template('add_info.html', funck=funck,
-                                                form_data=request.form, roles=roles)
-                    elif session.get('is_specialist', False):
-                        return render_template('add_info.html', funck=funck,
-                                                form_data=request.form)
+                    return render_template('add_info.html',
+                                           funck=funck,
+                                           form_data=request.form,
+                                           roles=roles,
+                                           departments=departments,
+                                           head_role_id=head_role_id)
                 finally:
                     conn.close()
 
