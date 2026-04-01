@@ -5,6 +5,7 @@ import os
 import sqlite3
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+import re
 
 # ============================================================================
 # 1. ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ!!wdfw
@@ -976,272 +977,468 @@ def delete_recording(id):
 
 @app.route('/add_info', methods=['GET', 'POST'])
 def add_info():
-    if 'user_id' not in session:
-        flash('Необходимо авторизоваться для доступа к этой странице.', 'warning')
+    funck = request.args.get('funck') or request.form.get('funck')
+
+    print(f"=== DEBUG ===")
+    print(f"funck: {funck}")
+    print(f"method: {request.method}")
+    print(f"args: {dict(request.args)}")
+    print(f"form: {dict(request.form)}")
+
+    if not funck:
+        flash('Не указан параметр функции', 'danger')
         return redirect(url_for('index'))
 
-    funck = request.args.get('funck')
-
-    match funck:
-        case 'edit_users':
-            if session.get('is_admin', False) or session.get('is_specialist', False):
-                # Вспомогательная функция для загрузки ролей из БД
-                def get_roles():
-                    conn = get_db_connection()
-                    rows = conn.execute('SELECT id_role, role_name FROM roles ORDER BY role_name').fetchall()
-                    conn.close()
-                    # Преобразуем в список словарей для удобства в шаблоне
-                    return [{'id': row['id_role'], 'name': row['role_name']} for row in rows]
-                
-                # GET-запрос: просто показываем форму со списком ролей
-                if request.method == 'GET':
-                    roles = get_roles()
-                    return render_template('add_info.html', funck=funck, roles=roles)
-
-                # POST-запрос: обработка отправленной формы
-                # 1. Получаем данные
-                username = request.form.get('username', '').strip()
-                email = request.form.get('email', '').strip().lower()
-                password = request.form.get('password', '')
-                confirm_password = request.form.get('confirmPassword', '')
-                full_name = request.form.get('fullName', '').strip()
-                phone = request.form.get('phone', '').strip()
-                if session.get('is_admin', False):
-                    role_id = request.form.get('role')  # строка из select
-
-                # 2. Валидация
-                errors = []
-
-                # Логин
-                if not username:
-                    errors.append('Имя пользователя обязательно')
-                elif len(username) < 3:
-                    errors.append('Имя пользователя должно быть не менее 3 символов')
-                elif len(username) > 20:
-                    errors.append('Имя пользователя должно быть не более 20 символов')
-                elif not username.replace('_', '').isalnum():
-                    errors.append('Имя пользователя может содержать только буквы, цифры и подчёркивание')
-
-                # Email
-                if not email:
-                    errors.append('Email обязателен')
-                elif '@' not in email or '.' not in email:
-                    errors.append('Введите корректный email')
-                elif len(email) > 100:
-                    errors.append('Email слишком длинный')
-
-                # Пароль
-                if not password:
-                    errors.append('Пароль обязателен')
-                elif len(password) < 6:
-                    errors.append('Пароль должен быть не менее 6 символов')
-                elif password != confirm_password:
-                    errors.append('Пароли не совпадают')
-
-                # ФИО
-                if not full_name:
-                    errors.append('ФИО обязательно')
-
-                # Роль: загружаем актуальный список для проверки
-                if session.get('is_admin', False):
-                    roles = get_roles()
-                    valid_role_ids = [str(r['id']) for r in roles]  # строки для сравнения с role_id из формы
-                    if not role_id or role_id not in valid_role_ids:
-                        errors.append('Выберите корректную роль')
-
-                # Если есть ошибки — показываем форму снова
-                if errors:
-                    for error in errors:
-                        flash(error, 'danger')
-                    return render_template(
-                        'add_info.html',
-                        funck=funck,
-                        form_data=request.form,  # передаём введённые данные для сохранения в полях
-                        roles=roles
-                    )
-
-                # 3. Проверка уникальности логина и email
+    if funck == 'edit_users':
+        if session.get('is_admin', False) or session.get('is_specialist', False):
+            # Вспомогательная функция для загрузки ролей из БД
+            def get_roles():
                 conn = get_db_connection()
+                rows = conn.execute('SELECT id_role, role_name FROM roles ORDER BY role_name').fetchall()
+                conn.close()
+                return [{'id': row['id_role'], 'name': row['role_name']} for row in rows]
+
+            # GET-запрос: просто показываем форму со списком ролей
+            if request.method == 'GET':
+                roles = get_roles()
+                return render_template('add_info.html', funck=funck, roles=roles)
+
+            # POST-запрос: обработка отправленной формы
+            # 1. Получаем данные
+            username = request.form.get('username', '').strip()
+            email = request.form.get('email', '').strip().lower()
+            password = request.form.get('password', '')
+            confirm_password = request.form.get('confirmPassword', '')
+            full_name = request.form.get('fullName', '').strip()
+            phone = request.form.get('phone', '').strip()
+            if session.get('is_admin', False):
+                role_id = request.form.get('role')
+
+            # 2. Валидация
+            errors = []
+
+            # Логин
+            if not username:
+                errors.append('Имя пользователя обязательно')
+            elif len(username) < 3:
+                errors.append('Имя пользователя должно быть не менее 3 символов')
+            elif len(username) > 20:
+                errors.append('Имя пользователя должно быть не более 20 символов')
+            elif not username.replace('_', '').isalnum():
+                errors.append('Имя пользователя может содержать только буквы, цифры и подчёркивание')
+
+            # Email
+            if not email:
+                errors.append('Email обязателен')
+            elif '@' not in email or '.' not in email:
+                errors.append('Введите корректный email')
+            elif len(email) > 100:
+                errors.append('Email слишком длинный')
+
+            # Пароль
+            if not password:
+                errors.append('Пароль обязателен')
+            elif len(password) < 6:
+                errors.append('Пароль должен быть не менее 6 символов')
+            elif password != confirm_password:
+                errors.append('Пароли не совпадают')
+
+            # ФИО
+            if not full_name:
+                errors.append('ФИО обязательно')
+
+            # Роль: загружаем актуальный список для проверки
+            roles = get_roles()
+            if session.get('is_admin', False):
+                valid_role_ids = [str(r['id']) for r in roles]
+                if not role_id or role_id not in valid_role_ids:
+                    errors.append('Выберите корректную роль')
+
+            # Если есть ошибки — показываем форму снова
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form,
+                    roles=roles
+                )
+
+            # 3. Проверка уникальности логина и email
+            conn = get_db_connection()
+            try:
+                existing_user = conn.execute(
+                    'SELECT id_user FROM users WHERE login = ?',
+                    (username,)
+                ).fetchone()
+                if existing_user:
+                    flash('Пользователь с таким логином уже существует', 'danger')
+                    return render_template('add_info.html', funck=funck,
+                                           form_data=request.form, roles=roles)
+
+                existing_email = conn.execute(
+                    'SELECT id_user FROM users WHERE email = ?',
+                    (email,)
+                ).fetchone()
+                if existing_email:
+                    flash('Пользователь с таким email уже существует', 'danger')
+                    return render_template('add_info.html', funck=funck,
+                                           form_data=request.form, roles=roles)
+
+                # 4. Хеширование пароля
+                password_hash = generate_password_hash(password)
+
+                # 5. Вставка нового пользователя
+                conn.execute('BEGIN TRANSACTION')
                 try:
-                    existing_user = conn.execute(
-                        'SELECT id_user FROM users WHERE login = ?',
-                        (username,)
-                    ).fetchone()
-                    if existing_user:
-                        flash('Пользователь с таким логином уже существует', 'danger')
-                        if session.get('is_admin', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form, roles=roles)
-                        elif session.get('is_specialist', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form)
-
-                    existing_email = conn.execute(
-                        'SELECT id_user FROM users WHERE email = ?',
-                        (email,)
-                    ).fetchone()
-                    if existing_email:
-                        flash('Пользователь с таким email уже существует', 'danger')
-                        if session.get('is_admin', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form, roles=roles)
-                        elif session.get('is_specialist', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form)
-
-                    # 4. Хеширование пароля
-                    password_hash = generate_password_hash(password)
-
-                    # 5. Вставка нового пользователя
-                    conn.execute('BEGIN TRANSACTION')
-                    try:
-                        cursor = conn.cursor()
-                        if session.get('is_admin', False):
-                            cursor.execute('''
-                                INSERT INTO users 
-                                (login, email, password, phone, full_name, created_at, id_role)
-                                VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'), ?)
-                            ''', (username, email, password_hash, phone, full_name, int(role_id)))
-                        elif session.get('is_specialist', False):
-                            cursor.execute('''
-                                INSERT INTO users 
-                                (login, email, password, phone, full_name, created_at, id_role)
-                                VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'), 4)
-                            ''', (username, email, password_hash, phone, full_name))
-                        conn.commit()
-                        flash(f'Пользователь {full_name} успешно создан!', 'success')
-        
-                        return redirect(url_for('load_table', funck='edit_users'))
-                    except sqlite3.Error as e:
-                        conn.rollback()
-                        flash(f'Ошибка базы данных при вставке: {str(e)}', 'danger')
-                        if session.get('is_admin', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form, roles=roles)
-                        elif session.get('is_specialist', False):
-                            return render_template('add_info.html', funck=funck,
-                                                form_data=request.form)
-                except sqlite3.Error as e:
-                    flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
+                    cursor = conn.cursor()
                     if session.get('is_admin', False):
-                        return render_template('add_info.html', funck=funck,
-                                                form_data=request.form, roles=roles)
+                        cursor.execute('''
+                            INSERT INTO users 
+                            (login, email, password, phone, full_name, created_at, id_role)
+                            VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'), ?)
+                        ''', (username, email, password_hash, phone, full_name, int(role_id)))
                     elif session.get('is_specialist', False):
-                        return render_template('add_info.html', funck=funck,
-                                                form_data=request.form)
-                finally:
-                    conn.close()
+                        cursor.execute('''
+                            INSERT INTO users 
+                            (login, email, password, phone, full_name, created_at, id_role)
+                            VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'), 4)
+                        ''', (username, email, password_hash, phone, full_name))
+                    conn.commit()
+                    flash(f'Пользователь {full_name} успешно создан!', 'success')
+                    return redirect(url_for('load_table', funck='edit_users'))
+                except sqlite3.Error as e:
+                    conn.rollback()
+                    flash(f'Ошибка базы данных при вставке: {str(e)}', 'danger')
+                    return render_template('add_info.html', funck=funck,
+                                           form_data=request.form, roles=roles)
+            except sqlite3.Error as e:
+                flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
+                return render_template('add_info.html', funck=funck,
+                                       form_data=request.form, roles=roles)
+            finally:
+                conn.close()
+        else:
+            flash('У вас нет прав для добавления пользователя', 'danger')
+            return redirect(url_for('index'))
 
-        case 'edit_disciplines':
-            if session.get('is_specialist', False):
-                # Вспомогательная функция для загрузки учебных планов (ПК) из БД
-                def get_pck_list():
-                    conn = get_db_connection()
-                    rows = conn.execute('SELECT id_pck, pck_name FROM pck ORDER BY pck_name').fetchall()
-                    conn.close()
-                    # Преобразуем в список словарей для удобства в шаблоне
-                    return [{'id_pck': row['id_pck'], 'pck_name': row['pck_name']} for row in rows]
+    if funck == 'edit_disciplines':
+        if session.get('is_specialist', False):
+            # Вспомогательная функция для загрузки PCK из БД
+            def get_pck():
+                conn = get_db_connection()
+                rows = conn.execute('SELECT id_pck, name_pck FROM pck ORDER BY name_pck').fetchall()
+                conn.close()
+                return [{'id': row['id_pck'], 'name': row['name_pck']} for row in rows]
 
-                # GET-запрос: просто показываем форму со списком учебных планов
-                if request.method == 'GET':
-                    pck_list = get_pck_list()
-                    return render_template('add_info.html', funck=funck, pck_list=pck_list)
+            # GET-запрос: просто показываем форму со списком PCK
+            if request.method == 'GET':
+                pck_list = get_pck()
+                return render_template('add_info.html', funck=funck, pck_list=pck_list)
 
-                # POST-запрос: обработка отправленной формы
-                # 1. Получаем данные
-                id_discipline = request.form.get('id_discipline', '').strip()
-                discipline_name = request.form.get('discipline_name', '').strip()
-                id_pck = request.form.get('id_pck', '').strip()
+            # POST-запрос: обработка отправленной формы
+            # 1. Получаем данные
+            discipline_id = request.form.get('discipline_id', '').strip()
+            discipline_name = request.form.get('discipline_name', '').strip()
+            id_pck = request.form.get('id_pck')
 
-                # 2. Валидация
-                errors = []
+            # 2. Валидация
+            errors = []
 
-                # Код дисциплины
-                if not id_discipline:
-                    errors.append('Код дисциплины обязателен')
-                elif len(id_discipline) < 2:
-                    errors.append('Код дисциплины должен быть не менее 2 символов')
-                elif len(id_discipline) > 50:
-                    errors.append('Код дисциплины должен быть не более 50 символов')
-                elif not id_discipline.replace('_', '').isalnum():
-                    errors.append('Код дисциплины может содержать только буквы, цифры и подчёркивание')
+            # ID дисциплины
+            if not discipline_id:
+                errors.append('ID дисциплины обязательно')
+            elif len(discipline_id) > 50:
+                errors.append('ID дисциплины должен быть не более 50 символов')
+            elif not re.match(r'^[а-яА-Яa-zA-Z0-9.]+$', discipline_id):
+                errors.append('ID дисциплины может содержать только буквы (русские/латинские), цифры и точки')
 
-                # Название дисциплины
-                if not discipline_name:
-                    errors.append('Название дисциплины обязательно')
-                elif len(discipline_name) < 3:
-                    errors.append('Название дисциплины должно быть не менее 3 символов')
-                elif len(discipline_name) > 50:
-                    errors.append('Название дисциплины должно быть не более 50 символов')
+            # Название дисциплины
+            if not discipline_name:
+                errors.append('Название дисциплины обязательно')
+            elif len(discipline_name) > 50:
+                errors.append('Название дисциплины должно быть не более 50 символов')
 
-                # Учебный план (ПК)
-                if not id_pck:
-                    errors.append('Учебный план обязателен')
-                else:
-                    try:
-                        id_pck_int = int(id_pck)
-                        if id_pck_int <= 0:
-                            errors.append('Выберите корректный учебный план')
-                    except ValueError:
-                        errors.append('Неверный формат учебного плана')
+            # Загружаем список PCK для проверки
+            pck_list = get_pck()
+            valid_pck_ids = [str(p['id']) for p in pck_list]
+            if not id_pck or id_pck not in valid_pck_ids:
+                errors.append('Выберите корректный ПЦК')
 
-                # Если есть ошибки — показываем форму снова
-                if errors:
-                    for error in errors:
-                        flash(error, 'danger')
-                    pck_list = get_pck_list()
+            # Если есть ошибки — показываем форму снова
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form,
+                    pck_list=pck_list
+                )
+
+            # 3. Проверка уникальности ID дисциплины
+            conn = get_db_connection()
+            try:
+                existing_discipline = conn.execute(
+                    'SELECT id_discipline FROM disciplines WHERE id_discipline = ?',
+                    (discipline_id,)
+                ).fetchone()
+                if existing_discipline:
+                    flash('Дисциплина с таким ID уже существует', 'danger')
                     return render_template(
                         'add_info.html',
                         funck=funck,
-                        form_data=request.form,  # передаём введённые данные для сохранения в полях
+                        form_data=request.form,
                         pck_list=pck_list
                     )
 
-                # 3. Проверка уникальности кода дисциплины
-                conn = get_db_connection()
+                # Проверка уникальности названия дисциплины
+                existing_name = conn.execute(
+                    'SELECT id_discipline FROM disciplines WHERE discipline_name = ?',
+                    (discipline_name,)
+                ).fetchone()
+                if existing_name:
+                    flash('Дисциплина с таким названием уже существует', 'danger')
+                    return render_template(
+                        'add_info.html',
+                        funck=funck,
+                        form_data=request.form,
+                        pck_list=pck_list
+                    )
+
+                # 4. Вставка новой дисциплины
+                conn.execute('BEGIN TRANSACTION')
                 try:
-                    existing_discipline = conn.execute(
-                        'SELECT id_discipline FROM disciplines WHERE id_discipline = ?',
-                        (id_discipline,)
-                    ).fetchone()
-                    if existing_discipline:
-                        flash('Дисциплина с таким кодом уже существует', 'danger')
-                        pck_list = get_pck_list()
-                        return render_template('add_info.html', funck=funck,
-                                               form_data=request.form, pck_list=pck_list)
-
-                    # 4. Вставка новой дисциплины
-                    conn.execute('BEGIN TRANSACTION')
-                    try:
-                        cursor = conn.cursor()
-                        cursor.execute('''
-                            INSERT INTO disciplines 
-                            (id_discipline, discipline_name, id_pck)
-                            VALUES (?, ?, ?)
-                        ''', (id_discipline, discipline_name, int(id_pck)))
-                        conn.commit()
-                        flash(f'Дисциплина "{discipline_name}" успешно добавлена!', 'success')
-
-                        return redirect(url_for('load_table', funck='edit_disciplines'))
-                    except sqlite3.Error as e:
-                        conn.rollback()
-                        flash(f'Ошибка базы данных при вставке: {str(e)}', 'danger')
-                        pck_list = get_pck_list()
-                        return render_template('add_info.html', funck=funck,
-                                               form_data=request.form, pck_list=pck_list)
+                    cursor = conn.cursor()
+                    cursor.execute('''
+                        INSERT INTO disciplines 
+                        (id_discipline, discipline_name, id_pck)
+                        VALUES (?, ?, ?)
+                    ''', (discipline_id, discipline_name, int(id_pck)))
+                    conn.commit()
+                    flash(f'Дисциплина {discipline_name} успешно создана!', 'success')
+                    return redirect(url_for('load_table', funck='edit_disciplines'))
                 except sqlite3.Error as e:
-                    flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
-                    pck_list = get_pck_list()
-                    return render_template('add_info.html', funck=funck,
-                                           form_data=request.form, pck_list=pck_list)
-                finally:
-                    conn.close()
-
-
-        # Обработка других значений funck (если есть)
-        case _:
-            flash('Неверный параметр функции', 'danger')
+                    conn.rollback()
+                    flash(f'Ошибка базы данных при вставке: {str(e)}', 'danger')
+                    return render_template(
+                        'add_info.html',
+                        funck=funck,
+                        form_data=request.form,
+                        pck_list=pck_list
+                    )
+            except sqlite3.Error as e:
+                flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form,
+                    pck_list=pck_list
+                )
+            finally:
+                conn.close()
+        else:
+            flash('У вас нет прав для добавления дисциплины', 'danger')
             return redirect(url_for('index'))
+
+    if funck == 'edit_years':
+        if session.get('is_specialist', False):
+            if request.method == 'GET':
+                return render_template('add_info.html', funck=funck)
+
+            year_name = request.form.get('year_name', '').strip()
+            errors = []
+
+            if not year_name:
+                errors.append('Название учебного года обязательно')
+            elif len(year_name) > 50:
+                errors.append('Название учебного года должно быть не более 50 символов')
+            elif not re.match(r'^\d{4}-\d{4}$', year_name):
+                errors.append('Название учебного года должно быть в формате ГГГГ-ГГГГ (например, 2023-2024)')
+
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+
+            # Работа с БД
+            conn = get_db_connection()
+            try:
+                # Проверка уникальности
+                existing_year = conn.execute(
+                    'SELECT id_year FROM academic_year WHERE year_name = ?',
+                    (year_name,)
+                ).fetchone()
+
+                if existing_year:
+                    flash('Такой учебный год уже существует', 'danger')
+                    return render_template(
+                        'add_info.html',
+                        funck=funck,
+                        form_data=request.form
+                    )
+
+                # Вставка нового учебного года
+                conn.execute(
+                    'INSERT INTO academic_year (year_name) VALUES (?)',
+                    (year_name,)
+                )
+                conn.commit()
+                flash(f'Учебный год {year_name} успешно создан!', 'success')
+                return redirect(url_for('load_table', funck='edit_years'))
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+            finally:
+                conn.close()
+        else:
+            flash('У вас нет прав для добавления учебного года', 'danger')
+            return redirect(url_for('index'))
+
+    if funck == 'edit_fgoss':
+        if session.get('is_specialist', False):
+            if request.method == 'GET':
+                return render_template('add_info.html', funck=funck)
+
+            fgos_name = request.form.get('fgos_name', '').strip()
+            errors = []
+
+            if not fgos_name:
+                errors.append('Название ФГОС обязательно')
+            elif len(fgos_name) > 50:
+                errors.append('Название ФГОС должно быть не более 50 символов')
+            elif not re.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.]+$', fgos_name):
+                errors.append(
+                    'Название ФГОС может содержать буквы (русские/латинские), цифры, пробелы, дефисы и точки')
+
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+
+            # Работа с БД
+            conn = get_db_connection()
+            try:
+                # Проверка уникальности
+                existing_fgos = conn.execute(
+                    'SELECT id_fgos FROM fgoss WHERE name = ?',
+                    (fgos_name,)
+                ).fetchone()
+
+                if existing_fgos:
+                    flash('Такой ФГОС уже существует', 'danger')
+                    return render_template(
+                        'add_info.html',
+                        funck=funck,
+                        form_data=request.form
+                    )
+
+                # Вставка нового ФГОС
+                conn.execute(
+                    'INSERT INTO fgoss (name) VALUES (?)',
+                    (fgos_name,)
+                )
+                conn.commit()
+                flash(f'ФГОС {fgos_name} успешно создан!', 'success')
+                return redirect(url_for('load_table', funck='edit_fgoss'))
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+            finally:
+                conn.close()
+        else:
+            flash('У вас нет прав для добавления ФГОС', 'danger')
+            return redirect(url_for('index'))
+
+    if funck == 'edit_pck':
+        if session.get('is_specialist', False):
+            if request.method == 'GET':
+                return render_template('add_info.html', funck=funck)
+
+            pck_name = request.form.get('pck_name', '').strip()
+            errors = []
+
+            if not pck_name:
+                errors.append('Название ПЦК обязательно')
+            elif len(pck_name) > 50:
+                errors.append('Название ПЦК должно быть не более 50 символов')
+            elif not re.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.]+$', pck_name):
+                errors.append(
+                    'Название ПЦК может содержать буквы (русские/латинские), цифры, пробелы, дефисы и точки')
+
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+
+            # Работа с БД
+            conn = get_db_connection()
+            try:
+                # Проверка уникальности
+                existing_pck = conn.execute(
+                    'SELECT id_pck FROM pck WHERE name_pck = ?',
+                    (pck_name,)
+                ).fetchone()
+
+                if existing_pck:
+                    flash('Такое ПЦК уже существует', 'danger')
+                    return render_template(
+                        'add_info.html',
+                        funck=funck,
+                        form_data=request.form
+                    )
+
+                # Вставка нового ПЦК
+                conn.execute(
+                    'INSERT INTO pck (name_pck) VALUES (?)',
+                    (pck_name,)
+                )
+                conn.commit()
+                flash(f'ПЦК {pck_name} успешно создано!', 'success')
+                return redirect(url_for('load_table', funck='edit_pck'))
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+            finally:
+                conn.close()
+        else:
+            flash('У вас нет прав для добавления ПЦК', 'danger')
+            return redirect(url_for('index'))
+
+    else:
+        flash('Неверный параметр функции', 'danger')
+        return redirect(url_for('index'))
 
 
 

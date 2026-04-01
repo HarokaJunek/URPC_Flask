@@ -6,19 +6,17 @@
     <h1>Ошибка 403!</h1>
 {% else %}
     {% if funck == 'edit_users' %}
-        <div class="blocks">
-            <div class="edit-form-container">
+    <div class="blocks">
+        <div class="edit-form-container">
             <div class="form-header">
                 {% if session.is_admin %}
-                <h2><i class="fas fa-edit"></i> Добавление пользователя в систему</h2>
+                    <h2><i class="fas fa-edit"></i> Добавление пользователя в систему</h2>
                 {% endif %}
                 {% if session.is_specialist %}
-                <h2><i class="fas fa-edit"></i> Добавление преподавателя в систему</h2>
+                    <h2><i class="fas fa-edit"></i> Добавление преподавателя в систему</h2>
                 {% endif %}
             </div>
-            {# Форма отправляется с параметром funck=edit_users #}
             <form method="POST" action="{{ url_for('add_info', funck='edit_users') }}" class="edit-form">
-                {# Поле логина #}
                 <div class="form-group">
                     <label for="username" class="required">
                         <i class="fas fa-user"></i> Логин
@@ -29,7 +27,6 @@
                     <div class="form-hint">Только латинские буквы и цифры</div>
                 </div>
 
-                {# Пароли #}
                 <div class="password-row">
                     <div class="form-group">
                         <label for="password" class="required">
@@ -52,7 +49,6 @@
                     </div>
                 </div>
 
-                {# Email #}
                 <div class="form-group">
                     <label for="email" class="required">
                         <i class="fas fa-envelope"></i> Электронная почта
@@ -62,7 +58,6 @@
                     <div class="form-hint">На эту почту придет подтверждение</div>
                 </div>
 
-                {# ФИО #}
                 <div class="form-group">
                     <label for="fullName" class="required">
                         <i class="fas fa-user-circle"></i> ФИО
@@ -72,7 +67,6 @@
                     <div class="form-hint">Введите полностью фамилию, имя и отчество</div>
                 </div>
 
-                {# Телефон #}
                 <div class="form-group">
                     <label for="phone">
                         <i class="fas fa-phone"></i> Номер телефона
@@ -82,129 +76,392 @@
                     <div class="form-hint">Необязательное поле</div>
                 </div>
 
-                {# Роль — динамически загружается из БД #}
                 {% if session.is_admin %}
-                <div class="form-group">
-                    <label for="edit-role" class="required">
-                        <i class="fas fa-user-tag"></i> Роль
-                    </label>
-                    <div class="select-wrapper">
-                        <select id="edit-role" name="role" required>
-                            <option value="" disabled {% if not form_data or not form_data.get('role') %}selected{% endif %}>Выберите роль</option>
-                            {% for role in roles %}
-                                <option value="{{ role.id }}"
-                                    {% if form_data and form_data.get('role')|int == role.id %}selected{% endif %}>
-                                    {{ role.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
+                    <div class="form-group">
+                        <label for="edit-role" class="required">
+                            <i class="fas fa-user-tag"></i> Роль
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="edit-role" name="role" required>
+                                <option value="" disabled {% if not form_data or not form_data.get('role') %}selected{% endif %}>Выберите роль</option>
+                                {% for role in roles %}
+                                    <option value="{{ role.id }}"
+                                        {% if form_data and form_data.get('role')|int == role.id %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
                     </div>
-                </div>
                 {% endif %}
 
-                {# Кнопка отправки #}
                 <button type="submit" id="submitBtn">Создать аккаунт</button>
             </form>
         </div>
-        </div>
+    </div>
 
-        {# JavaScript для маски телефона (без изменений) #}
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const phoneInput = document.getElementById('phone');
-
-                if (phoneInput) {
-                    phoneInput.addEventListener('input', function(e) {
-                        let value = e.target.value.replace(/\D/g, '');
-
-                        if (value.startsWith('7') || value.startsWith('8')) {
-                            value = value.substring(1);
-                        }
-
-                        value = value.substring(0, 10);
-
-                        let formattedValue = '+7';
-                        if (value.length > 0) {
-                            formattedValue += ' (' + value.substring(0, 3);
-                        }
-                        if (value.length > 3) {
-                            formattedValue += ') ' + value.substring(3, 6);
-                        }
-                        if (value.length > 6) {
-                            formattedValue += '-' + value.substring(6, 8);
-                        }
-                        if (value.length > 8) {
-                            formattedValue += '-' + value.substring(8, 10);
-                        }
-
-                        if (value.length <= 3 && formattedValue.endsWith('(')) {
-                            formattedValue = formattedValue.slice(0, -2);
-                        }
-
-                        e.target.value = formattedValue;
-                    });
-                }
-            });
-        </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.startsWith('7') || value.startsWith('8')) {
+                        value = value.substring(1);
+                    }
+                    value = value.substring(0, 10);
+                    let formattedValue = '+7';
+                    if (value.length > 0) {
+                        formattedValue += ' (' + value.substring(0, 3);
+                    }
+                    if (value.length > 3) {
+                        formattedValue += ') ' + value.substring(3, 6);
+                    }
+                    if (value.length > 6) {
+                        formattedValue += '-' + value.substring(6, 8);
+                    }
+                    if (value.length > 8) {
+                        formattedValue += '-' + value.substring(8, 10);
+                    }
+                    if (value.length <= 3 && formattedValue.endsWith('(')) {
+                        formattedValue = formattedValue.slice(0, -2);
+                    }
+                    e.target.value = formattedValue;
+                });
+            }
+        });
+    </script>
     {% endif %}
 
     {% if funck == 'edit_disciplines' %}
     <div class="blocks">
         <div class="edit-form-container">
             <div class="form-header">
-                {% if session.is_specialist %}
+                {% if session.is_admin %}
                     <h2><i class="fas fa-edit"></i> Добавление дисциплины в систему</h2>
+                {% endif %}
+                {% if session.is_specialist %}
+                    <h2><i class="fas fa-edit"></i> Добавление новой дисциплины</h2>
                 {% endif %}
             </div>
             <form method="POST" action="{{ url_for('add_info', funck='edit_disciplines') }}" class="edit-form">
-                {# Код дисциплины #}
                 <div class="form-group">
-                    <label for="id_discipline" class="required">
-                        <i class="fas fa-hashtag"></i> Код дисциплины
+                    <label for="discipline_id" class="required">
+                        <i class="fas fa-hashtag"></i> ID дисциплины
                     </label>
-                    <input type="text" id="id_discipline" name="id_discipline"
-                           placeholder="Введите код дисциплины"
-                           value="{{ form_data.get('id_discipline', '') if form_data else '' }}">
-                    <div class="form-hint">Только кириллица буквы и цифры, например: ОУД.01</div>
+                    <input type="text" id="discipline_id" name="discipline_id"
+                           placeholder="Например: СГ.01"
+                           value="{{ form_data.get('discipline_id', '') if form_data else '' }}">
+                    <div class="form-hint">Буквы (русские/латинские), цифры и точки (макс. 50 символов)</div>
                 </div>
 
-                {# Название дисциплины #}
                 <div class="form-group">
                     <label for="discipline_name" class="required">
                         <i class="fas fa-book"></i> Название дисциплины
                     </label>
                     <input type="text" id="discipline_name" name="discipline_name"
-                           placeholder="Введите название дисциплины"
+                           placeholder="Введите полное название дисциплины"
                            value="{{ form_data.get('discipline_name', '') if form_data else '' }}">
-                    <div class="form-hint">Полное название дисциплины</div>
+                    <div class="form-hint">Например: Высшая математика, Программирование и т.д.</div>
                 </div>
 
-                {# ПК (учебный план) #}
                 <div class="form-group">
                     <label for="id_pck" class="required">
-                        <i class="fas fa-graduation-cap"></i> Учебный план (ПК)
+                        <i class="fas fa-chalkboard-teacher"></i> ПЦК (Предметно-цикловая комиссия)
                     </label>
                     <div class="select-wrapper">
-                        <select id="id_pck" name="id_pck" required="required">
-                            <option value="" disabled="disabled" {% if not form_data or not form_data.get('id_pck') %}selected="selected"{% endif %}>Выберите учебный план</option>
-                            {% for pck in pck_list %}
-                                <option value="{{ pck.id_pck }}"
-                                    {% if form_data and form_data.get('id_pck')|int == pck.id_pck %}selected="selected"{% endif %}>
-                                    {{ pck.pck_name }}
-                                </option>
-                            {% endfor %}
+                        <select id="id_pck" name="id_pck" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('id_pck') %}selected{% endif %}>Выберите ПЦК</option>
+                            {% if pck_list %}
+                                {% for pck in pck_list %}
+                                    <option value="{{ pck.id }}"
+                                        {% if form_data and form_data.get('id_pck')|int == pck.id %}selected{% endif %}>
+                                        {{ pck.name }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>Нет доступных ПЦК</option>
+                            {% endif %}
                         </select>
                         <i class="fas fa-chevron-down select-arrow"></i>
                     </div>
-                    <div class="form-hint">Выберите ПЦК, к которой относится дисциплина</div>
+                    <div class="form-hint">Выберите предметно-цикловую комиссию, к которой относится дисциплина</div>
                 </div>
 
-                {# Кнопка отправки #}
-                <button type="submit" id="submitBtn">Добавить дисциплину</button>
+                <button type="submit" id="submitBtn">Создать дисциплину</button>
             </form>
         </div>
     </div>
-{% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const disciplineIdInput = document.getElementById('discipline_id');
+            const disciplineNameInput = document.getElementById('discipline_name');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (disciplineIdInput) {
+                disciplineIdInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    let cleaned = value.replace(/[^а-яА-Яa-zA-Z0-9.]/g, '');
+                    if (cleaned !== value) {
+                        e.target.value = cleaned;
+                    }
+                    if (cleaned.length > 50) {
+                        e.target.value = cleaned.substring(0, 50);
+                    }
+                });
+            }
+
+            if (disciplineNameInput) {
+                disciplineNameInput.addEventListener('input', function(e) {
+                    if (e.target.value.length > 50) {
+                        e.target.value = e.target.value.substring(0, 50);
+                    }
+                });
+            }
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    const disciplineId = disciplineIdInput ? disciplineIdInput.value.trim() : '';
+                    const disciplineName = disciplineNameInput ? disciplineNameInput.value.trim() : '';
+                    const idPckSelect = document.getElementById('id_pck');
+                    const idPck = idPckSelect ? idPckSelect.value : '';
+
+                    let errors = [];
+
+                    if (!disciplineId) {
+                        errors.push('Пожалуйста, укажите ID дисциплины');
+                    } else if (disciplineId.length > 50) {
+                        errors.push('ID дисциплины не может быть длиннее 50 символов');
+                    } else if (!/^[а-яА-Яa-zA-Z0-9.]+$/.test(disciplineId)) {
+                        errors.push('ID дисциплины может содержать только буквы (русские/латинские), цифры и точки');
+                    }
+
+                    if (!disciplineName) {
+                        errors.push('Пожалуйста, укажите название дисциплины');
+                    } else if (disciplineName.length > 50) {
+                        errors.push('Название дисциплины не может быть длиннее 50 символов');
+                    }
+
+                    if (!idPck) {
+                        errors.push('Пожалуйста, выберите ПЦК');
+                    }
+
+                    if (errors.length > 0) {
+                        e.preventDefault();
+                        alert(errors.join('\n'));
+                    }
+                });
+            }
+        });
+    </script>
     {% endif %}
+
+    {% if funck == 'edit_years' %}
+    <div class="blocks">
+        <div class="edit-form-container">
+            <div class="form-header">
+                {% if session.is_admin %}
+                    <h2><i class="fas fa-calendar-alt"></i> Добавление учебного года в систему</h2>
+                {% endif %}
+                {% if session.is_specialist %}
+                    <h2><i class="fas fa-calendar-alt"></i> Добавление нового учебного года</h2>
+                {% endif %}
+            </div>
+            <form method="POST" action="{{ url_for('add_info', funck='edit_years') }}" class="edit-form">
+                <div class="form-group">
+                    <label for="year_name" class="required">
+                        <i class="fas fa-calendar-alt"></i> Учебный год
+                    </label>
+                    <input type="text" id="year_name" name="year_name"
+                           placeholder="Формат: ГГГГ-ГГГГ"
+                           value="{{ form_data.get('year_name', '') if form_data else '' }}">
+                    <div class="form-hint">Например: 2023-2024</div>
+                </div>
+
+                <button type="submit" id="submitBtn">Создать учебный год</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearNameInput = document.getElementById('year_name');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (yearNameInput) {
+                yearNameInput.addEventListener('input', function(e) {
+                    if (e.target.value.length > 50) {
+                        e.target.value = e.target.value.substring(0, 50);
+                    }
+                });
+            }
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    const yearName = yearNameInput ? yearNameInput.value.trim() : '';
+
+                    let errors = [];
+
+                    if (!yearName) {
+                        errors.push('Пожалуйста, укажите название учебного года');
+                    } else if (yearName.length > 50) {
+                        errors.push('Название учебного года не может быть длиннее 50 символов');
+                    } else if (!/^\d{4}-\d{4}$/.test(yearName)) {
+                        errors.push('Название учебного года должно быть в формате ГГГГ-ГГГГ (например, 2023-2024)');
+                    }
+
+                    if (errors.length > 0) {
+                        e.preventDefault();
+                        alert(errors.join('\n'));
+                    }
+                });
+            }
+        });
+    </script>
+    {% endif %}
+
+    {% if funck == 'edit_fgoss' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            {% if session.is_admin %}
+                <h2><i class="fas fa-edit"></i> Добавление ФГОС в систему</h2>
+            {% endif %}
+            {% if session.is_specialist %}
+                <h2><i class="fas fa-edit"></i> Добавление нового ФГОС</h2>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ url_for('add_info', funck='edit_fgoss') }}" class="edit-form">
+            <div class="form-group">
+                <label for="fgos_name" class="required">
+                    <i class="fas fa-graduation-cap"></i> Название ФГОС
+                </label>
+                <input type="text" id="fgos_name" name="fgos_name"
+                       placeholder="Например: ТОП-50"
+                       value="{{ form_data.get('fgos_name', '') if form_data else '' }}">
+                <div class="form-hint">Буквы (русские/латинские), цифры, пробелы, дефисы и точки (макс. 50 символов)</div>
+            </div>
+
+            <button type="submit" id="submitBtn">Создать ФГОС</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fgosNameInput = document.getElementById('fgos_name');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (fgosNameInput) {
+            fgosNameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                // Разрешаем русские буквы, латинские буквы, цифры, пробелы, дефисы и точки
+                let cleaned = value.replace(/[^а-яА-Яa-zA-Z0-9\s\-\.]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                // Ограничение длины 50 символов
+                if (cleaned.length > 50) {
+                    e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        }
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                const fgosName = fgosNameInput ? fgosNameInput.value.trim() : '';
+
+                let errors = [];
+
+                if (!fgosName) {
+                    errors.push('Пожалуйста, укажите название ФГОС');
+                } else if (fgosName.length > 50) {
+                    errors.push('Название ФГОС не может быть длиннее 50 символов');
+                } else if (!/^[а-яА-Яa-zA-Z0-9\s\-\.]+$/.test(fgosName)) {
+                    errors.push('Название ФГОС может содержать только буквы (русские/латинские), цифры, пробелы, дефисы и точки');
+                }
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alert(errors.join('\n'));
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+{% if funck == 'edit_pck' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            {% if session.is_admin %}
+                <h2><i class="fas fa-edit"></i> Добавление ПЦК в систему</h2>
+            {% endif %}
+            {% if session.is_specialist %}
+                <h2><i class="fas fa-edit"></i> Добавление новой ПЦК</h2>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ url_for('add_info', funck='edit_pck') }}" class="edit-form">
+            <div class="form-group">
+                <label for="pck_name" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Название ПЦК
+                </label>
+                <input type="text" id="pck_name" name="pck_name"
+                       placeholder="Например: Информационных технологий"
+                       value="{{ form_data.get('pck_name', '') if form_data else '' }}">
+                <div class="form-hint">Буквы (русские/латинские), цифры, пробелы, дефисы и точки (макс. 50 символов)</div>
+            </div>
+
+            <button type="submit" id="submitBtn">Создать ПЦК</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pckNameInput = document.getElementById('pck_name');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (pckNameInput) {
+            pckNameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                // Разрешаем русские буквы, латинские буквы, цифры, пробелы, дефисы и точки
+                let cleaned = value.replace(/[^а-яА-Яa-zA-Z0-9\s\-\.]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                // Ограничение длины 50 символов
+                if (cleaned.length > 50) {
+                    e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        }
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                const pckName = pckNameInput ? pckNameInput.value.trim() : '';
+
+                let errors = [];
+
+                if (!pckName) {
+                    errors.push('Пожалуйста, укажите название ПЦК');
+                } else if (pckName.length > 50) {
+                    errors.push('Название ПЦК не может быть длиннее 50 символов');
+                } else if (!/^[а-яА-Яa-zA-Z0-9\s\-\.]+$/.test(pckName)) {
+                    errors.push('Название ПЦК может содержать только буквы (русские/латинские), цифры, пробелы, дефисы и точки');
+                }
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alert(errors.join('\n'));
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+{% endif %}
 {% endblock %}

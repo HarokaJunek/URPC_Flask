@@ -122,7 +122,7 @@
         <div class="table-header">
             <h2><i class="fas fa-database"></i> Управление дисциплинами</h2>
             <div class="table-actions">
-                <a href="{{ url_for('add_info') }}" class="action-btn add-btn">
+                <a href="{{ url_for('add_info', funck='edit_disciplines') }}" class="action-btn add-btn">
                     <i class="fas fa-plus"></i> Добавить запись
                 </a>
                 <div class="search-box">
@@ -194,9 +194,9 @@
     <div class="table-header">
         <h2><i class="fas fa-database"></i> Управление учебными годами</h2>
         <div class="table-actions">
-            <button class="action-btn add-btn">
+           <a href="{{ url_for('add_info', funck='edit_years') }}" class="action-btn add-btn">
                 <i class="fas fa-plus"></i> Добавить учебный год
-            </button>
+           </a>
             <div class="search-box">
                 <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
                     <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
@@ -273,9 +273,9 @@
     <div class="table-header">
         <h2><i class="fas fa-database"></i> Управление ПЦК</h2>
         <div class="table-actions">
-            <button class="action-btn add-btn">
+            <a href="{{ url_for('add_info', funck='edit_pck') }}" class="action-btn add-btn">
                 <i class="fas fa-plus"></i> Добавить ПЦК
-            </button>
+            </a>
             <div class="search-box">
                 <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
                     <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
@@ -352,9 +352,9 @@
     <div class="table-header">
         <h2><i class="fas fa-database"></i> Управление ФГОСами</h2>
         <div class="table-actions">
-            <button class="action-btn add-btn">
+            <a href="{{ url_for('add_info', funck='edit_fgoss') }}" class="action-btn add-btn">
                 <i class="fas fa-plus"></i> Добавить ФГОС
-            </button>
+           </a>
             <div class="search-box">
                 <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
                     <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
