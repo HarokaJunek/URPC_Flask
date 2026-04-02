@@ -1867,7 +1867,7 @@ def edit_info():
                                                    is_specialist=session.get('is_specialist', False),
                                                    form_data=request.form)
 
-                        # Обновление записи
+                        # Обновление записиlelele
                         conn.execute('BEGIN TRANSACTION')
                         conn.execute('''
                             UPDATE academic_year
