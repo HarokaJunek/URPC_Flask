@@ -56,11 +56,9 @@
                     <tr>
                         <td class="actions-cell">
     <!-- Кнопка редактирования (пока не реализована) -->
-                            <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить запись {{ user.full_name }}?');">
-                                <button type="submit" class="icon-btn edit" title="Редактировать">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </form>
+                            <a href="{{ url_for('edit_info', funck='edit_users', user_id=user.id_user) }}" class="icon-btn edit" title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </a>
                             <!-- Форма удаления -->
                             <form action="{{ url_for('delete_recording', id=user.id_user, funck='edit_users') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить запись {{ user.full_name }}?');">
                                 <button type="submit" class="icon-btn delete" title="Удалить">
