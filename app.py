@@ -1633,8 +1633,284 @@ def edit_info():
                 flash('У вас нет прав доступа.', 'danger')
                 return redirect(url_for('index'))
 
-        # ... остальные case
+        case 'edit_disciplines':
+            if session.get('is_specialist', False):
 
+                def get_pck_list():
+                    conn = get_db_connection()
+                    rows = conn.execute('SELECT id_pck, name_pck FROM pck ORDER BY name_pck').fetchall()
+                    conn.close()
+                    return [{'id': row['id_pck'], 'name': row['name_pck']} for row in rows]
+
+                # Получаем ID дисциплины из аргументов
+                discipline_id = request.args.get('discipline_id', type=str)
+                if not discipline_id:
+                    flash('Не указан ID дисциплины', 'danger')
+                    return redirect(url_for('load_table', funck='edit_disciplines'))
+
+                conn = get_db_connection()
+                discipline = conn.execute('''
+                    SELECT d.id_discipline, d.discipline_name, d.id_pck, p.name_pck as pck_name
+                    FROM disciplines d
+                    LEFT JOIN pck p ON d.id_pck = p.ID_pck
+                    WHERE d.id_discipline = ?
+                ''', (discipline_id,)).fetchone()
+                conn.close()
+
+                if not discipline:
+                    flash('Дисциплина не найдена.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_disciplines'))
+
+                # Загружаем список ПЦК для всех (нужен для выбора)
+                pck_list = get_pck_list()
+
+                # GET – показываем форму
+                if request.method == 'GET':
+                    return render_template('edit_info.html',
+                                           funck=funck,
+                                           discipline=discipline,
+                                           pck_list=pck_list,
+                                           is_specialist=session.get('is_specialist', False))
+
+                # POST – обрабатываем сохранение
+                discipline_id_new = request.form.get('disciplineId', '').strip()
+                discipline_name = request.form.get('disciplineName', '').strip()
+                pck_id = request.form.get('pck', type=int)
+
+                # Валидация
+                errors = []
+
+                # Валидация ID дисциплины
+                if not discipline_id_new:
+                    errors.append('ID дисциплины обязательно')
+                elif not re.match(r'^[а-яА-ЯёЁ0-9.]+$', discipline_id_new):
+                    errors.append('ID дисциплины может содержать только русские буквы, цифры и точки')
+                elif len(discipline_id_new) > 50:
+                    errors.append('ID дисциплины не может превышать 50 символов')
+
+                # Валидация названия дисциплины
+                if not discipline_name:
+                    errors.append('Название дисциплины обязательно')
+                elif len(discipline_name) > 50:
+                    errors.append('Название дисциплины не может превышать 50 символов')
+
+                # Валидация ПЦК
+                if not pck_id:
+                    errors.append('Выберите ПЦК')
+                else:
+                    valid_pck_ids = [str(p['id']) for p in pck_list]
+                    if str(pck_id) not in valid_pck_ids:
+                        errors.append('Выбрана некорректная ПЦК')
+
+                if errors:
+                    for error in errors:
+                        flash(error, 'danger')
+                    return render_template('edit_info.html',
+                                           funck=funck,
+                                           discipline=discipline,
+                                           pck_list=pck_list,
+                                           is_specialist=session.get('is_specialist', False),
+                                           form_data=request.form)
+
+                # Проверка уникальности ID дисциплины (исключая текущую)
+                conn = get_db_connection()
+                try:
+                    existing_discipline = conn.execute('''
+                        SELECT id_discipline FROM disciplines 
+                        WHERE id_discipline = ? AND id_discipline != ?
+                    ''', (discipline_id_new, discipline_id)).fetchone()
+
+                    if existing_discipline:
+                        flash('Дисциплина с таким ID уже существует', 'danger')
+                        conn.close()
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               discipline=discipline,
+                                               pck_list=pck_list,
+                                               is_specialist=session.get('is_specialist', False),
+                                               form_data=request.form)
+
+                    # Проверка уникальности названия дисциплины (опционально)
+                    existing_name = conn.execute('''
+                        SELECT id_discipline FROM disciplines 
+                        WHERE discipline_name = ? AND id_discipline != ?
+                    ''', (discipline_name, discipline_id)).fetchone()
+
+                    if existing_name:
+                        flash('Дисциплина с таким названием уже существует', 'danger')
+                        conn.close()
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               discipline=discipline,
+                                               pck_list=pck_list,
+                                               is_specialist=session.get('is_specialist', False),
+                                               form_data=request.form)
+
+                    # Формируем запрос на обновление
+                    conn.execute('BEGIN TRANSACTION')
+
+                    # Проверяем, изменился ли ID дисциплины
+                    if discipline_id_new != discipline_id:
+                        # Если ID изменился, обновляем запись (внешние ключи с CASCADE)
+                        conn.execute('''
+                            UPDATE disciplines
+                            SET id_discipline = ?, discipline_name = ?, id_pck = ?
+                            WHERE id_discipline = ?
+                        ''', (discipline_id_new, discipline_name, pck_id, discipline_id))
+                    else:
+                        # Простое обновление
+                        conn.execute('''
+                            UPDATE disciplines
+                            SET discipline_name = ?, id_pck = ?
+                            WHERE id_discipline = ?
+                        ''', (discipline_name, pck_id, discipline_id))
+
+                    conn.commit()
+                    flash('Изменения успешно сохранены!', 'success')
+                    conn.close()
+                    return redirect(url_for('load_table', funck='edit_disciplines'))
+
+                except sqlite3.IntegrityError as e:
+                    conn.rollback()
+                    if 'UNIQUE constraint failed' in str(e):
+                        flash('Дисциплина с таким ID или названием уже существует', 'danger')
+                    else:
+                        flash(f'Ошибка целостности базы данных: {str(e)}', 'danger')
+                    conn.close()
+                    return render_template('edit_info.html',
+                                           funck=funck,
+                                           discipline=discipline,
+                                           pck_list=pck_list,
+                                           is_specialist=session.get('is_specialist', False),
+                                           form_data=request.form)
+                except sqlite3.Error as e:
+                    conn.rollback()
+                    flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                    conn.close()
+                    return render_template('edit_info.html',
+                                           funck=funck,
+                                           discipline=discipline,
+                                           pck_list=pck_list,
+                                           is_specialist=session.get('is_specialist', False),
+                                           form_data=request.form)
+
+            else:
+                flash('У вас нет прав доступа.', 'danger')
+                return redirect(url_for('index'))
+
+        case 'edit_years':
+            if session.get('is_specialist', False):
+
+                # Получаем ID учебного года из аргументов
+                year_id = request.args.get('year_id', type=int)
+                if not year_id:
+                    flash('Не указан ID учебного года', 'danger')
+                    return redirect(url_for('load_table', funck='edit_years'))
+
+                conn = get_db_connection()
+                academic_year = conn.execute('''
+                    SELECT id_year, year_name
+                    FROM academic_year
+                    WHERE id_year = ?
+                ''', (year_id,)).fetchone()
+                conn.close()
+
+                if not academic_year:
+                    flash('Учебный год не найден.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_years'))
+
+                # Обработка POST запроса
+                if request.method == 'POST':
+                    year_name = request.form.get('yearName', '').strip()
+
+                    # Валидация
+                    errors = []
+
+                    if not year_name:
+                        errors.append('Название учебного года обязательно')
+                    elif len(year_name) > 50:
+                        errors.append('Название учебного года не может превышать 50 символов')
+                    elif not re.match(r'^\d{4}-\d{4}$', year_name):
+                        errors.append('Формат должен быть: ГГГГ-ГГГГ (например, 2023-2024)')
+                    else:
+                        years = year_name.split('-')
+                        start_year = int(years[0])
+                        end_year = int(years[1])
+                        if start_year >= end_year:
+                            errors.append('Начальный год должен быть меньше конечного')
+                        elif end_year - start_year != 1:
+                            errors.append('Учебный год должен длиться 1 год (например, 2023-2024)')
+
+                    if errors:
+                        for error in errors:
+                            flash(error, 'danger')
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               academic_year=academic_year,
+                                               is_specialist=session.get('is_specialist', False),
+                                               form_data=request.form)
+
+                    # Проверка уникальности названия учебного года (исключая текущий)
+                    conn = get_db_connection()
+                    try:
+                        existing_year = conn.execute('''
+                            SELECT id_year FROM academic_year 
+                            WHERE year_name = ? AND id_year != ?
+                        ''', (year_name, year_id)).fetchone()
+
+                        if existing_year:
+                            flash('Учебный год с таким названием уже существует', 'danger')
+                            conn.close()
+                            return render_template('edit_info.html',
+                                                   funck=funck,
+                                                   academic_year=academic_year,
+                                                   is_specialist=session.get('is_specialist', False),
+                                                   form_data=request.form)
+
+                        # Обновление записи
+                        conn.execute('BEGIN TRANSACTION')
+                        conn.execute('''
+                            UPDATE academic_year
+                            SET year_name = ?
+                            WHERE id_year = ?
+                        ''', (year_name, year_id))
+
+                        conn.commit()
+                        flash('Изменения успешно сохранены!', 'success')
+                        conn.close()
+                        return redirect(url_for('load_table', funck='edit_years'))
+
+                    except sqlite3.IntegrityError as e:
+                        conn.rollback()
+                        if 'UNIQUE constraint failed' in str(e):
+                            flash('Учебный год с таким названием уже существует', 'danger')
+                        else:
+                            flash(f'Ошибка целостности базы данных: {str(e)}', 'danger')
+                        conn.close()
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               academic_year=academic_year,
+                                               is_specialist=session.get('is_specialist', False),
+                                               form_data=request.form)
+                    except sqlite3.Error as e:
+                        conn.rollback()
+                        flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                        conn.close()
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               academic_year=academic_year,
+                                               is_specialist=session.get('is_specialist', False),
+                                               form_data=request.form)
+
+                # GET запрос
+                return render_template('edit_info.html',
+                                       funck=funck,
+                                       academic_year=academic_year,
+                                       is_specialist=session.get('is_specialist', False))
+
+            else:
+                flash('У вас нет прав доступа.', 'danger')
+                return redirect(url_for('index'))
 
 if __name__ == '__main__':
     if not os.path.exists(DATABASE):

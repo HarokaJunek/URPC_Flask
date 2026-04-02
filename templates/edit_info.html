@@ -247,6 +247,257 @@
 </script>
 {% endif %}
 
+{% if funck == 'edit_disciplines' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-edit"></i> Редактирование дисциплины</h2>
+            <div class="header-actions">
+                <span class="record-id">ID: {{ discipline.id_discipline }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_disciplines', discipline_id=discipline.id_discipline) }}" class="edit-form">
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-book"></i> Информация о дисциплине
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="disciplineId" class="required">
+                            <i class="fas fa-hashtag"></i> ID дисциплины
+                        </label>
+                        <input type="text" id="disciplineId" name="disciplineId"
+                               value="{{ form_data.get('disciplineId', discipline.id_discipline) if form_data else discipline.id_discipline }}"
+                               placeholder="Например: ОП.01 или МДК.02.01" required>
+                        <div class="form-hint">Буквы (русские/латинские), цифры и точки (макс. 50 символов)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="disciplineName" class="required">
+                            <i class="fas fa-graduation-cap"></i> Название дисциплины
+                        </label>
+                        <input type="text" id="disciplineName" name="disciplineName"
+                               value="{{ form_data.get('disciplineName', discipline.discipline_name) if form_data else discipline.discipline_name }}"
+                               placeholder="Введите название дисциплины" required>
+                        <div class="form-hint">Например: Высшая математика, Программирование и т.д.</div>
+
+                    </div>
+                </div>
+
+                <div class="form-row">
+    <div class="form-group">
+        <label for="pck" class="required">
+            <i class="fas fa-layer-group"></i> ПЦК
+        </label>
+        <div class="select-wrapper">
+            <select id="pck" name="pck" required>
+                <option value="" disabled>Выберите ПЦК</option>
+                {% for pck_item in pck_list %}
+                    <option value="{{ pck_item.id }}"
+                        {% if form_data %}
+                            {% if form_data.get('pck')|int == pck_item.id %}selected{% endif %}
+                        {% else %}
+                            {% if discipline.id_pck == pck_item.id %}selected{% endif %}
+                        {% endif %}>
+                        {{ pck_item.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            <i class="fas fa-chevron-down select-arrow"></i>
+        </div>
+        <div class="form-hint">Выберите предметно-цикловую комиссию, к которой относится дисциплина
+</div>
+    </div>
+</div>
+
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <a href="{{ url_for('delete_recording', id=discipline.id_discipline, funck='edit_disciplines') }}"
+                   class="btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту дисциплину?');">
+                    <i class="fas fa-trash-alt"></i> Удалить
+                </a>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Валидация ID дисциплины (только русские буквы, цифры и точки)
+        const disciplineIdInput = document.getElementById('disciplineId');
+        if (disciplineIdInput) {
+            disciplineIdInput.addEventListener('input', function(e) {
+                // Разрешаем: русские буквы (верхний и нижний регистр), цифры, точку
+                this.value = this.value.replace(/[^а-яА-ЯёЁ0-9.]/g, '');
+            });
+
+            // Дополнительная валидация при потере фокуса
+            disciplineIdInput.addEventListener('blur', function(e) {
+                // Проверка, что поле не пустое
+                if (this.value.trim() === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('ID дисциплины не может быть пустым');
+                } else {
+                    this.style.borderColor = '';
+                    this.setCustomValidity('');
+                }
+            });
+
+            // Убираем красную рамку при начале ввода
+            disciplineIdInput.addEventListener('input', function(e) {
+                this.style.borderColor = '';
+                this.setCustomValidity('');
+            });
+        }
+
+        // Валидация названия дисциплины
+        const disciplineNameInput = document.getElementById('disciplineName');
+        if (disciplineNameInput) {
+            disciplineNameInput.addEventListener('input', function(e) {
+                if (this.value.length > 50) {
+                    this.value = this.value.substring(0, 50);
+                }
+            });
+        }
+
+        // Подтверждение при удалении
+        const deleteBtn = document.querySelector('.btn-danger');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function(e) {
+                if (!confirm('Вы уверены, что хотите удалить эту дисциплину?\nЭто действие нельзя отменить.')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+{% if funck == 'edit_years' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-edit"></i> Редактирование учебного года</h2>
+            <div class="header-actions">
+                <span class="record-id">ID: {{ academic_year.id_year }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_years', year_id=academic_year.id_year) }}" class="edit-form">
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-calendar-alt"></i> Информация об учебном годе
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="yearName" class="required">
+                            <i class="fas fa-calendar"></i> Название учебного года
+                        </label>
+                        <input type="text" id="yearName" name="yearName"
+                               value="{{ form_data.get('yearName', academic_year.year_name) if form_data else academic_year.year_name }}"
+                               placeholder="Например: 2023-2024" required>
+                        <div class="form-hint">Формат: ГГГГ-ГГГГ (например, 2023-2024)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <a href="{{ url_for('delete_recording', id=academic_year.id_year, funck='edit_years') }}"
+                   class="btn-danger" onclick="return confirm('Вы уверены, что хотите удалить этот учебный год?');">
+                    <i class="fas fa-trash-alt"></i> Удалить
+                </a>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Валидация названия учебного года
+        const yearNameInput = document.getElementById('yearName');
+        if (yearNameInput) {
+            // Валидация при вводе
+            yearNameInput.addEventListener('input', function(e) {
+                // Ограничение длины
+                if (this.value.length > 50) {
+                    this.value = this.value.substring(0, 50);
+                }
+
+                // Убираем красную рамку при начале ввода
+                this.style.borderColor = '';
+                this.setCustomValidity('');
+            });
+
+            // Валидация при потере фокуса
+            yearNameInput.addEventListener('blur', function(e) {
+                const value = this.value.trim();
+
+                // Проверка, что поле не пустое
+                if (value === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('Название учебного года не может быть пустым');
+                }
+                // Проверка формата ГГГГ-ГГГГ
+                else if (!/^\d{4}-\d{4}$/.test(value)) {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('Формат должен быть: ГГГГ-ГГГГ (например, 2023-2024)');
+                }
+                // Проверка, что первый год меньше второго
+                else {
+                    const years = value.split('-');
+                    const startYear = parseInt(years[0]);
+                    const endYear = parseInt(years[1]);
+
+                    if (startYear >= endYear) {
+                        this.style.borderColor = '#dc3545';
+                        this.setCustomValidity('Начальный год должен быть меньше конечного');
+                    } else if (endYear - startYear !== 1) {
+                        this.style.borderColor = '#dc3545';
+                        this.setCustomValidity('Учебный год должен длиться 1 год (например, 2023-2024)');
+                    } else {
+                        this.style.borderColor = '';
+                        this.setCustomValidity('');
+                    }
+                }
+            });
+
+            // Автоматическое форматирование при вводе
+            yearNameInput.addEventListener('input', function(e) {
+                let value = this.value.replace(/[^\d-]/g, '');
+
+                // Автоматическая вставка дефиса
+                if (value.length === 4 && !value.includes('-')) {
+                    value = value + '-';
+                }
+
+                this.value = value;
+            });
+        }
+
+        // Подтверждение при удалении
+        const deleteBtn = document.querySelector('.btn-danger');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function(e) {
+                if (!confirm('Вы уверены, что хотите удалить этот учебный год?\nЭто действие нельзя отменить.')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
 
 {% endif %}
 {% endblock %}
