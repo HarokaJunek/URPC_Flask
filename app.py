@@ -1,4 +1,5 @@
 from platform import machine
+from unittest import case
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import os
@@ -955,7 +956,15 @@ def delete_recording(id):
 
             # ==================== ВЕДОМОСТЬ (С ОЦЕНКАМИ) ==================== #
 
+            case 'edit_ved':
+                if not session.get('is_zav', False):
+                    flash('У вас нет прав на формы обучения.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_ved'))
 
+                conn.execute('DELETE FROM statement WHERE id_statement = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_ved'))
 
             # Обработка других значений funck (если есть)
             case _:
@@ -1435,7 +1444,372 @@ def add_info():
         else:
             flash('У вас нет прав для добавления ПЦК', 'danger')
             return redirect(url_for('index'))
+        
+# ============================ СТУДЕНТЫ ================================ #    
+    
+    if funck == 'edit_students':
+        if session.get('is_zav', False):
 
+            # Вспомогательная функция для загрузки ролей из БД
+            def get_groups():
+                conn = get_db_connection()
+                rows = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
+                conn.close()
+                return [{'id': row['id_group']} for row in rows]
+
+            # GET-запрос: просто показываем форму со списком ролей
+            if request.method == 'GET':
+                groups = get_groups()
+                return render_template('add_info.html', funck=funck, groups=groups)
+
+            # POST-запрос: обработка отправленной формы
+            # 1. Получаем данные
+            full_name = request.form.get('fio', '').strip()
+            id_group = request.form.get('group')
+
+            # 2. Валидация
+            errors = []
+
+            # ФИО
+            if not full_name:
+                errors.append('ФИО обязательно')
+            elif len(full_name) > 50:
+                errors.append('ФИО должно быть не более 20 символов')
+            elif not full_name.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.]+$', type_name):
+                errors.append('Название типа ведомости может содержать буквы (русские/латинские), цифры, пробелы, дефисы и точки')
+           
+            # Группы
+            groups = get_groups()
+            if session.get('is_zav', False):
+                valid_group_ids = [str(g['id']) for g in groups]
+                if not id_group or id_group not in valid_group_ids:
+                    errors.append('Выберите корректную группу')
+
+            # Если есть ошибки — показываем форму снова
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form,
+                    groups=groups
+                )
+
+            # 5. Вставка нового студента
+            conn.execute('BEGIN TRANSACTION')
+            try:
+                    cursor = conn.cursor()
+                    if session.get('is_zav', False):
+                        cursor.execute('''
+                            INSERT INTO students 
+                            (full_name, id_group)
+                            VALUES (?, ?)
+                        ''', (full_name, int(id_group)))
+                    conn.commit()
+                    flash(f'Студент {full_name} успешно создан!', 'success')
+                    return redirect(url_for('load_table', funck='edit_students'))
+            except sqlite3.Error as e:
+                    conn.rollback()
+                    flash(f'Ошибка базы данных при вставке: {str(e)}', 'danger')
+                    return render_template('add_info.html', funck=funck,
+                                           form_data=request.form, groups=groups)
+            except sqlite3.Error as e:
+                flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
+                return render_template('add_info.html', funck=funck,
+                                       form_data=request.form, groups=groups)
+            finally:
+                conn.close()
+        else:
+            flash('У вас нет прав для добавления студента', 'danger')
+            return redirect(url_for('index'))
+
+# ============================ ВИДЫ ВЕДОМОСТИ ================================ #   
+
+    if funck == 'edit_typesved':
+
+        if session.get('is_zav', False):
+
+            # Если метод запроса GET - показываем форму для добавления
+            if request.method == 'GET':
+                return render_template('add_info.html', funck=funck)
+
+            type_name = request.form.get('type_name', '').strip()
+            errors = []
+
+            if not type_name:
+                errors.append('Название типа ведомости обязательно')
+            elif len(type_name) > 50:
+                errors.append('Название типа ведомости должно быть не более 50 символов')
+            elif not type_name.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.]+$', type_name):
+                errors.append(
+                    'Название типа ведомости может содержать буквы (русские/латинские), цифры, пробелы, дефисы и точки')
+
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+
+            # Работа с БД
+            conn = get_db_connection()
+            try:
+                # Проверка уникальности
+                existing_type = conn.execute(
+                    'SELECT id_type FROM statement_types WHERE type_name = ?',
+                    (type_name)
+                ).fetchone()
+
+                if existing_type:
+                    flash('Такой тип ведомости уже существует', 'danger')
+                    return render_template(
+                        'add_info.html',
+                        funck=funck,
+                        form_data=request.form
+                    )
+
+                # Вставка новой записи
+                conn.execute(
+                    'INSERT INTO statement_types (type_name) VALUES (?)',
+                    (type_name)
+                )
+                conn.commit()
+                flash(f'Тип ведомости {type_name} успешно создан!', 'success')
+                return redirect(url_for('load_table', funck='edit_typesved'))
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+            finally:
+                conn.close()
+        else:
+            flash('У вас нет прав для добавления типов ведомости', 'danger')
+            return redirect(url_for('index'))
+
+# ============================ ГРУППЫ ================================ #
+
+    # if funck == 'edit_students':
+    #     if session.get('is_zav', False):
+
+    #         # Вспомогательная функция для загрузки ролей из БД
+    #         def get_groups():
+    #             conn = get_db_connection()
+    #             rows = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
+    #             conn.close()
+    #             return [{'id': row['id_group']} for row in rows]
+
+    #         # GET-запрос: просто показываем форму со списком ролей
+    #         if request.method == 'GET':
+    #             groups = get_groups()
+    #             return render_template('add_info.html', funck=funck, groups=groups)
+
+    #         # POST-запрос: обработка отправленной формы
+    #         # 1. Получаем данные
+    #         full_name = request.form.get('fio', '').strip()
+    #         id_group = request.form.get('group')
+
+    #         # 2. Валидация
+    #         errors = []
+
+    #         # ФИО
+    #         if not full_name:
+    #             errors.append('ФИО обязательно')
+    #         elif len(full_name) > 50:
+    #             errors.append('ФИО должно быть не более 20 символов')
+    #         elif not full_name.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.]+$', type_name):
+    #             errors.append('Название типа ведомости может содержать буквы (русские/латинские), цифры, пробелы, дефисы и точки')
+           
+    #         # Группы
+    #         groups = get_groups()
+    #         if session.get('is_zav', False):
+    #             valid_group_ids = [str(g['id']) for g in groups]
+    #             if not id_group or id_group not in valid_group_ids:
+    #                 errors.append('Выберите корректную группу')
+
+    #         # Если есть ошибки — показываем форму снова
+    #         if errors:
+    #             for error in errors:
+    #                 flash(error, 'danger')
+    #             return render_template(
+    #                 'add_info.html',
+    #                 funck=funck,
+    #                 form_data=request.form,
+    #                 groups=groups
+    #             )
+
+    #         # 5. Вставка нового студента
+    #         conn.execute('BEGIN TRANSACTION')
+    #         try:
+    #                 cursor = conn.cursor()
+    #                 if session.get('is_zav', False):
+    #                     cursor.execute('''
+    #                         INSERT INTO students 
+    #                         (full_name, id_group)
+    #                         VALUES (?, ?)
+    #                     ''', (full_name, int(id_group)))
+    #                 conn.commit()
+    #                 flash(f'Студент {full_name} успешно создан!', 'success')
+    #                 return redirect(url_for('load_table', funck='edit_students'))
+    #         except sqlite3.Error as e:
+    #                 conn.rollback()
+    #                 flash(f'Ошибка базы данных при вставке: {str(e)}', 'danger')
+    #                 return render_template('add_info.html', funck=funck,
+    #                                        form_data=request.form, groups=groups)
+    #         except sqlite3.Error as e:
+    #             flash('Ошибка подключения к базе данных. Попробуйте позже.', 'danger')
+    #             return render_template('add_info.html', funck=funck,
+    #                                    form_data=request.form, groups=groups)
+    #         finally:
+    #             conn.close()
+    #     else:
+    #         flash('У вас нет прав для добавления студента', 'danger')
+    #         return redirect(url_for('index'))
+
+# ============================ ФОРМА ОБУЧЕНИЯ ================================ #
+
+    if funck == 'edit_formobuch':
+
+        if session.get('is_zav', False):
+
+            # Если метод запроса GET - показываем форму для добавления
+            if request.method == 'GET':
+                return render_template('add_info.html', funck=funck)
+
+
+            form_name = request.form.get('form_name', '').strip()
+            errors = []
+
+            if not form_name:
+                errors.append('Название формы обучения обязательно')
+
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+
+            # Работа с БД
+            conn = get_db_connection()
+            try:
+                # Проверка уникальности
+                existing_form = conn.execute(
+                    'SELECT id_form FROM study_form WHERE form_name = ?',
+                    (form_name)
+                ).fetchone()
+
+                if existing_form:
+                    flash('Такая форма обучения уже существует', 'danger')
+                    return render_template(
+                        'add_info.html',
+                        funck=funck,
+                        form_data=request.form
+                    )
+
+                # Вставка новой записи
+                conn.execute(
+                    'INSERT INTO study_form (form_name) VALUES (?)',
+                    (form_name)
+                )
+                conn.commit()
+                flash(f'Форма обучения {form_name} успешно создан!', 'success')
+                return redirect(url_for('load_table', funck='edit_formobuch'))
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+            finally:
+                conn.close()
+        else:
+            flash('У вас нет прав для добавления форм обучения', 'danger')
+            return redirect(url_for('index'))
+
+# # ============================ СПЕЦИАЛЬНОСТИ ================================ #
+
+#     if funck == 'edit_typesved':
+
+#         if session.get('is_zav', False):
+
+#             # Если метод запроса GET - показываем форму для добавления
+#             if request.method == 'GET':
+#                 return render_template('add_info.html', funck=funck)
+
+
+#             type_name = request.form.get('type_name', '').strip()
+#             errors = []
+
+#             if not type_name:
+#                 errors.append('Название типа ведомости обязательно')
+#             elif len(type_name) > 50:
+#                 errors.append('Название типа ведомости должно быть не более 50 символов')
+#             elif not re.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.]+$', type_name):
+#                 errors.append(
+#                     'Название типа ведомости может содержать буквы (русские/латинские), цифры, пробелы, дефисы и точки')
+
+#             if errors:
+#                 for error in errors:
+#                     flash(error, 'danger')
+#                 return render_template(
+#                     'add_info.html',
+#                     funck=funck,
+#                     form_data=request.form
+#                 )
+
+#             # Работа с БД
+#             conn = get_db_connection()
+#             try:
+#                 # Проверка уникальности
+#                 existing_type = conn.execute(
+#                     'SELECT id_type FROM statement_types WHERE type_name = ?',
+#                     (type_name,)
+#                 ).fetchone()
+
+#                 if existing_student:
+#                     flash('Такой тип ведомости уже существует', 'danger')
+#                     return render_template(
+#                         'add_info.html',
+#                         funck=funck,
+#                         form_data=request.form
+#                     )
+
+#                 # Вставка новой записи
+#                 conn.execute(
+#                     'INSERT INTO statement_types (type_name) VALUES (?)',
+#                     (full_name,)
+#                 )
+#                 conn.commit()
+#                 flash(f'Студент {full_name} успешно создан!', 'success')
+#                 return redirect(url_for('load_table', funck='edit_typesved'))
+
+#             except sqlite3.Error as e:
+#                 conn.rollback()
+#                 flash(f'Ошибка базы данных: {str(e)}', 'danger')
+#                 return render_template(
+#                     'add_info.html',
+#                     funck=funck,
+#                     form_data=request.form
+#                 )
+#             finally:
+#                 conn.close()
+#         else:
+#             flash('У вас нет прав для добавления типов ведомости', 'danger')
+#             return redirect(url_for('index'))
+            
     else:
         flash('Неверный параметр функции', 'danger')
         return redirect(url_for('index'))
@@ -1911,6 +2285,176 @@ def edit_info():
             else:
                 flash('У вас нет прав доступа.', 'danger')
                 return redirect(url_for('index'))
+
+# ============================ СТУДЕНТЫ ================================ #    
+
+
+# ==================== ВИДЫ ВЕДОМОСТИ ==================== #
+
+
+# ==================== ГРУППЫ ==================== #
+
+
+# ==================== ФОРМА ОБУЧЕНИЯ ==================== #
+            
+        case 'edit_formobuch':
+
+            # 1. ПРОВЕРКА ПРАВ ДОСТУПА
+            if session.get('is_zav', False):     
+
+                # 2. ПОЛУЧЕНИЕ ID ИЗ URL
+                    id_speciality = request.args.get('id_speciality', type=int)
+                
+                # Если ID не передан - показываем ошибку и возвращаемся к списку годов
+                    if not id_speciality:
+                        flash('Не указан ID специальности', 'danger')
+                        return redirect(url_for('load_table', funck='edit_specs'))
+
+                # 3. ЗАГРУЗКА ТЕКУЩИХ ДАННЫХ ИЗ БАЗЫ ДАННЫХ
+                    conn = get_db_connection()
+                
+                # Выполняем запрос
+                    speciality = conn.execute('''
+                        SELECT id_speciality, speciality_name
+                        FROM speciality
+                        WHERE id_speciality = ?
+                    ''', (id_speciality,)).fetchone()  # fetchone() возвращает одну запись или None
+                    conn.close()  # Сразу закрываем соединение
+
+                    # Если специальность не найдена в базе - ошибка и редирект
+                    if not speciality:
+                        flash('Специальность не найдена.', 'danger')
+                        return redirect(url_for('load_table', funck='edit_specs'))
+
+                    # 4. ОБРАБОТКА POST-ЗАПРОСА (когда пользователь отправил форму)
+                    if request.method == 'POST':
+                        # Получаем новое название года из формы и удаляем лишние пробелы
+                        year_name = request.form.get('yearName', '').strip()
+
+                        # 4.1 ВАЛИДАЦИЯ ДАННЫХ (проверка на ошибки)
+                        errors = []  # Список для сбора всех ошибок
+
+                        # Проверка 1: поле не должно быть пустым
+                        if not year_name:
+                            errors.append('Название учебного года обязательно')
+                        
+                        # Проверка 2: максимальная длина - 50 символов
+                        elif len(year_name) > 50:
+                            errors.append('Название учебного года не может превышать 50 символов')
+                        
+                        # Проверка 3: формат должен быть ГГГГ-ГГГГ (регулярное выражение)
+                        elif not re.match(r'^\d{4}-\d{4}$', year_name):
+                            errors.append('Формат должен быть: ГГГГ-ГГГГ (например, 2023-2024)')
+                        
+                        # Проверка 4: логика годов (начальный должен быть меньше конечного)
+                        else:
+                            # Разбиваем строку "2023-2024" на ["2023", "2024"]
+                            years = year_name.split('-')
+                            start_year = int(years[0])  # Начальный год
+                            end_year = int(years[1])    # Конечный год
+                            
+                            # Конечный год должен быть больше начального
+                            if start_year >= end_year:
+                                errors.append('Начальный год должен быть меньше конечного')
+                            # Разница должна быть ровно 1 год (учебный год длится 1 год)
+                            elif end_year - start_year != 1:
+                                errors.append('Учебный год должен длиться 1 год (например, 2023-2024)')
+
+                        # Если есть ошибки - показываем их все и возвращаем форму
+                        if errors:
+                            for error in errors:
+                                flash(error, 'danger')
+                            # Возвращаем форму с уже введёнными данными (form_data)
+                            return render_template('edit_info.html',
+                                                funck=funck,
+                                                academic_year=academic_year,
+                                                is_specialist=session.get('is_specialist', False),
+                                                form_data=request.form)
+
+                        # 4.2 ПРОВЕРКА УНИКАЛЬНОСТИ (нет ли уже такого года в БД)
+                        conn = get_db_connection()
+                        try:
+                            # Ищем год с таким же названием, но другим ID (исключаем текущий)
+                            existing_year = conn.execute('''
+                                SELECT id_year FROM academic_year 
+                                WHERE year_name = ? AND id_year != ?
+                            ''', (year_name, year_id)).fetchone()
+
+                            # Если нашли - значит дубликат
+                            if existing_year:
+                                flash('Учебный год с таким названием уже существует', 'danger')
+                                conn.close()
+                                return render_template('edit_info.html',
+                                                    funck=funck,
+                                                    academic_year=academic_year,
+                                                    is_specialist=session.get('is_specialist', False),
+                                                    form_data=request.form)
+
+                            # 4.3 ВЫПОЛНЕНИЕ ОБНОВЛЕНИЯ В БАЗЕ ДАННЫХ
+                            # Начинаем транзакцию (чтобы можно было откатить при ошибке)
+                            conn.execute('BEGIN TRANSACTION')
+                            
+                            # UPDATE запрос: заменяем старое название на новое
+                            conn.execute('''
+                                UPDATE academic_year
+                                SET year_name = ?
+                                WHERE id_year = ?
+                            ''', (year_name, year_id))
+
+                            # Фиксируем изменения (сохраняем в базу)
+                            conn.commit()
+                            flash('Изменения успешно сохранены!', 'success')
+                            conn.close()
+                            
+                            # Перенаправляем на страницу со списком учебных годов
+                            return redirect(url_for('load_table', funck='edit_years'))
+
+                        # 4.4 ОБРАБОТКА ОШИБОК БАЗЫ ДАННЫХ
+                        except sqlite3.IntegrityError as e:
+                            # Ошибка целостности (чаще всего - нарушение UNIQUE constraint)
+                            conn.rollback()  # Откатываем транзакцию
+                            if 'UNIQUE constraint failed' in str(e):
+                                flash('Учебный год с таким названием уже существует', 'danger')
+                            else:
+                                flash(f'Ошибка целостности базы данных: {str(e)}', 'danger')
+                            conn.close()
+                            # Возвращаем форму с введёнными данными
+                            return render_template('edit_info.html',
+                                                funck=funck,
+                                                academic_year=academic_year,
+                                                is_zav=session.get('is_zav', False),
+                                                form_data=request.form)
+                            
+                        except sqlite3.Error as e:
+                            # Любая другая ошибка SQLite
+                            conn.rollback()  # Откатываем транзакцию
+                            flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                            conn.close()
+                            return render_template('edit_info.html',
+                                                funck=funck,
+                                                academic_year=academic_year,
+                                                is_zav=session.get('is_zav', False),
+                                                form_data=request.form)
+
+                    # 5. ОБРАБОТКА GET-ЗАПРОСА (просто показать форму для редактирования)
+                    # Если метод не POST - значит GET, показываем пустую форму с текущими данными
+                    return render_template('edit_info.html',
+                                        funck=funck,
+                                        academic_year=academic_year,
+                                        is_specialist=session.get('is_specialist', False))
+
+            # 6. ЕСЛИ У ПОЛЬЗОВАТЕЛЯ НЕТ ПРАВ - ПОКАЗЫВАЕМ ОШИБКУ И РЕДИРЕКТ НА ГЛАВНУЮ
+            else:
+                flash('У вас нет прав доступа.', 'danger')
+                return redirect(url_for('index'))
+            
+
+# ==================== СПЕЦИАЛЬНОСТЬ ==================== #
+
+ 
+# ==================== ВЕДОМОСТЬ (С ОЦЕНКАМИ) ==================== #
+
+
 
 if __name__ == '__main__':
     if not os.path.exists(DATABASE):
