@@ -802,7 +802,7 @@ def load_table():
             
 
 
-@app.route('/delete_recording/<path:id>', methods=['POST'])
+@app.route('/delete_recording/<path:id>', methods=['GET', 'POST'])
 def delete_recording(id):
     """
     Удаление пользователя по ID.

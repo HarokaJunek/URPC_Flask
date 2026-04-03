@@ -60,11 +60,9 @@
                             <i class="fas fa-edit"></i>
                         </a>
                             <!-- Форма удаления -->
-                            <form action="{{ url_for('delete_recording', id=user.id_user, funck='edit_users') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить запись {{ user.full_name }}?');">
-                                <button type="submit" class="icon-btn delete" title="Удалить">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </form>
+                            <a href="{{ url_for('delete_recording', id=user.id_user, funck='edit_users') }}" class="icon-btn delete" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить запись {{ user.full_name }}?');">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
                         </td>
                         <td>{{ user.id_user }}</td>
                         <td>
@@ -158,11 +156,11 @@
                             <i class="fas fa-edit"></i>
                     </a>
                     <!-- Форма удаления -->
-                    <form action="{{ url_for('delete_recording', id=discipline.id_discipline, funck='edit_disciplines') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить запись {{ discipline.id_discipline }}?');">
-                        <button type="submit" class="icon-btn delete" title="Удалить">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </form>
+
+                    <a href="{{ url_for('delete_recording', id=discipline.id_discipline, funck='edit_disciplines') }}" class="icon-btn delete" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить запись {{ discipline.id_discipline }}?');">
+                                <i class="fas fa-trash-alt"></i>
+                    </a>
+
                 </td>
                 <td>{{ discipline.id_discipline }}</td>
                 <td>{{ discipline.discipline_name }}</td>
@@ -220,11 +218,10 @@
                             <i class="fas fa-edit"></i>
                         </a>
                         <!-- Форма удаления -->
-                        <form action="{{ url_for('delete_recording', id=academic_year.id_year, funck='edit_years') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить учебный год {{ academic_year.id_year }}?');">
-                            <button type="submit" class="icon-btn delete" title="Удалить">
+                        <a href="{{ url_for('delete_recording', id=academic_year.id_year, funck='edit_years') }}" class="icon-btn delete" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить учебный год {{ academic_year.id_year }}?');">
                                 <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
+                        </a>
+
                     </td>
                     <td>{{ academic_year.id_year }}</td>
                     <td>{{ academic_year.year_name }}</td>
@@ -283,11 +280,10 @@
                             <i class="fas fa-edit"></i>
                         </a>
                         <!-- Форма удаления -->
-                        <form action="{{ url_for('delete_recording', id=pck.id_pck, funck='edit_pck') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить ПЦК {{ pck.id_pck }}?');">
-                            <button type="submit" class="icon-btn delete" title="Удалить">
+                        <a href="{{ url_for('delete_recording', id=pck.id_pck, funck='edit_pck') }}" class="icon-btn delete" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить ПЦК {{ pck.id_pck }}?');">
                                 <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
+                        </a>
+
                     </td>
                     <td>{{ pck.id_pck }}</td>
                     <td>{{ pck.name_pck }}</td>
@@ -346,11 +342,9 @@
                             <i class="fas fa-edit"></i>
                         </a>
                         <!-- Форма удаления -->
-                        <form action="{{ url_for('delete_recording', id=fgos.id_fgos, funck='edit_fgoss') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить ФГОС {{ fgos.id_fgos }}?');">
-                            <button type="submit" class="icon-btn delete" title="Удалить">
+                        <a href="{{ url_for('delete_recording', id=fgos.id_fgos, funck='edit_fgoss') }}" class="icon-btn delete" title="Удалить" onclick="return confirm('Вы уверены, что хотите удалить ФГОС {{ fgos.id_fgos }}?');">
                                 <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
+                        </a>
                     </td>
                     <td>{{ fgos.id_fgos }}</td>
                     <td>{{ fgos.name }}</td>
