@@ -2286,6 +2286,142 @@ def edit_info():
                 flash('У вас нет прав доступа.', 'danger')
                 return redirect(url_for('index'))
 
+        case 'edit_fgoss':
+            if session.get('is_specialist', False):
+
+                fgos_id = request.args.get('fgos_id', type=int)
+                if not fgos_id:
+                    flash('Не указан ID ФГОС', 'danger')
+                    return redirect(url_for('load_table', funck='edit_fgoss'))
+
+                conn = get_db_connection()
+                fgos = conn.execute('''
+                    SELECT id_fgos, name
+                    FROM fgoss
+                    WHERE id_fgos = ?
+                ''', (fgos_id,)).fetchone()
+                conn.close()
+
+                if not fgos:
+                    flash('ФГОС не найден.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_fgoss'))
+
+                if request.method == 'POST':
+                    name = request.form.get('fgosName', '').strip()
+
+                    errors = []
+                    if not name:
+                        errors.append('Название ФГОС обязательно')
+                    elif len(name) > 50:
+                        errors.append('Название ФГОС не может превышать 50 символов')
+
+                    if errors:
+                        for error in errors:
+                            flash(error, 'danger')
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               fgos=fgos,
+                                               is_specialist=session.get('is_specialist', False),
+                                               form_data=request.form)
+
+                    conn = get_db_connection()
+                    try:
+                        conn.execute('''
+                            UPDATE fgoss
+                            SET name = ?
+                            WHERE id_fgos = ?
+                        ''', (name, fgos_id))
+                        conn.commit()
+                        flash('Изменения успешно сохранены!', 'success')
+                        return redirect(url_for('load_table', funck='edit_fgoss'))
+                    except sqlite3.Error as e:
+                        conn.rollback()
+                        flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               fgos=fgos,
+                                               is_specialist=session.get('is_specialist', False),
+                                               form_data=request.form)
+                    finally:
+                        conn.close()
+
+                return render_template('edit_info.html',
+                                       funck=funck,
+                                       fgos=fgos,
+                                       is_specialist=session.get('is_specialist', False))
+
+            else:
+                flash('У вас нет прав доступа.', 'danger')
+                return redirect(url_for('index'))
+
+        case 'edit_pck':
+            if session.get('is_specialist', False):
+
+                pck_id = request.args.get('pck_id', type=int)
+                if not pck_id:
+                    flash('Не указан ID ПЦК', 'danger')
+                    return redirect(url_for('load_table', funck='edit_pck'))
+
+                conn = get_db_connection()
+                pck = conn.execute('''
+                    SELECT id_pck, name_pck
+                    FROM pck
+                    WHERE id_pck = ?
+                ''', (pck_id,)).fetchone()
+                conn.close()
+
+                if not pck:
+                    flash('ПЦК не найдена.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_pck'))
+
+                if request.method == 'POST':
+                    name_pck = request.form.get('pckName', '').strip()
+
+                    errors = []
+                    if not name_pck:
+                        errors.append('Название ПЦК обязательно')
+                    elif len(name_pck) > 50:
+                        errors.append('Название ПЦК не может превышать 50 символов')
+
+                    if errors:
+                        for error in errors:
+                            flash(error, 'danger')
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               pck=pck,
+                                               is_specialist=session.get('is_specialist', False),
+                                               form_data=request.form)
+
+                    conn = get_db_connection()
+                    try:
+                        conn.execute('''
+                            UPDATE pck
+                            SET name_pck = ?
+                            WHERE id_pck = ?
+                        ''', (name_pck, pck_id))
+                        conn.commit()
+                        flash('Изменения успешно сохранены!', 'success')
+                        conn.close()
+                        return redirect(url_for('load_table', funck='edit_pck'))
+                    except sqlite3.Error as e:
+                        conn.rollback()
+                        flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                        conn.close()
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               pck=pck,
+                                               is_specialist=session.get('is_specialist', False),
+                                               form_data=request.form)
+
+                return render_template('edit_info.html',
+                                       funck=funck,
+                                       pck=pck,
+                                       is_specialist=session.get('is_specialist', False))
+
+            else:
+                flash('У вас нет прав доступа.', 'danger')
+                return redirect(url_for('index'))
+
 # ============================ СТУДЕНТЫ ================================ #    
 
 

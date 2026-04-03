@@ -150,7 +150,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for discipline in table_info %}  <!-- Изменено с user на discipline -->
+            {% for discipline in table_info %}
             <tr>
                 <td class="actions-cell">
                     <!-- Кнопка редактирования -->
@@ -165,25 +165,17 @@
                     </form>
                 </td>
                 <td>{{ discipline.id_discipline }}</td>
-                <td>
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <i class="fas fa-book"></i>  <!-- Изменено с user-circle на book для дисциплин -->
-                        </div>
-                        <span>{{ discipline.discipline_name }}</span>  <!-- Показываем название дисциплины -->
-                    </div>
-                </td>
+                <td>{{ discipline.discipline_name }}</td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="3" style="text-align: center;">Нет данных для отображения</td>  <!-- Изменено с 8 на 3 колонки -->
+                <td colspan="3" style="text-align: center;">Нет данных для отображения</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 {% endif %}
-
 
        {% if funck == 'edit_years' %}
 <div class="table-responsive">
@@ -216,14 +208,14 @@
                 <tr>
                     <th>Действия</th>
                     <th>ID</th>
-                    <th>Годы</th>  <!-- Добавлена колонка для годов -->
+                    <th>Годы</th>
                 </tr>
             </thead>
             <tbody>
                 {% for academic_year in table_info %}
                 <tr>
                     <td class="actions-cell">
-                        <!-- Кнопка редактирования jhjhjhj -->
+                        <!-- Кнопка редактирования -->
                         <a href="{{ url_for('edit_info', funck='edit_years', year_id=academic_year.id_year) }}" class="icon-btn edit" title="Редактировать">
                             <i class="fas fa-edit"></i>
                         </a>
@@ -234,26 +226,12 @@
                             </button>
                         </form>
                     </td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-calendar-alt"></i>  <!-- Изменена иконка на календарь -->
-                            </div>
-                            <span>{{ academic_year.id_year }}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-graduation-cap"></i>  <!-- Иконка для учебного года -->
-                            </div>
-                            <span>{{ academic_year.year_name }}</span>  <!-- Выводим название года -->
-                        </div>
-                    </td>
+                    <td>{{ academic_year.id_year }}</td>
+                    <td>{{ academic_year.year_name }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="3" style="text-align: center;">Нет данных для отображения</td>  <!-- Исправлено: 3 колонки -->
+                    <td colspan="3" style="text-align: center;">Нет данных для отображения</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -293,7 +271,7 @@
                 <tr>
                     <th>Действия</th>
                     <th>ID</th>
-                    <th>ПЦК</th>  <!-- Добавлена колонка для годов -->
+                    <th>ПЦК</th>
                 </tr>
             </thead>
             <tbody>
@@ -301,11 +279,9 @@
                 <tr>
                     <td class="actions-cell">
                         <!-- Кнопка редактирования -->
-                        <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать учебный год {{ pck.id_pck }}?');">
-                            <button type="submit" class="icon-btn edit" title="Редактировать">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </form>
+                        <a href="{{ url_for('edit_info', funck='edit_pck', pck_id=pck.id_pck) }}" class="icon-btn edit" title="Редактировать" onclick="return confirm('Вы уверены, что хотите отредактировать ПЦК {{ pck.id_pck }}?');">
+                            <i class="fas fa-edit"></i>
+                        </a>
                         <!-- Форма удаления -->
                         <form action="{{ url_for('delete_recording', id=pck.id_pck, funck='edit_pck') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить ПЦК {{ pck.id_pck }}?');">
                             <button type="submit" class="icon-btn delete" title="Удалить">
@@ -313,26 +289,12 @@
                             </button>
                         </form>
                     </td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-calendar-alt"></i>  <!-- Изменена иконка на календарь -->
-                            </div>
-                            <span>{{ pck.id_pck }}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-graduation-cap"></i>  <!-- Иконка для учебного года -->
-                            </div>
-                            <span>{{ pck.name_pck }}</span>  <!-- Выводим название года -->
-                        </div>
-                    </td>
+                    <td>{{ pck.id_pck }}</td>
+                    <td>{{ pck.name_pck }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="3" style="text-align: center;">Нет данных для отображения</td>  <!-- Исправлено: 3 колонки -->
+                    <td colspan="3" style="text-align: center;">Нет данных для отображения</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -376,38 +338,22 @@
                 </tr>
             </thead>
             <tbody>
-                {% for fgoss in table_info %}
+                {% for fgos in table_info %}
                 <tr>
                     <td class="actions-cell">
                         <!-- Кнопка редактирования -->
-                        <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать ФГОС {{ fgoss.id_fgos }}?');">
-                            <button type="submit" class="icon-btn edit" title="Редактировать">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </form>
+                        <a href="{{ url_for('edit_info', funck='edit_fgoss', fgos_id=fgos.id_fgos) }}" class="icon-btn edit" title="Редактировать" onclick="return confirm('Вы уверены, что хотите отредактировать ФГОС {{ fgos.id_fgos }}?');">
+                            <i class="fas fa-edit"></i>
+                        </a>
                         <!-- Форма удаления -->
-                        <form action="{{ url_for('delete_recording', id=fgoss.id_fgos, funck='edit_fgoss') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить ФГОС {{ fgoss.id_fgos }}?');">
+                        <form action="{{ url_for('delete_recording', id=fgos.id_fgos, funck='edit_fgoss') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить ФГОС {{ fgos.id_fgos }}?');">
                             <button type="submit" class="icon-btn delete" title="Удалить">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </form>
                     </td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-id-card"></i>  <!-- Иконка для ID -->
-                            </div>
-                            <span>{{ fgoss.id_fgos }}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-certificate"></i>  <!-- Иконка для ФГОС -->
-                            </div>
-                            <span>{{ fgoss.name }}</span>  <!-- Выводим название ФГОС -->
-                        </div>
-                    </td>
+                    <td>{{ fgos.id_fgos }}</td>
+                    <td>{{ fgos.name }}</td>
                 </tr>
                 {% else %}
                 <tr>
