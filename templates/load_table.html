@@ -451,14 +451,12 @@
                                     </form>
 
                                     <!-- Форма удаления -->
-                                    <form action="{{ url_for('delete_recording', id=student.id_student, funck='edit_students') }}" 
-                                    method="post" 
-                                    style="display:inline;" 
-                                    onsubmit="return confirm('Вы уверены, что хотите удалить студента {{  student.id_student  }}?');">
-                                        <button type="submit" class="icon-btn delete" title="Удалить">
+                                    <a href="{{ url_for('delete_recording', id=student.id_student, funck='edit_students') }}" 
+                                    class="icon-btn delete" 
+                                    title="Удалить" 
+                                    onclick="return confirm('Вы уверены, что хотите удалить студента {{ student.id_student }}?');">
                                             <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
+                                    </a>
                                 </td>
 
                                 <!-- ==================== КОЛОНКА: ID ==================== -->
@@ -577,14 +575,12 @@
                                     </form>
 
                                     <!-- Форма удаления -->
-                                    <form action="{{ url_for('delete_recording', id=typesved.id_type, funck='edit_typesved') }}" 
-                                    method="post" 
-                                    style="display:inline;" 
-                                    onsubmit="return confirm('Вы уверены, что хотите удалить тип ведомости {{ typesved.id_type }}?');">
-                                        <button type="submit" class="icon-btn delete" title="Удалить">
+                                    <a href="{{ url_for('delete_recording', id=typesved.id_type, funck='edit_typesved') }}" 
+                                    class="icon-btn delete" 
+                                    title="Удалить" 
+                                    onclick="return confirm('Вы уверены, что хотите удалить тип ведомости {{ typesved.id_type }}?');">
                                             <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
+                                    </a>
                                 </td>
 
                                 <!-- ==================== КОЛОНКА: ID ==================== -->
@@ -662,12 +658,13 @@
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 </form>
-                                <!-- Форма удаления -->
-                                <form action="{{ url_for('delete_recording', id=group.id_group, funck='edit_groups') }}" method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить группу {{ group.id_group }}?');">
-                                    <button type="submit" class="icon-btn delete" title="Удалить">
+                               <!-- Форма удаления -->
+                                <a href="{{ url_for('delete_recording', id=group.id_group, funck='edit_groups') }}" 
+                                class="icon-btn delete" 
+                                title="Удалить" 
+                                onclick="return confirm('Вы уверены, что хотите удалить тип группу {{ group.id_group }}?');">
                                         <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
+                                </a>
                             </td>
                             <td>
                                 <div class="user-info">
@@ -781,15 +778,13 @@
                                             </button>
                                         </form>
 
-                                        <!-- Форма удаления -->
-                                        <form action="{{ url_for('delete_recording', id=formobuch.id_form, funck='edit_formobuch') }}" 
-                                        method="post" 
-                                        style="display:inline;" 
-                                        onsubmit="return confirm('Вы уверены, что хотите удалить тип ведомости {{ formobuch.id_form }}?');">
-                                            <button type="submit" class="icon-btn delete" title="Удалить">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </form>
+                                    <!-- Форма удаления -->
+                                    <a href="{{ url_for('delete_recording', id=formobuch.id_form, funck='edit_formobuch') }}" 
+                                    class="icon-btn delete" 
+                                    title="Удалить" 
+                                    onclick="return confirm('Вы уверены, что хотите удалить форму обучения {{ formobuch.id_form }}?');">
+                                            <i class="fas fa-trash-alt"></i>
+                                    </a>
                                     </td>
 
                                     <!-- ==================== КОЛОНКА: ID ==================== -->
@@ -906,14 +901,12 @@
                                             </form>
 
                                             <!-- Форма удаления -->
-                                            <form action="{{ url_for('delete_recording', id=spec.id_specialty, funck='edit_spec') }}" 
-                                            method="post" 
-                                            style="display:inline;" 
-                                            onsubmit="return confirm('Вы уверены, что хотите удалить тип ведомости {{ spec.id_specialty }}?');">
-                                                <button type="submit" class="icon-btn delete" title="Удалить">
+                                            <a href="{{ url_for('delete_recording', id=spec.id_specialty, funck='edit_spec') }}" 
+                                            class="icon-btn delete" 
+                                            title="Удалить" 
+                                            onclick="return confirm('Вы уверены, что хотите удалить специальность {{ spec.id_specialty }}?');">
                                                     <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
+                                            </a>
                                         </td>
 
                                         <!-- ==================== КОЛОНКА: ID ==================== -->
