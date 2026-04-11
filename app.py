@@ -498,6 +498,135 @@ def load_table():
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
+#НАГРУЗКА!!!!!!!!!!!!
+        case 'edit_nagruzka':
+            if session.get('is_specialist', False):
+                conn = get_db_connection()
+
+                # Исправленный запрос - используем правильное название колонки form_name
+                query = '''
+                    SELECT 
+                        w.id_load,
+                        w.id_year,
+                        w.id_teacher,
+                        w.id_group,
+                        w.id_discipline,
+                        w.weeks_summer,
+                        w.weeks_winter,
+                        w.exam,
+                        w.credit,
+                        w.diff_credit,
+                        w.independent_summer,
+                        w.consultations_summer,
+                        w.lectures_summer,
+                        w.practice_summer,
+                        w.labs_summer,
+                        w.seminars_summer,
+                        w.course_project_summer,
+                        w.attestation_summer,
+                        w.independent_winter,
+                        w.consultations_winter,
+                        w.lectures_winter,
+                        w.practice_winter,
+                        w.labs_winter,
+                        w.seminars_winter,
+                        w.course_project_winter,
+                        w.attestation_winter,
+                        d.discipline_name,
+                        d.id_pck,
+                        p.name_pck as pck_name,
+                        u.full_name as teacher_name,
+                        ay.year_name,
+                        g.id_study_form,
+                        sf.form_name as study_form
+                    FROM workload w
+                    JOIN disciplines d ON w.id_discipline = d.id_discipline
+                    JOIN pck p ON d.id_pck = p.id_pck
+                    JOIN users u ON w.id_teacher = u.id_user
+                    JOIN academic_year ay ON w.id_year = ay.id_year
+                    JOIN groups g ON w.id_group = g.id_group
+                    JOIN study_form sf ON g.id_study_form = sf.id_form
+                    ORDER BY ay.year_name DESC, d.discipline_name
+                '''
+
+                rows = conn.execute(query).fetchall()
+
+                # Формируем данные для таблицы
+                workload_data = []
+                for row in rows:
+                    # Расчет нагрузок
+                    with_teacher_summer = (row['lectures_summer'] or 0) + (row['practice_summer'] or 0) + \
+                                          (row['labs_summer'] or 0) + (row['seminars_summer'] or 0) + \
+                                          (row['course_project_summer'] or 0)
+
+                    with_teacher_winter = (row['lectures_winter'] or 0) + (row['practice_winter'] or 0) + \
+                                          (row['labs_winter'] or 0) + (row['seminars_winter'] or 0) + \
+                                          (row['course_project_winter'] or 0)
+
+                    total_summer = (row['independent_summer'] or 0) + (
+                                row['consultations_summer'] or 0) + with_teacher_summer
+                    total_winter = (row['independent_winter'] or 0) + (
+                                row['consultations_winter'] or 0) + with_teacher_winter
+
+                    weekly_load_summer = round(total_summer / (row['weeks_summer'] or 1), 1) if row[
+                        'weeks_summer'] else 0
+                    weekly_load_winter = round(total_winter / (row['weeks_winter'] or 1), 1) if row[
+                        'weeks_winter'] else 0
+
+                    workload_data.append({
+                        'id_load': row['id_load'],
+                        'id_year': row['id_year'],
+                        'year_name': row['year_name'],
+                        'id_discipline': row['id_discipline'],
+                        'discipline_name': row['discipline_name'],
+                        'id_group': row['id_group'],
+                        'study_form': row['study_form'],
+                        'teacher_name': row['teacher_name'],
+                        'pck_name': row['pck_name'],
+                        'weeks_summer': row['weeks_summer'],
+                        'weeks_winter': row['weeks_winter'],
+                        'independent_summer': row['independent_summer'],
+                        'consultations_summer': row['consultations_summer'],
+                        'lectures_summer': row['lectures_summer'],
+                        'practice_summer': row['practice_summer'],
+                        'labs_summer': row['labs_summer'],
+                        'seminars_summer': row['seminars_summer'],
+                        'course_project_summer': row['course_project_summer'],
+                        'attestation_summer': row['attestation_summer'],
+                        'independent_winter': row['independent_winter'],
+                        'consultations_winter': row['consultations_winter'],
+                        'lectures_winter': row['lectures_winter'],
+                        'practice_winter': row['practice_winter'],
+                        'labs_winter': row['labs_winter'],
+                        'seminars_winter': row['seminars_winter'],
+                        'course_project_winter': row['course_project_winter'],
+                        'attestation_winter': row['attestation_winter'],
+                        'total_summer': total_summer,
+                        'total_winter': total_winter,
+                        'with_teacher_summer': with_teacher_summer,
+                        'with_teacher_winter': with_teacher_winter,
+                        'weekly_load_summer': weekly_load_summer,
+                        'weekly_load_winter': weekly_load_winter,
+                        'total_load': total_summer + total_winter
+                    })
+
+                # Получаем список учебных годов для фильтра
+                academic_years = conn.execute(
+                    'SELECT id_year, year_name FROM academic_year ORDER BY year_name DESC'
+                ).fetchall()
+
+                conn.close()
+
+                # Передаем данные в шаблон
+                return render_template(
+                    'load_table.html',
+                    workload_data=workload_data,
+                    academic_years=academic_years,
+                    funck=funck
+                )
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
 
         case 'edit_years':
             if session.get('is_specialist', False):
