@@ -2655,6 +2655,82 @@ def edit_info():
 
 # ============================ СТУДЕНТЫ ================================ #    
 
+        case 'edit_students':
+            if session.get('is_zav', False):
+                # Получаем ID студента
+                id_student = request.args.get('id_student', type=int)
+                if not id_student:
+                    flash('Не указан ID студента', 'danger')
+                    return redirect(url_for('load_table', funck='edit_students'))
+
+                conn = get_db_connection()
+                student = conn.execute('''
+                    SELECT id_student, full_name, id_group
+                    FROM students
+                    WHERE id_student = ?
+                ''', (id_student,)).fetchone()
+                
+                # Получаем список групп для выпадающего списка
+                groups = conn.execute('SELECT id_group, name_group FROM groups ORDER BY name_group').fetchall()
+                conn.close()
+
+                if not student:
+                    flash('Студент не найден.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_students'))
+
+                # GET — показываем форму
+                if request.method == 'GET':
+                    return render_template('edit_student.html',
+                                        funck=funck,
+                                        student=student,
+                                        groups=groups)
+
+                # POST — сохраняем изменения
+                if request.method == 'POST':
+                    full_name = request.form.get('full_name', '').strip()
+                    id_group = request.form.get('id_group', type=int)
+
+                    errors = []
+                    if not full_name:
+                        errors.append('ФИО обязательно')
+                    elif len(full_name) > 50:
+                        errors.append('ФИО не может быть длиннее 50 символов')
+                    
+                    if not id_group:
+                        errors.append('Выберите группу')
+
+                    if errors:
+                        for error in errors:
+                            flash(error, 'danger')
+                        return render_template('edit_student.html',
+                                            funck=funck,
+                                            student=student,
+                                            groups=groups)
+
+                    # Обновление в базе
+                    conn = get_db_connection()
+                    try:
+                        conn.execute('''
+                            UPDATE students
+                            SET full_name = ?, id_group = ?
+                            WHERE id_student = ?
+                        ''', (full_name, id_group, id_student))
+                        conn.commit()
+                        flash('Данные студента успешно обновлены', 'success')
+                        conn.close()
+                        return redirect(url_for('load_table', funck='edit_students'))
+                    except sqlite3.Error as e:
+                        conn.rollback()
+                        flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                        conn.close()
+                        return render_template('edit_student.html',
+                                            funck=funck,
+                                            student=student,
+                                            groups=groups)
+
+            else:
+                flash('У вас нет прав доступа.', 'danger')
+                return redirect(url_for('index'))
 
 # ==================== ВИДЫ ВЕДОМОСТИ ==================== #
 
