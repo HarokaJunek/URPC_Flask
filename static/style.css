@@ -2328,7 +2328,7 @@ width: auto;
         transform: translateY(-1px);
         box-shadow: 0 4px 10px rgba(77, 195, 240, 0.4);
     }
-    @media (max-width: 768px) {
+@media (max-width: 768px) {
         #readable-table th, #readable-table td {
             padding: 8px 6px;
             font-size: 11px;

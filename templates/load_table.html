@@ -361,6 +361,280 @@
 {% endif %}
     <!-- НАГРУЗКА -->
 
+        {% if funck == 'edit_nagruzka' %}
+    <div class="table-header">
+        <h2><i class="fas fa-database"></i> Перечень дисциплин</h2>
+        <div class="table-actions">
+            <a href="{{ url_for('add_info', funck='edit_nagruzka') }}" class="action-btn add-btn">
+                <i class="fas fa-plus"></i> Добавить запись
+            </a>
+            <div class="search-box">
+                <form method="get" action="{{ url_for('load_table') }}">
+                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                    <input type="hidden" name="funck" value="edit_nagruzka">
+                    <i class="fas fa-search"></i>
+                </form>
+                {% if request.args.get('search') %}
+                    <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="clear-search">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="filters-wrapper">
+        <input type="checkbox" id="toggle-filters" hidden>
+        <div class="filters-header">
+            <label for="toggle-filters" class="filters-toggle-btn">
+                <i class="fas fa-filter"></i> Фильтры
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </label>
+        </div>
+        <div class="filters-panel">
+            <div class="filters-grid">
+                <div class="filter-item">
+                    <label><i class="fas fa-calendar-alt"></i> Год обучения</label>
+                    <select class="filter-select" id="filter-year">
+                        <option value="">Все</option>
+                        {% for year in academic_years %}
+                        <option value="{{ year.id_year }}">{{ year.year_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label><i class="fas fa-chalkboard-teacher"></i> Преподаватель</label>
+                    <input type="text" class="filter-input" id="filter-teacher" placeholder="ФИО">
+                </div>
+                <div class="filter-item">
+                    <label><i class="fas fa-book"></i> Дисциплина</label>
+                    <input type="text" class="filter-input" id="filter-discipline" placeholder="Название">
+                </div>
+                <div class="filter-item">
+                    <label><i class="fas fa-users"></i> Группа</label>
+                    <select class="filter-select" id="filter-group">
+                        <option value="">Все</option>
+                        {% for group in groups %}
+                        <option value="{{ group.id_group }}">{{ group.id_group }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label><i class="fas fa-layer-group"></i> Семестр</label>
+                    <select class="filter-select" id="filter-semester">
+                        <option value="">Все</option>
+                        <option value="winter">Зимний семестр</option>
+                        <option value="summer">Летний семестр</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filters-actions">
+                <a href="javascript:void(0);" class="apply-filters-btn" onclick="applyFilters()">Применить</a>
+                <a href="javascript:void(0);" class="reset-filters-btn" onclick="resetFilters()">Сбросить</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица -->
+    <div class="table-responsive">
+        <table class="all-table big-schedule-table" id="readable-table">
+            <thead>
+                <tr class="main-name-table">
+                    <th rowspan="3">Действия</th>
+                    <th rowspan="3">Форма</th>
+                    <th rowspan="3">Индекс</th>
+                    <th rowspan="3">Наименование дисциплин</th>
+                    <th rowspan="3">Группы</th>
+                    <th rowspan="3">Год обучения</th>
+                    <th colspan="11">Зимний семестр</th>
+                    <th colspan="11">Летний семестр</th>
+                    <th rowspan="3">Нагр. препод.</th>
+                    <th rowspan="3">ФИО препод.</th>
+                    <th rowspan="3">ПЦК</th>
+                </tr>
+                <tr class="double-name-table">
+                    <th>Объём ОП</th><th>Самост.</th><th>Консульт.</th><th>С препод.</th><th>Нагр. в нед.</th>
+                    <th>Лекции</th><th>Пр. занятия</th><th>Лаб. занятия</th><th>Семинар.</th><th>Курс. пр.</th><th>Аттестация</th>
+                    <th>Объём ОП</th><th>Самост.</th><th>Консульт.</th><th>С препод.</th><th>Нагр. в нед.</th>
+                    <th>Лекции</th><th>Пр. занятия</th><th>Лаб. занятия</th><th>Семинар.</th><th>Курс. пр.</th><th>Аттестация</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for load in table_info %}
+                {# Безопасное получение значений с заменой None на 0 #}
+                {% set lectures_winter = load.lectures_winter or 0 %}
+                {% set practice_winter = load.practice_winter or 0 %}
+                {% set labs_winter = load.labs_winter or 0 %}
+                {% set seminars_winter = load.seminars_winter or 0 %}
+                {% set independent_winter = load.independent_winter or 0 %}
+                {% set consultations_winter = load.consultations_winter or 0 %}
+                {% set course_project_winter = load.course_project_winter or 0 %}
+                {% set weeks_winter = load.weeks_winter or 1 %}
+
+                {% set lectures_summer = load.lectures_summer or 0 %}
+                {% set practice_summer = load.practice_summer or 0 %}
+                {% set labs_summer = load.labs_summer or 0 %}
+                {% set seminars_summer = load.seminars_summer or 0 %}
+                {% set independent_summer = load.independent_summer or 0 %}
+                {% set consultations_summer = load.consultations_summer or 0 %}
+                {% set course_project_summer = load.course_project_summer or 0 %}
+                {% set weeks_summer = load.weeks_summer or 1 %}
+
+                {# Расчет часов #}
+                {% set winter_hours = lectures_winter + practice_winter + labs_winter + seminars_winter %}
+                {% set summer_hours = lectures_summer + practice_summer + labs_summer + seminars_summer %}
+                {% set total_hours = winter_hours + summer_hours %}
+
+                {# Расчет нагрузки в неделю #}
+                {% set winter_weekly = (winter_hours / weeks_winter) | round(1) if winter_hours > 0 else 0 %}
+                {% set summer_weekly = (summer_hours / weeks_summer) | round(1) if summer_hours > 0 else 0 %}
+
+                {# Определение аттестации #}
+                {% set attestation_winter = 'Экзамен' if load.exam else ('Диф. зачёт' if load.diff_credit else ('Зачёт' if load.credit else '—')) %}
+                {% set attestation_summer = 'Экзамен' if load.exam else ('Диф. зачёт' if load.diff_credit else ('Зачёт' if load.credit else '—')) %}
+
+                <tr data-group="{{ load.id_group }}" data-year="{{ load.id_year }}" data-teacher="{{ load.teacher_full_name or '' }}" data-discipline="{{ load.discipline_name or '' }}">
+                    <td class="actions-cell">
+                        <a href="{{ url_for('edit_info', funck='edit_nagruzka', id_load=load.id_load) }}" class="icon-btn edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{{ url_for('delete_recording', id=load.id_load, funck='edit_nagruzka') }}" class="icon-btn delete" onclick="return confirm('Удалить запись?');">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </td>
+                    <td>{{ load.study_form_name or 'очная' }}</td>
+                    <td class="id-cell">{{ load.id_discipline or '' }}</td>
+                    <td>{{ load.discipline_name or '' }}</td>
+                    <td>{{ load.id_group or '' }}</td>
+                    <td>{{ load.year_name or '' }}</td>
+                    <!-- Зимний семестр -->
+                    <td class="winter-data">{{ winter_hours }}</td>
+                    <td class="winter-data">{{ independent_winter }}</td>
+                    <td class="winter-data">{{ consultations_winter }}</td>
+                    <td class="winter-data">{{ winter_hours }}</td>
+                    <td class="winter-data">{{ winter_weekly }}</td>
+                    <td class="winter-data">{{ lectures_winter }}</td>
+                    <td class="winter-data">{{ practice_winter }}</td>
+                    <td class="winter-data">{{ labs_winter }}</td>
+                    <td class="winter-data">{{ seminars_winter }}</td>
+                    <td class="winter-data">{{ course_project_winter }}</td>
+                    <td class="winter-data">{{ attestation_winter }}</td>
+                    <!-- Летний семестр -->
+                    <td class="summer-data">{{ summer_hours }}</td>
+                    <td class="summer-data">{{ independent_summer }}</td>
+                    <td class="summer-data">{{ consultations_summer }}</td>
+                    <td class="summer-data">{{ summer_hours }}</td>
+                    <td class="summer-data">{{ summer_weekly }}</td>
+                    <td class="summer-data">{{ lectures_summer }}</td>
+                    <td class="summer-data">{{ practice_summer }}</td>
+                    <td class="summer-data">{{ labs_summer }}</td>
+                    <td class="summer-data">{{ seminars_summer }}</td>
+                    <td class="summer-data">{{ course_project_summer }}</td>
+                    <td class="summer-data">{{ attestation_summer }}</td>
+                    <td>{{ total_hours }}</td>
+                    <td>{{ load.teacher_full_name or '' }}</td>
+                    <td>{{ load.pck_name or '—' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="28" style="text-align: center;">Нет данных для отображения</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Подвал таблицы -->
+    <div class="table-footer">
+        <div class="table-info">
+            Всего записей: <span class="total-count">{{ table_info|length }}</span>
+        </div>
+        <div class="export-buttons">
+            <button class="export-btn" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+            <button class="export-btn" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function applyFilters() {
+    const yearFilter = document.getElementById('filter-year').value;
+    const teacherFilter = document.getElementById('filter-teacher').value.toLowerCase();
+    const disciplineFilter = document.getElementById('filter-discipline').value.toLowerCase();
+    const groupFilter = document.getElementById('filter-group').value;
+    const semesterFilter = document.getElementById('filter-semester').value;
+
+    const rows = document.querySelectorAll('#readable-table tbody tr');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        if (row.cells.length === 1) return;
+
+        let show = true;
+
+        if (yearFilter && row.dataset.year !== yearFilter) show = false;
+        if (teacherFilter && !row.dataset.teacher.toLowerCase().includes(teacherFilter)) show = false;
+        if (disciplineFilter && !row.dataset.discipline.toLowerCase().includes(disciplineFilter)) show = false;
+        if (groupFilter && row.dataset.group !== groupFilter) show = false;
+
+        // Фильтр по семестру
+        if (show && semesterFilter) {
+            if (semesterFilter === 'winter') {
+                const winterCells = row.querySelectorAll('.winter-data');
+                let hasWinterData = false;
+                winterCells.forEach(cell => {
+                    const value = cell.textContent.trim();
+                    if (value && value !== '0' && value !== '—') {
+                        hasWinterData = true;
+                    }
+                });
+                if (!hasWinterData) show = false;
+            } else if (semesterFilter === 'summer') {
+                const summerCells = row.querySelectorAll('.summer-data');
+                let hasSummerData = false;
+                summerCells.forEach(cell => {
+                    const value = cell.textContent.trim();
+                    if (value && value !== '0' && value !== '—') {
+                        hasSummerData = true;
+                    }
+                });
+                if (!hasSummerData) show = false;
+            }
+        }
+
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+    });
+
+    document.querySelector('.total-count').textContent = visibleCount;
+}
+
+function resetFilters() {
+    document.getElementById('filter-year').value = '';
+    document.getElementById('filter-teacher').value = '';
+    document.getElementById('filter-discipline').value = '';
+    document.getElementById('filter-group').value = '';
+    document.getElementById('filter-semester').value = '';
+
+    const rows = document.querySelectorAll('#readable-table tbody tr');
+    rows.forEach(row => {
+        row.style.display = '';
+    });
+
+    document.querySelector('.total-count').textContent = rows.length;
+}
+
+function exportToExcel() {
+    alert('Экспорт в Excel будет реализован');
+}
+
+function exportToPDF() {
+    alert('Экспорт в PDF будет реализован');
+}
+</script>
+{% endif %}
+
 
 
 <!-- ==================== СТУДЕНТЫ ==================== -->

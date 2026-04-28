@@ -500,6 +500,69 @@ def load_table():
                 return redirect(url_for('index'))
 #НАГРУЗКА!!!!!!!!!!!!
 
+        case 'edit_nagruzka':
+            if session.get('is_specialist', False):
+                conn = get_db_connection()
+
+                # Базовый запрос (исправлено sf.form_name)
+                query = '''
+                    SELECT 
+                        w.*,
+                        d.discipline_name,
+                        d.id_discipline,
+                        g.id_group,
+                        g.id_study_form,
+                        ay.year_name,
+                        ay.id_year,
+                        u.full_name as teacher_full_name,
+                        u.id_user as teacher_id,
+                        pck.name_pck as pck_name,
+                        sf.form_name as study_form_name,
+                        f.name as fgos_name
+                    FROM workload w
+                    LEFT JOIN disciplines d ON w.id_discipline = d.id_discipline
+                    LEFT JOIN groups g ON w.id_group = g.id_group
+                    LEFT JOIN academic_year ay ON w.id_year = ay.id_year
+                    LEFT JOIN users u ON w.id_teacher = u.id_user
+                    LEFT JOIN pck ON d.id_pck = pck.id_pck
+                    LEFT JOIN study_form sf ON g.id_study_form = sf.id_form
+                    LEFT JOIN fgoss f ON w.id_fgos = f.id_fgos
+                    WHERE 1=1
+                '''
+                params = []
+
+                # Если передан поисковый запрос, добавляем условия фильтрации
+                if search_query:
+                    query += ''' AND (
+                        d.discipline_name LIKE ? OR 
+                        u.full_name LIKE ? OR 
+                        g.id_group LIKE ? OR
+                        ay.year_name LIKE ?
+                    )'''
+                    like_pattern = f'%{search_query}%'
+                    params.extend([like_pattern, like_pattern, like_pattern, like_pattern])
+
+                # Добавляем сортировку
+                query += ' ORDER BY ay.year_name DESC, d.discipline_name ASC'
+
+                workload_data = conn.execute(query, params).fetchall()
+
+                # Получаем данные для фильтров
+                academic_years = conn.execute(
+                    'SELECT id_year, year_name FROM academic_year ORDER BY id_year DESC').fetchall()
+                groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
+
+                conn.close()
+
+                return render_template('load_table.html',
+                                       funck=funck,
+                                       table_info=workload_data,
+                                       academic_years=academic_years,
+                                       groups=groups)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+
 
         case 'edit_years':
             if session.get('is_specialist', False):
@@ -890,6 +953,23 @@ def delete_recording(id):
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_fgoss'))
+
+            case 'edit_nagruzka':
+                if not session.get('is_specialist', False):
+                    flash('У вас нет прав на удаление нагрузки.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_nagruzka'))
+
+                conn = get_db_connection()
+                try:
+                    conn.execute('DELETE FROM workload WHERE id_load = ?', (id,))
+                    conn.commit()
+                    flash('Запись успешно удалена!', 'success')
+                except Exception as e:
+                    flash(f'Ошибка при удалении: {str(e)}', 'danger')
+                finally:
+                    conn.close()
+
+                return redirect(url_for('load_table', funck='edit_nagruzka'))
             
 
             # ============================ СТУДЕНТЫ ================================ #
