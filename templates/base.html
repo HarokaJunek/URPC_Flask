@@ -66,16 +66,43 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="nav-menu">
         {% if session.user_id %}
             <a href="{{ url_for('index') }}" class="nav-link">
-                <i class="fa fa-home"></i> Главная страница
+                <i class="fa fa-home"></i>
             </a>
             {% if session.is_admin %}
                 <a href="{{ url_for('load_table', funck='edit_users') }}" class="nav-link">
                     <i class="fas fa-users-cog"></i> Управление пользователями
                 </a>
+            {% endif %}
+
+            {% if session.is_specialist %}
+                <a href="{{ url_for('load_table', funck='edit_users') }}" class="nav-link">
+                    <i class="fa fa-user-circle" aria-hidden="true"></i>
+                </a>
+
+                <a href="{{ url_for('load_table', funck='edit_disciplines') }}" class="nav-link">
+                    <i class="fa fa-book" aria-hidden="true"></i>
+                </a>
+
+                <a href="{{ url_for('load_table', funck='edit_years') }}" class="nav-link">
+                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                </a>
+
+                <a href="{{ url_for('load_table', funck='edit_fgoss') }}" class="nav-link">
+                    <i class="fas fa-graduation-cap"></i>
+                </a>
+
+                <a href="{{ url_for('load_table', funck='edit_pck') }}" class="nav-link">
+                     <i class="fa fa-bookmark" aria-hidden="true"></i>
+                </a>
+
+                <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="nav-link">
+                        <i class="fa fa-table" aria-hidden="true"></i>
+                </a>
                 <!-- Здесь можно добавить другие ссылки для админа -->
             {% endif %}
+
             <a href="{{ url_for('logout') }}" class="nav-link">
-                Выйти из системы <i class="fas fa-sign-out-alt"></i>
+                <i class="fas fa-sign-out-alt"></i>
             </a>
         {% else %}
             <a href="{{ url_for('index') }}" class="nav-link active">

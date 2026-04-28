@@ -192,10 +192,7 @@
 
             <!-- Кнопки действий -->
             <div class="form-actions">
-                <a href="{{ url_for('delete_recording', id=user.id_user, funck='edit_users') }}"
-                   class="btn-danger" onclick="return confirm('Вы уверены, что хотите удалить запись?');">
-                    <i class="fas fa-trash-alt"></i> Удалить
-                </a>
+
                 <button type="submit" class="btn-primary">
                     <i class="fas fa-save"></i> Сохранить изменения
                 </button>
@@ -315,10 +312,6 @@
 
             <!-- Кнопки действий -->
             <div class="form-actions">
-                <a href="{{ url_for('delete_recording', id=discipline.id_discipline, funck='edit_disciplines') }}"
-                   class="btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту дисциплину?');">
-                    <i class="fas fa-trash-alt"></i> Удалить
-                </a>
                 <button type="submit" class="btn-primary">
                     <i class="fas fa-save"></i> Сохранить изменения
                 </button>
@@ -365,16 +358,6 @@
                 }
             });
         }
-
-        // Подтверждение при удалении
-        const deleteBtn = document.querySelector('.btn-danger');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', function(e) {
-                if (!confirm('Вы уверены, что хотите удалить эту дисциплину?\nЭто действие нельзя отменить.')) {
-                    e.preventDefault();
-                }
-            });
-        }
     });
 </script>
 {% endif %}
@@ -411,10 +394,6 @@
 
             <!-- Кнопки действий -->
             <div class="form-actions">
-                <a href="{{ url_for('delete_recording', id=academic_year.id_year, funck='edit_years') }}"
-                   class="btn-danger" onclick="return confirm('Вы уверены, что хотите удалить этот учебный год?');">
-                    <i class="fas fa-trash-alt"></i> Удалить
-                </a>
                 <button type="submit" class="btn-primary">
                     <i class="fas fa-save"></i> Сохранить изменения
                 </button>
@@ -485,16 +464,6 @@
                 this.value = value;
             });
         }
-
-        // Подтверждение при удалении
-        const deleteBtn = document.querySelector('.btn-danger');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', function(e) {
-                if (!confirm('Вы уверены, что хотите удалить этот учебный год?\nЭто действие нельзя отменить.')) {
-                    e.preventDefault();
-                }
-            });
-        }
     });
 </script>
 {% endif %}
@@ -531,10 +500,6 @@
 
             <!-- Кнопки действий -->
             <div class="form-actions">
-                <a href="{{ url_for('delete_recording', id=fgos.id_fgos, funck='edit_fgoss') }}"
-                   class="btn-danger" onclick="return confirm('Вы уверены, что хотите удалить этот ФГОС?');">
-                    <i class="fas fa-trash-alt"></i> Удалить
-                </a>
                 <button type="submit" class="btn-primary">
                     <i class="fas fa-save"></i> Сохранить изменения
                 </button>
@@ -574,16 +539,6 @@
                 }
             });
         }
-
-        // Подтверждение при удалении
-        const deleteBtn = document.querySelector('.btn-danger');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', function(e) {
-                if (!confirm('Вы уверены, что хотите удалить этот ФГОС?\nЭто действие нельзя отменить.')) {
-                    e.preventDefault();
-                }
-            });
-        }
     });
 </script>
 {% endif %}
@@ -620,10 +575,6 @@
 
             <!-- Кнопки действий -->
             <div class="form-actions">
-                <a href="{{ url_for('delete_recording', id=pck.id_pck, funck='edit_pck') }}"
-                   class="btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту ПЦК?');">
-                    <i class="fas fa-trash-alt"></i> Удалить
-                </a>
                 <button type="submit" class="btn-primary">
                     <i class="fas fa-save"></i> Сохранить изменения
                 </button>
@@ -660,16 +611,6 @@
                 } else {
                     this.style.borderColor = '';
                     this.setCustomValidity('');
-                }
-            });
-        }
-
-        // Подтверждение при удалении
-        const deleteBtn = document.querySelector('.btn-danger');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', function(e) {
-                if (!confirm('Вы уверены, что хотите удалить эту ПЦК?\nЭто действие нельзя отменить.')) {
-                    e.preventDefault();
                 }
             });
         }

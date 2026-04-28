@@ -159,7 +159,7 @@ main {
 }
 
 .nav-link i {
-    font-size: 14px;
+    font-size: 20px;
     transition: var(--transition);
 }
 
@@ -1806,7 +1806,7 @@ footer {
         width: 100%;
         flex-direction: column;
         align-items: center;
-        gap: 5px;
+        gap: 2px;
         padding: 20px 0 10px 0;
         background: rgba(81, 81, 82, 0.95);
         backdrop-filter: blur(5px);
@@ -2346,6 +2346,9 @@ width: auto;
             font-size: 12px;
         }
     }
+
+
+
 
 #readable-table .double-name-table th {
         writing-mode: vertical-lr;
