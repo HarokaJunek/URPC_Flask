@@ -654,10 +654,10 @@ function exportToPDF() {
                     <!-- Блок с кнопками действий над таблицей -->
                     <div class="table-actions">
 
-                        <!-- Кнопка добавления новой ведомости -->
-                        <button class="action-btn add-btn">
+                        <!-- Кнопка добавления  -->
+                        <a href="{{ url_for('add_info', funck='edit_students') }}" class="action-btn add-btn">
                             <i class="fas fa-plus"></i> Добавить студента
-                        </button>
+                        </a>
 
                         <!-- ==================== БЛОК ПОИСКА ==================== -->
                         <div class="search-box">
@@ -668,10 +668,10 @@ function exportToPDF() {
                                 <!-- Поле ввода поискового запроса -->
                                 <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
                                 
-                                <!-- Скрытое поле: передаем текущий режим работы (ведомости) -->
+                                <!-- Скрытое поле: передаем текущий режим работы -->
                                 <input type="hidden" name="funck" value="edit_students">
                                 
-                                <!-- Скрытая кнопка отправки (поиск срабатывает при нажатии Enter) -->
+                                <!-- Скрытая кнопка отправки -->
                                 <button type="submit" style="display: none;">Найти</button>
                             </form>
 
@@ -779,10 +779,10 @@ function exportToPDF() {
                     <!-- Блок с кнопками действий над таблицей -->
                     <div class="table-actions">
 
-                        <!-- Кнопка добавления новой ведомости -->
-                        <button class="action-btn add-btn">
+                        <!-- Кнопка добавления -->
+                         <a href="{{ url_for('add_info', funck='edit_typesved') }}" class="action-btn add-btn">
                             <i class="fas fa-plus"></i> Добавить тип ведомости
-                        </button>
+                        </a>
 
                         <!-- ==================== БЛОК ПОИСКА ==================== -->
                         <div class="search-box">
@@ -892,9 +892,9 @@ function exportToPDF() {
             <div class="table-header">
                 <h2><i class="fas fa-database"></i> Управление группами</h2>
                 <div class="table-actions">
-                    <button class="action-btn add-btn">
-                        <i class="fas fa-plus"></i> Добавить группу
-                    </button>
+                         <a href="{{ url_for('add_info', funck='edit_groups') }}" class="action-btn add-btn">
+                            <i class="fas fa-plus"></i> Добавить группу
+                        </a>
                     <div class="search-box">
                         <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
                             <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
@@ -983,10 +983,10 @@ function exportToPDF() {
                         <!-- Блок с кнопками действий над таблицей -->
                         <div class="table-actions">
 
-                            <!-- Кнопка добавления новой ведомости -->
-                            <button class="action-btn add-btn">
+                            <!-- Кнопка добавления -->
+                            <a href="{{ url_for('add_info', funck='edit_formobuch') }}" class="action-btn add-btn">
                                 <i class="fas fa-plus"></i> Добавить форму обучения
-                            </button>
+                            </a>
 
                             <!-- ==================== БЛОК ПОИСКА ==================== -->
                             <div class="search-box">
@@ -1105,10 +1105,10 @@ function exportToPDF() {
                         <!-- Блок с кнопками действий над таблицей -->
                         <div class="table-actions">
 
-                            <!-- Кнопка добавления новой ведомости -->
-                            <button class="action-btn add-btn">
+                            <!-- Кнопка добавления -->
+                            <a href="{{ url_for('add_info', funck='edit_spec') }}" class="action-btn add-btn">
                                 <i class="fas fa-plus"></i> Добавить специальность
-                            </button>
+                            </a>
 
                             <!-- ==================== БЛОК ПОИСКА ==================== -->
                             <div class="search-box">
@@ -1170,7 +1170,7 @@ function exportToPDF() {
                                             <!-- Кнопка редактирования -->
                                             <form method="post" 
                                             style="display:inline;" 
-                                            onsubmit="return confirm('Вы уверены, что хотите отредактировать тип ведомости {{ spec.id_specialty }}?');">
+                                            onsubmit="return confirm('Вы уверены, что хотите отредактировать специальность {{ spec.id_specialty }}?');">
                                                 <button type="submit" class="icon-btn edit" title="Редактировать">
                                                     <i class="fas fa-edit"></i>
                                                 </button>

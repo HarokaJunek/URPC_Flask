@@ -463,5 +463,525 @@
     });
 </script>
 {% endif %}
+
+
+<!-- CТУДЕНТЫ -->
+
+{% if funck == 'edit_students' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            {% if session.is_zav %}
+                <h2><i class="fas fa-edit"></i> Добавление студента в систему</h2>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ url_for('add_info', funck='edit_students') }}" class="edit-form">
+            <div class="form-group">
+                <label for="full_name" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> ФИО студента
+                </label>
+                <input type="text" id="full_name" name="full_name"
+                       placeholder="Например: Иванов Иван Иванович"
+                       value="{{ form_data.get('full_name', '') if form_data else '' }}">
+                <div class="form-hint">Буквы (русские/латинские), пробелы (макс. 50 символов)</div>
+            </div>
+
+            <div class="form-group">
+                    <label for="id_group" class="required">
+                        <i class="fas fa-chalkboard-teacher"></i> Код группы
+                    </label>
+                    <div class="select-wrapper">
+                        <select id="id_group" name="id_group" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('id_group') %}selected{% endif %}>Выберите группу</option>
+                            {% if group_list %}
+                                {% for group in group_list %}
+                                    <option value="{{ group.id }}"
+                                        {% if form_data and form_data.get('id_group')|int == group.id %}selected{% endif %}>
+                                        {{ group.id }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>Нет доступных групп</option>
+                            {% endif %}
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                    <div class="form-hint">Выберите группу, к которой относится студент</div>
+                </div>
+
+            <button type="submit" id="submitBtn">Создать студента</button>
+        </form>
+    </div>
+</div>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fullNameInput = document.getElementById('full_name');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (fullNameInput) {
+                fullNameInput.addEventListener('input', function(e) {
+                    if (e.target.value.length > 50) {
+                        e.target.value = e.target.value.substring(0, 50);
+                    }
+                });
+            }
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    const fullName = fullNameInput ? fullNameInput.value.trim() : '';
+                    const idGroupSelect = document.getElementById('id_group');
+                    const idGroup = idGroupSelect ? idGroupSelect.value : '';
+
+                    let errors = [];
+
+                    if (!fullName) {
+                        errors.push('Пожалуйста, укажите ФИО студента');
+                    } else if (fullName.length > 50) {
+                        errors.push('ФИО студента не может быть длиннее 50 символов');
+                    }
+
+                    if (!idGroup) {
+                        errors.push('Пожалуйста, выберите группу');
+                    }
+
+                    if (errors.length > 0) {
+                        e.preventDefault();
+                        alert(errors.join('\n'));
+                    }
+                });
+            }
+        });
+    </script>
+{% endif %}
+
+
+<!-- ВИДЫ ВЕДОМОСТИ -->
+
+{% if funck == 'edit_typesved' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            {% if session.is_zav %}
+                <h2><i class="fas fa-edit"></i> Добавление типа ведомости в систему</h2>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ url_for('add_info', funck='edit_typesved') }}" class="edit-form">
+            <div class="form-group">
+                <label for="typeved_name" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Название типа ведомости
+                </label>
+                <input type="text" id="typeved_name" name="typeved_name"
+                       placeholder="Например: Экзамен"
+                       value="{{ form_data.get('typeved_name', '') if form_data else '' }}">
+                <div class="form-hint">Буквы (русские/латинские), пробелы (макс. 50 символов)</div>
+            </div>
+
+            <button type="submit" id="submitBtn">Создать тип ведомости</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const typevedNameInput = document.getElementById('typeved_name');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (typevedNameInput) {
+        typevedNameInput.addEventListener('input', function(e) {
+            let value = e.target.value;
+            // Разрешаем русские и латинские буквы, цифры, пробелы, дефисы, точки
+            let cleaned = value.replace(/[^а-яА-Яa-zA-Z0-9\s\-\.]/g, '');
+            if (cleaned !== value) {
+                e.target.value = cleaned;
+            }
+            // Ограничение длины 50 символов
+            if (cleaned.length > 50) {
+                e.target.value = cleaned.substring(0, 50);
+            }
+        });
+    }
+
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+            const type_name = typevedNameInput ? typevedNameInput.value.trim() : '';
+            
+            let errors = [];
+            
+            if (!type_name) {
+                errors.push('Пожалуйста, укажите название типа ведомости');
+            } else if (type_name.length > 50) {
+                errors.push('Название типа ведомости не может быть длиннее 50 символов');
+            } else if (!/^[а-яА-Яa-zA-Z0-9\s\-\/]+$/.test(type_name)) {
+                errors.push('Название типа ведомости может содержать только буквы (русские/латинские), цифры, пробелы, дефисы и косые черты ');
+            }
+            
+            if (errors.length > 0) {
+                e.preventDefault();
+                alert(errors.join('\n'));
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+
+<!-- ГРУППА -->
+
+{% if funck == 'edit_groups' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            {% if session.is_zav %}
+                <h2><i class="fas fa-edit"></i> Добавление группы в систему</h2>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ url_for('add_info', funck='edit_groups') }}" class="edit-form">
+            <div class="form-group">
+                <label for="group_name" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Название группы
+                </label>
+                <input type="text" id="group_name" name="group_name"
+                       placeholder="Например: 21/МТ-201"
+                       value="{{ form_data.get('group_name', '') if form_data else '' }}">
+                <div class="form-hint">Буквы (русские/латинские), цифры, пробелы, дефисы, точки, слэш (макс. 50 символов)</div>
+            </div>
+
+            <!-- выпадающий список форма обучения -->
+            <div class="studyform-group">
+                <label for="id_study_form" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Форма обучения
+                </label>
+                <div class="select-wrapper">
+                    <select id="id_study_form" name="id_study_form" required>
+                        <option value="" disabled {% if not form_data or not form_data.get('id_study_form') %}selected{% endif %}>Выберите форму обучения</option>
+                        {% if studyform_list %}
+                            {% for studyform in studyform_list %}
+                                <option value="{{ studyform.id }}"
+                                    {% if form_data and form_data.get('id_study_form')|int == studyform.id %}selected{% endif %}>
+                                    {{ studyform.name }}
+                                </option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled>Нет доступных форм обучения</option>
+                        {% endif %}
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="form-hint">Выберите форму обучения, к которой относится группа</div>
+            </div>
+
+            <!-- выпадающий список классный руководитель -->               
+            <div class="classteach-group">
+                <label for="id_classteach" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Классный руководитель
+                </label>
+                <div class="select-wrapper">
+                    <select id="id_classteach" name="id_classteach" required>
+                        <option value="" disabled {% if not form_data or not form_data.get('id_classteach') %}selected{% endif %}>Выберите классного руководителя</option>
+                        {% if classteach_list %}
+                            {% for classteach in classteach_list %}
+                                <option value="{{ classteach.id }}"
+                                    {% if form_data and form_data.get('id_classteach')|int == classteach.id %}selected{% endif %}>
+                                    {{ classteach.name }}
+                                </option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled>Нет доступных классных руководителей</option>
+                        {% endif %}
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="form-hint">Выберите классного руководителя группы</div>
+            </div>
+            
+            <!-- выпадающий список специальность -->
+            <div class="spec-group">
+                <label for="id_spec" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Специальность
+                </label>
+                <div class="select-wrapper">
+                    <select id="id_spec" name="id_spec" required>
+                        <option value="" disabled {% if not form_data or not form_data.get('id_spec') %}selected{% endif %}>Выберите специальность</option>
+                        {% if spec_list %}
+                            {% for spec in spec_list %}
+                                <option value="{{ spec.id }}"
+                                    {% if form_data and form_data.get('id_spec')|int == spec.id %}selected{% endif %}>
+                                    {{ spec.name }}
+                                </option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled>Нет доступных специальностей</option>
+                        {% endif %}
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="form-hint">Выберите специальность, к которой относится группа</div>
+            </div>
+
+            <button type="submit" id="submitBtn">Создать группу</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const groupNameInput = document.getElementById('group_name');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (groupNameInput) {
+            groupNameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                // Разрешаем буквы (русские/латинские), цифры, пробелы, дефисы, точки, слэш
+                let cleaned = value.replace(/[^а-яА-Яa-zA-Z0-9\s\-\.\/]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                // Ограничение длины 50 символов
+                if (cleaned.length > 50) {
+                    e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        }
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                const groupName = groupNameInput ? groupNameInput.value.trim() : '';
+                const idStudyFormSelect = document.getElementById('id_study_form');
+                const idStudyForm = idStudyFormSelect ? idStudyFormSelect.value : '';
+                const idClassTeachSelect = document.getElementById('id_classteach');
+                const idClassTeach = idClassTeachSelect ? idClassTeachSelect.value : '';
+                const idSpecSelect = document.getElementById('id_spec');
+                const idSpec = idSpecSelect ? idSpecSelect.value : '';
+
+                let errors = [];
+
+                if (!groupName) {
+                    errors.push('Пожалуйста, укажите название группы');
+                } else if (groupName.length > 50) {
+                    errors.push('Название группы не может быть длиннее 50 символов');
+                } else if (!/^[а-яА-Яa-zA-Z0-9\s\-\.\/]+$/.test(groupName)) {
+                    errors.push('Название группы может содержать только буквы (русские/латинские), цифры, пробелы, дефисы, точки и слэш');
+                }
+
+                if (!idStudyForm) {
+                    errors.push('Пожалуйста, выберите форму обучения');
+                }
+                
+                if (!idClassTeach) {
+                    errors.push('Пожалуйста, выберите классного руководителя');
+                }
+                
+                if (!idSpec) {
+                    errors.push('Пожалуйста, выберите специальность');
+                }
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alert(errors.join('\n'));
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<!-- ФОРМА ОБУЧЕНИЯ -->
+
+{% if funck == 'edit_formobuch' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            {% if session.is_zav %}
+                <h2><i class="fas fa-edit"></i> Добавление формы обучения в систему</h2>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ url_for('add_info', funck='edit_formobuch') }}" class="edit-form">
+            <div class="form-group">
+                <label for="formobuch_name" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Название формы обучения
+                </label>
+                <input type="text" id="formobuch_name" name="formobuch_name"
+                       placeholder="Например: Заочная"
+                       value="{{ form_data.get('formobuch_name', '') if form_data else '' }}">
+                <div class="form-hint">Буквы (русские/латинские), пробелы, дефисы (макс. 50 символов)</div>
+            </div>
+
+            <button type="submit" id="submitBtn">Создать форму обучения</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formobuchNameInput = document.getElementById('formobuch_name');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (formobuchNameInput) {
+            formobuchNameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                // Разрешаем русские и латинские буквы, пробелы, дефисы
+                let cleaned = value.replace(/[^а-яА-Яa-zA-Z\s\-]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                // Ограничение длины 50 символов
+                if (cleaned.length > 50) {
+                    e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        }
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                const formobuch_name = formobuchNameInput ? formobuchNameInput.value.trim() : '';
+                
+                let errors = [];
+                
+                if (!formobuch_name) {
+                    errors.push('Пожалуйста, укажите название формы обучения');
+                } else if (formobuch_name.length > 50) {
+                    errors.push('Название формы обучения не может быть длиннее 50 символов');
+                } else if (!/^[а-яА-Яa-zA-Z\s\-]+$/.test(formobuch_name)) {
+                    errors.push('Название формы обучения может содержать только буквы, пробелы и дефисы');
+                }
+                
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alert(errors.join('\n'));
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<!-- СПЕЦИАЛЬНОСТИ -->
+{% if funck == 'edit_spec' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            {% if session.is_zav %}
+                <h2><i class="fas fa-edit"></i> Добавление специальности в систему</h2>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ url_for('add_info', funck='edit_spec') }}" class="edit-form">
+            <div class="form-group">
+                <label for="id_specialty" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Код специальности
+                </label>
+                <input type="text" id="id_specialty" name="id_specialty"
+                       placeholder="Например: 38.02.01"
+                       value="{{ form_data.get('id_specialty', '') if form_data else '' }}">
+                <div class="form-hint">Формат: 00.00.00 (цифры и точки)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="specialty_name" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Название специальности
+                </label>
+                <input type="text" id="specialty_name" name="specialty_name"
+                       placeholder="Например: Технология машиностроения"
+                       value="{{ form_data.get('specialty_name', '') if form_data else '' }}">
+                <div class="form-hint">Буквы (русские/латинские), пробелы (макс. 50 символов)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_department" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Отделение
+                </label>
+                <div class="select-wrapper">
+                    <select id="id_department" name="id_department" required>
+                        <option value="" disabled {% if not form_data or not form_data.get('id_department') %}selected{% endif %}>Выберите отделение</option>
+                        {% if department_list %}
+                            {% for department in department_list %}
+                                <option value="{{ department.id }}"
+                                    {% if form_data and form_data.get('id_department')|int == department.id %}selected{% endif %}>
+                                    {{ department.name }}
+                                </option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled>Нет доступных отделений</option>
+                        {% endif %}
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="form-hint">Выберите отделение, к которому относится специальность</div>
+            </div>
+
+            <button type="submit" id="submitBtn">Создать специальность</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const idSpecialtyInput = document.getElementById('id_specialty');
+        const specialtyNameInput = document.getElementById('specialty_name');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Валидация кода специальности при вводе
+        if (idSpecialtyInput) {
+            idSpecialtyInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                let cleaned = value.replace(/[^0-9\.]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                if (cleaned.length > 8) {
+                    e.target.value = cleaned.substring(0, 8);
+                }
+            });
+        }
+
+        // Валидация названия специальности при вводе
+        if (specialtyNameInput) {
+            specialtyNameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                let cleaned = value.replace(/[^а-яА-Яa-zA-Z\s\-]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                if (cleaned.length > 50) {
+                    e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        }
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                const idSpecialty = idSpecialtyInput ? idSpecialtyInput.value.trim() : '';
+                const specialtyName = specialtyNameInput ? specialtyNameInput.value.trim() : '';
+                const idDepartmentSelect = document.getElementById('id_department');
+                const idDepartment = idDepartmentSelect ? idDepartmentSelect.value : '';
+
+                let errors = [];
+
+                if (!idSpecialty) {
+                    errors.push('Пожалуйста, укажите код специальности');
+                } else if (!/^\d{2}\.\d{2}\.\d{2}$/.test(idSpecialty)) {
+                    errors.push('Неверный формат кода специальности. Пример: 38.02.01');
+                }
+
+                if (!specialtyName) {
+                    errors.push('Пожалуйста, укажите название специальности');
+                } else if (specialtyName.length > 50) {
+                    errors.push('Название специальности не может быть длиннее 50 символов');
+                }
+
+                if (!idDepartment) {
+                    errors.push('Пожалуйста, выберите отделение');
+                }
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alert(errors.join('\n'));
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
 {% endif %}
 {% endblock %}
