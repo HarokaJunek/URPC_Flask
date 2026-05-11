@@ -23,11 +23,6 @@ app.secret_key = 'your-secret-key-123-change-this'
 DATABASE = os.path.join('instance', 'nagruzka_DEMO.db')
 
 
-#lololololo
-# я делаю вдох так пахнет диор.......
-# я искал тебя вечность....
-#вот идиот.....
-#дураddddd
 # ============================================================================
 # 2. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С БД
 # ============================================================================
@@ -634,17 +629,11 @@ def load_table():
                 return redirect(url_for('index'))
 
         
-# СТУДЕНТЫ #
+# СТУДЕНТЫ 
 
         case 'edit_students':
-
-             # Проверка прав доступа
             if (session.get('is_zav', False)):
-            
-                # Установка соединения с базой данных
                 conn = get_db_connection()
-
-                # Запрос
                 query = '''
                     SELECT 
                         students.id_student,
@@ -653,91 +642,54 @@ def load_table():
                     FROM students
                     INNER JOIN groups ON groups.id_group = students.id_group
                     '''
-                
-                # Список параметров для безопасной подстановки в запрос
                 params = []
-
-                # Если передан поисковый запрос, добавляем условия фильтрации
                 if search_query:
                     query += ''' AND (
                         students.id_student LIKE ? OR
                         students.full_name LIKE ? OR
                         groups.id_group LIKE ? 
                         )'''
-
-                    # Шаблон для поиска по подстроке
                     like_pattern = f'%{search_query}%'
                     params.extend([like_pattern, like_pattern, like_pattern])
-
-                # Выполнение запроса с параметрами
                 table_info = conn.execute(query, params).fetchall()
-                
-                # Закрытие соединения с БД
                 conn.close()
-
-                # Отображение таблицы с полученными данными
                 return render_template('load_table.html', table_info=table_info, funck=funck)
             
             else:
-            
-                # Сообщение об ошибке при отсутствии прав доступа
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
-# ТИП ВЕДОМОСТИ #
+# ТИП ВЕДОМОСТИ 
 
         case 'edit_typesved':
-
-             # Проверка прав доступа
             if (session.get('is_zav', False)):
-            
-                # Установка соединения с базой данных
                 conn = get_db_connection()
-
-                # Запрос
                 query = '''
                     SELECT 
                         statement_types.id_type,
                         statement_types.type_name
                     FROM statement_types
                     '''
-                
-                # Список параметров для безопасной подстановки в запрос
                 params = []
-
-                # Если передан поисковый запрос, добавляем условия фильтрации
                 if search_query:
                     query += ''' AND (
                         statement_types.id_type LIKE ? OR
                         statement_types.type_name LIKE ? 
                         )'''
-
-                    # Шаблон для поиска по подстроке
                     like_pattern = f'%{search_query}%'
                     params.extend([like_pattern, like_pattern])
-
-                # Выполнение запроса с параметрами
                 table_info = conn.execute(query, params).fetchall()
-                
-                # Закрытие соединения с БД
                 conn.close()
-
-                # Отображение таблицы с полученными данными
                 return render_template('load_table.html', table_info=table_info, funck=funck)
-            
             else:
-            
-                # Сообщение об ошибке при отсутствии прав доступа
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
-# ГРУППЫ #
+# ГРУППЫ 
 
         case 'edit_groups':
             if (session.get('is_specialist', False) or session.get('is_zav', False)):
                 conn = get_db_connection()
-
-                # Базовый запрос - ИСПРАВЛЕНО: добавлены пробелы
                 query = ('SELECT groups.id_group, groups.course_number, study_form.form_name, '
                          'users.id_user as class_teacher_id, users.full_name as teacher_name, '
                          'specialties.id_specialty as specialty_name '
@@ -746,80 +698,49 @@ def load_table():
                          'INNER JOIN specialties ON groups.id_specialty = specialties.id_specialty '
                          'INNER JOIN study_form ON groups.id_study_form = study_form.id_form')
                 params = []
-
-                # Если передан поисковый запрос, добавляем WHERE с условиями
                 if search_query:
                     query += ' WHERE groups.id_group LIKE ? OR groups.course_number LIKE ? OR study_form.id_form LIKE ? OR users.full_name LIKE ? OR specialties.name_specialty LIKE ?'
                     like_pattern = f'%{search_query}%'
                     params = [like_pattern, like_pattern, like_pattern, like_pattern, like_pattern]
-
                 cursor = conn.execute(query, params)
                 table_info = cursor.fetchall()
                 conn.close()
-
                 return render_template('load_table.html', table_info=table_info, funck=funck)
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
-# ФОРМЫ ОБУЧЕНИЯ #
+# ФОРМЫ ОБУЧЕНИЯ 
 
         case 'edit_formobuch':
-
-             # Проверка прав доступа
             if (session.get('is_zav', False)):
-            
-                # Установка соединения с базой данных
                 conn = get_db_connection()
-
-                # Запрос
                 query = '''
                     SELECT 
                         study_form.id_form,
                         study_form.form_name
                     FROM study_form
                     '''
-                
-                # Список параметров для безопасной подстановки в запрос
                 params = []
-
-                # Если передан поисковый запрос, добавляем условия фильтрации
                 if search_query:
                     query += ''' AND (
                         study_form.id_form LIKE ? OR
                         study_form.form_name LIKE ? 
                         )'''
-
-                    # Шаблон для поиска по подстроке
                     like_pattern = f'%{search_query}%'
                     params.extend([like_pattern, like_pattern])
-
-                # Выполнение запроса с параметрами
                 table_info = conn.execute(query, params).fetchall()
-                
-                # Закрытие соединения с БД
                 conn.close()
-
-                # Отображение таблицы с полученными данными
                 return render_template('load_table.html', table_info=table_info, funck=funck)
-            
             else:
-            
-                # Сообщение об ошибке при отсутствии прав доступа
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
             
-# СПЕЦИАЛЬНОСТИ #
+# СПЕЦИАЛЬНОСТИ 
 
         case 'edit_spec':
-
-             # Проверка прав доступа
             if (session.get('is_zav', False)):
-            
-                # Установка соединения с базой данных
                 conn = get_db_connection()
-
-                # Запрос
                 query = '''
                     SELECT 
                         specialties.id_specialty,
@@ -829,43 +750,61 @@ def load_table():
                     FROM specialties
                     INNER JOIN departments ON specialties.id_department = departments.id_department
                     '''
-                
-                # Список параметров для безопасной подстановки в запрос
                 params = []
-
-                # Если передан поисковый запрос, добавляем условия фильтрации
                 if search_query:
                     query += ''' WHERE (
                         specialties.id_specialty LIKE ? OR
                         specialties.specialty_name LIKE ? OR
                         departments.department_name LIKE ?
                         )'''
-
-                    # Шаблон для поиска по подстроке
                     like_pattern = f'%{search_query}%'
                     params.extend([like_pattern, like_pattern, like_pattern])
-
-                # Сортировка
                 query += ' ORDER BY specialties.id_specialty'
-
-                # Выполнение запроса с параметрами
                 table_info = conn.execute(query, params).fetchall()
-                
-                # Закрытие соединения с БД
                 conn.close()
-
-                # Отображение таблицы с полученными данными
                 return render_template('load_table.html', table_info=table_info, funck=funck)
-            
             else:
-            
-                # Сообщение об ошибке при отсутствии прав доступа
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
             
+# ВЕДОМОСТИ 
+
+        case 'edit_statement':
+            if (session.get('is_zav', False) or session.get('is_prepod', False)):
+                conn = get_db_connection()
+                query = '''
+                    SELECT 
+                        statements.id_statement,
+                        disciplines.discipline_name,
+                        groups.id_group,
+                        statements.semester,
+                        statements.status
+                    FROM statements 
+                    INNER JOIN disciplines ON statements.id_discipline = disciplines.id_discipline
+                    INNER JOIN workload ON statements.id_discipline = workload.id_discipline
+                    INNER JOIN groups ON workload.id_group = groups.id_group
+                    '''
+                params = []
+                if search_query:
+                    query += ''' WHERE (
+                        statements.id_statements LIKE ? OR
+                        disciplines.discipline_name LIKE ? OR
+                        groups.id_group LIKE ? OR
+                        statements.semester LIKE ? OR
+                        statements.status LIKE ?
+                        )'''
+                    like_pattern = f'%{search_query}%'
+                    params.extend([like_pattern, like_pattern, like_pattern, like_pattern, like_pattern])
+                query += ' ORDER BY statements.id_statements'
+                table_info = conn.execute(query, params).fetchall()
+                conn.close()
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+                    
         # Обработка других значений funck (если есть)
         case _:
-
             # Обработка неизвестного параметра функции
             flash('Неверный параметр функции', 'danger')
             return redirect(url_for('index'))

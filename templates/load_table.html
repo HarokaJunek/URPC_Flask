@@ -637,67 +637,35 @@ function exportToPDF() {
 
 
 
-<!-- ==================== СТУДЕНТЫ ==================== -->
+<!-- СТУДЕНТЫ -->
 
 {% if funck == 'edit_students' %}
-    
     <div class="table-responsive">
-
         {% if funck == 'edit_students' %}
-
-                <!-- ==================== ЗАГОЛОВОК ТАБЛИЦЫ ==================== -->
                 <div class="table-header">
-
-                    <!-- Заголовок с иконкой базы данных -->
                     <h2><i class="fas fa-database"></i> Управление студентами</h2>
-
-                    <!-- Блок с кнопками действий над таблицей -->
                     <div class="table-actions">
-
-                        <!-- Кнопка добавления  -->
                         <a href="{{ url_for('add_info', funck='edit_students') }}" class="action-btn add-btn">
                             <i class="fas fa-plus"></i> Добавить студента
                         </a>
-
-                        <!-- ==================== БЛОК ПОИСКА ==================== -->
                         <div class="search-box">
-
-                            <!-- Форма поиска: отправляет GET-запрос на тот же маршрут -->
                             <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
-
-                                <!-- Поле ввода поискового запроса -->
                                 <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
-                                
-                                <!-- Скрытое поле: передаем текущий режим работы -->
                                 <input type="hidden" name="funck" value="edit_students">
-                                
-                                <!-- Скрытая кнопка отправки -->
                                 <button type="submit" style="display: none;">Найти</button>
                             </form>
-
-                            <!-- Иконка поиска/очистки -->
                             {% if request.args.get('search') and funck == 'edit_students' %}
-
-                                <!-- Если есть активный поиск - показываем крестик для очистки -->
                                 <a href="{{ url_for('load_table', funck='edit_students') }}" class="clear-search" title="Очистить поиск">
                                     <i class="fas fa-times-circle"></i>
                                 </a>
                             {% else %}
-
-                                <!-- Если поиск не активен - показываем иконку лупы -->
                                 <i class="fas fa-search"></i>
                             {% endif %}
                         </div>
-
                     </div>
-
                 </div>
-
-                <!-- ==================== ОСНОВНАЯ ТАБЛИЦА ==================== -->
                 <div class="table-responsive">
                     <table class="all-table">
-
-                        <!-- Шапка таблицы -->
                         <thead>
                             <tr>
                                 <th>Действия</th>
@@ -706,23 +674,13 @@ function exportToPDF() {
                                 <th>Номер группы</th>
                             </tr>
                         </thead>
-
-                        <!-- ТЕЛО ТАБЛИЦЫ: выводим данные из БД -->
                         <tbody>
-
-                            <!-- Цикл по всем записям -->
                             {% for student in table_info %}
                             <tr>
-
-                                <!-- ==================== КОЛОНКА ДЕЙСТВИЙ ==================== -->
                                 <td class="actions-cell">
-
-                                    <!-- Кнопка редактирования -->
                                     <a href="{{ url_for('edit_info', funck='edit_students', id_student=student.id_student) }}" class="icon-btn edit" title="Редактировать">
                                         <i class="fas fa-edit"></i>
                                     </a>
-
-                                    <!-- Форма удаления -->
                                     <a href="{{ url_for('delete_recording', id=student.id_student, funck='edit_students') }}" 
                                     class="icon-btn delete" 
                                     title="Удалить" 
@@ -730,8 +688,6 @@ function exportToPDF() {
                                             <i class="fas fa-trash-alt"></i>
                                     </a>
                                 </td>
-
-                                <!-- ==================== КОЛОНКА: ID ==================== -->
                                 <td>
                                     <div class="user-info">
                                         <div class="user-avatar">
@@ -740,8 +696,6 @@ function exportToPDF() {
                                         <span>{{  student.id_student  }}</span>
                                     </div>
                                 </td>
-
-                                <!-- ==================== ОСТАЛЬНЫЕ КОЛОНКИ ==================== -->
                                 <td>{{ student.full_name or 'Не назначена' }}</td>
                                 <td>{{ student.id_group or 'Не указана'}}</td>
                             </tr>
@@ -753,72 +707,40 @@ function exportToPDF() {
                         </tbody>
                     </table>
                 </div>
-        {% endif %} <!-- Конец проверки -->
+        {% endif %}
     </div>
-{% endif %} <!-- Конец основного блока -->
+{% endif %} 
 
 
-<!-- ==================== ВИДЫ ВЕДОМОСТЕЙ ==================== -->
+<!-- ВИДЫ ВЕДОМОСТЕЙ -->
 
 {% if funck == 'edit_typesved' %}
-    
     <div class="table-responsive">
-
         {% if funck == 'edit_typesved' %}
-
-                <!-- ==================== ЗАГОЛОВОК ТАБЛИЦЫ ==================== -->
                 <div class="table-header">
-
-                    <!-- Заголовок с иконкой базы данных -->
                     <h2><i class="fas fa-database"></i> Управление типами ведомости</h2>
-
-                    <!-- Блок с кнопками действий над таблицей -->
                     <div class="table-actions">
-
-                        <!-- Кнопка добавления -->
                          <a href="{{ url_for('add_info', funck='edit_typesved') }}" class="action-btn add-btn">
                             <i class="fas fa-plus"></i> Добавить тип ведомости
                         </a>
-
-                        <!-- ==================== БЛОК ПОИСКА ==================== -->
                         <div class="search-box">
-
-                            <!-- Форма поиска: отправляет GET-запрос на тот же маршрут -->
                             <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
-
-                                <!-- Поле ввода поискового запроса -->
                                 <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
-                                
-                                <!-- Скрытое поле: передаем текущий режим работы (ведомости) -->
                                 <input type="hidden" name="funck" value="edit_typesved">
-                                
-                                <!-- Скрытая кнопка отправки (поиск срабатывает при нажатии Enter) -->
                                 <button type="submit" style="display: none;">Найти</button>
                             </form>
-
-                            <!-- Иконка поиска/очистки -->
                             {% if request.args.get('search') and funck == 'edit_typesved' %}
-
-                                <!-- Если есть активный поиск - показываем крестик для очистки -->
                                 <a href="{{ url_for('load_table', funck='edit_typesved') }}" class="clear-search" title="Очистить поиск">
                                     <i class="fas fa-times-circle"></i>
                                 </a>
                             {% else %}
-
-                                <!-- Если поиск не активен - показываем иконку лупы -->
                                 <i class="fas fa-search"></i>
                             {% endif %}
                         </div>
-
                     </div>
-
                 </div>
-
-                <!-- ==================== ОСНОВНАЯ ТАБЛИЦА ==================== -->
                 <div class="table-responsive">
                     <table class="all-table">
-
-                        <!-- Шапка таблицы -->
                         <thead>
                             <tr>
                                 <th>Действия</th>
@@ -826,23 +748,13 @@ function exportToPDF() {
                                 <th>Наименование типа</th>
                             </tr>
                         </thead>
-
-                        <!-- ТЕЛО ТАБЛИЦЫ: выводим данные из БД -->
                         <tbody>
-
-                            <!-- Цикл по всем записям -->
                             {% for typesved in table_info %}
                             <tr>
-
-                                <!-- ==================== КОЛОНКА ДЕЙСТВИЙ ==================== -->
                                 <td class="actions-cell">
-
-                                    <!-- Кнопка редактирования -->
                                     <a href="{{ url_for('edit_info', funck='edit_typesved', id_type=typesved.id_type) }}" class="icon-btn edit" title="Редактировать">
                                         <i class="fas fa-edit"></i>
                                     </a>
-
-                                    <!-- Форма удаления -->
                                     <a href="{{ url_for('delete_recording', id=typesved.id_type, funck='edit_typesved') }}" 
                                     class="icon-btn delete" 
                                     title="Удалить" 
@@ -850,8 +762,6 @@ function exportToPDF() {
                                             <i class="fas fa-trash-alt"></i>
                                     </a>
                                 </td>
-
-                                <!-- ==================== КОЛОНКА: ID ==================== -->
                                 <td>
                                     <div class="user-info">
                                         <div class="user-avatar">
@@ -860,8 +770,6 @@ function exportToPDF() {
                                         <span>{{ typesved.id_type }}</span>
                                     </div>
                                 </td>
-
-                                <!-- ==================== ОСТАЛЬНЫЕ КОЛОНКИ ==================== -->
                                 <td>{{ typesved.type_name or 'Не указана'}}</td>
                             </tr>
                             {% else %}
@@ -872,12 +780,12 @@ function exportToPDF() {
                         </tbody>
                     </table>
                 </div>
-        {% endif %} <!-- Конец проверки -->
+        {% endif %}
     </div>
-{% endif %} <!-- Конец основного блока -->
+{% endif %}
 
 
-<!-- ==================== ГРУППЫ ==================== -->
+<!-- ГРУППЫ -->
 
     {% if funck == 'edit_groups' %}
         <div class="table-responsive">
@@ -903,7 +811,6 @@ function exportToPDF() {
                     </div>
                 </div>
             </div>
-
             <div class="table-responsive">
                 <table class="all-table">
                     <thead>
@@ -917,16 +824,13 @@ function exportToPDF() {
                         </tr>
                     </thead>
                     <tbody>
-                        {% for group in table_info %}  <!-- ИСПРАВЛЕНО: groups -> group -->
+                        {% for group in table_info %}
                         <tr>
                             <td class="actions-cell">
-                                <!-- Кнопка редактирования -->
                                 <a href="{{ url_for('edit_info', funck='edit_groups', id_group=group.id_group) }}" 
                                 class="icon-btn edit" title="Редактировать">
                                     <i class="fas fa-edit"></i>
                                 </a>
-
-                               <!-- Форма удаления -->
                                 <a href="{{ url_for('delete_recording', id=group.id_group, funck='edit_groups') }}" 
                                 class="icon-btn delete" 
                                 title="Удалить" 
@@ -937,19 +841,19 @@ function exportToPDF() {
                             <td>
                                 <div class="user-info">
                                     <div class="user-avatar">
-                                        <i class="fas fa-users"></i>  <!-- ИСПРАВЛЕНО: icon для групп -->
+                                        <i class="fas fa-users"></i> 
                                     </div>
                                     <span>{{ group.id_group }}</span>
                                 </div>
                             </td>
-                            <td>{{ group.course_number }}</td>  <!-- ДОБАВЛЕНО -->
-                            <td>{{ group.form_name}}</td>  <!-- ДОБАВЛЕНО -->
-                            <td>{{ group.teacher_name or 'Не назначен' }}</td>  <!-- ДОБАВЛЕНО -->
-                            <td>{{ group.specialty_name or 'Не указана' }}</td>  <!-- ДОБАВЛЕНО -->
+                            <td>{{ group.course_number }}</td> 
+                            <td>{{ group.form_name}}</td> 
+                            <td>{{ group.teacher_name or 'Не назначен' }}</td> 
+                            <td>{{ group.specialty_name or 'Не указана' }}</td> 
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6" style="text-align: center;">Нет данных для отображения</td>  <!-- ИСПРАВЛЕНО: 3 -> 6 колонок -->
+                            <td colspan="6" style="text-align: center;">Нет данных для отображения</td> 
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -959,66 +863,34 @@ function exportToPDF() {
     {% endif %}
 
 
-<!-- ==================== ФОРМЫ ОБУЧЕНИЯ ==================== -->
+<!-- ФОРМЫ ОБУЧЕНИЯ -->
     {% if funck == 'edit_formobuch' %}
-        
         <div class="table-responsive">
-
             {% if funck == 'edit_formobuch' %}
-
-                    <!-- ==================== ЗАГОЛОВОК ТАБЛИЦЫ ==================== -->
                     <div class="table-header">
-
-                        <!-- Заголовок с иконкой базы данных -->
                         <h2><i class="fas fa-database"></i> Управление формами обучения</h2>
-
-                        <!-- Блок с кнопками действий над таблицей -->
                         <div class="table-actions">
-
-                            <!-- Кнопка добавления -->
                             <a href="{{ url_for('add_info', funck='edit_formobuch') }}" class="action-btn add-btn">
                                 <i class="fas fa-plus"></i> Добавить форму обучения
                             </a>
-
-                            <!-- ==================== БЛОК ПОИСКА ==================== -->
                             <div class="search-box">
-
-                                <!-- Форма поиска: отправляет GET-запрос на тот же маршрут -->
                                 <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
-
-                                    <!-- Поле ввода поискового запроса -->
                                     <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
-                                    
-                                    <!-- Скрытое поле: передаем текущий режим работы (ведомости) -->
                                     <input type="hidden" name="funck" value="edit_formobuch">
-                                    
-                                    <!-- Скрытая кнопка отправки (поиск срабатывает при нажатии Enter) -->
                                     <button type="submit" style="display: none;">Найти</button>
                                 </form>
-
-                                <!-- Иконка поиска/очистки -->
                                 {% if request.args.get('search') and funck == 'edit_formobuch' %}
-
-                                    <!-- Если есть активный поиск - показываем крестик для очистки -->
                                     <a href="{{ url_for('load_table', funck='edit_formobuch') }}" class="clear-search" title="Очистить поиск">
                                         <i class="fas fa-times-circle"></i>
                                     </a>
                                 {% else %}
-
-                                    <!-- Если поиск не активен - показываем иконку лупы -->
                                     <i class="fas fa-search"></i>
                                 {% endif %}
                             </div>
-
                         </div>
-
                     </div>
-
-                    <!-- ==================== ОСНОВНАЯ ТАБЛИЦА ==================== -->
                     <div class="table-responsive">
                         <table class="all-table">
-
-                            <!-- Шапка таблицы -->
                             <thead>
                                 <tr>
                                     <th>Действия</th>
@@ -1026,23 +898,13 @@ function exportToPDF() {
                                     <th>Наименование формы обучения</th>
                                 </tr>
                             </thead>
-
-                            <!-- ТЕЛО ТАБЛИЦЫ: выводим данные из БД -->
                             <tbody>
-
-                                <!-- Цикл по всем записям -->
                                 {% for formobuch in table_info %}
                                 <tr>
-
-                                    <!-- ==================== КОЛОНКА ДЕЙСТВИЙ ==================== -->
                                     <td class="actions-cell">
-
-                                        <!-- Кнопка редактирования -->
                                         <a href="{{ url_for('edit_info', funck='edit_formobuch', id_form=formobuch.id_form) }}" class="icon-btn edit" title="Редактировать">
                                             <i class="fas fa-edit"></i>
                                         </a>
-
-                                    <!-- Форма удаления -->
                                     <a href="{{ url_for('delete_recording', id=formobuch.id_form, funck='edit_formobuch') }}" 
                                     class="icon-btn delete" 
                                     title="Удалить" 
@@ -1050,8 +912,6 @@ function exportToPDF() {
                                             <i class="fas fa-trash-alt"></i>
                                     </a>
                                     </td>
-
-                                    <!-- ==================== КОЛОНКА: ID ==================== -->
                                     <td>
                                         <div class="user-info">
                                             <div class="user-avatar">
@@ -1060,8 +920,6 @@ function exportToPDF() {
                                             <span>{{ formobuch.id_form }}</span>
                                         </div>
                                     </td>
-
-                                    <!-- ==================== ОСТАЛЬНЫЕ КОЛОНКИ ==================== -->
                                     <td>{{ formobuch.form_name or 'Не указана'}}</td>
                                 </tr>
                                 {% else %}
@@ -1072,70 +930,39 @@ function exportToPDF() {
                             </tbody>
                         </table>
                     </div>
-            {% endif %} <!-- Конец проверки -->
+            {% endif %} 
         </div>
-    {% endif %} <!-- Конец основного блока -->
+    {% endif %}
 
 
-<!-- ==================== СПЕЦИАЛЬНОСТИ ==================== -->
+<!-- СПЕЦИАЛЬНОСТИ -->
     {% if funck == 'edit_spec' %}
-        
         <div class="table-responsive">
-
             {% if funck == 'edit_spec' %}
-
-                    <!-- ==================== ЗАГОЛОВОК ТАБЛИЦЫ ==================== -->
                     <div class="table-header">
-
-                        <!-- Заголовок с иконкой базы данных -->
                         <h2><i class="fas fa-database"></i> Управление специальностями</h2>
-
-                        <!-- Блок с кнопками действий над таблицей -->
                         <div class="table-actions">
-
-                            <!-- Кнопка добавления -->
                             <a href="{{ url_for('add_info', funck='edit_spec') }}" class="action-btn add-btn">
                                 <i class="fas fa-plus"></i> Добавить специальность
                             </a>
-
-                            <!-- ==================== БЛОК ПОИСКА ==================== -->
                             <div class="search-box">
-
-                                <!-- Форма поиска: отправляет GET-запрос на тот же маршрут -->
                                 <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
-
-                                    <!-- Поле ввода поискового запроса -->
                                     <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
-                                    
-                                    <!-- Скрытое поле: передаем текущий режим работы (ведомости) -->
                                     <input type="hidden" name="funck" value="edit_spec">
-                                    
-                                    <!-- Скрытая кнопка отправки (поиск срабатывает при нажатии Enter) -->
                                     <button type="submit" style="display: none;">Найти</button>
                                 </form>
-
                                 {% if request.args.get('search') and funck == 'edit_spec' %}
-
-                                    <!-- Если есть активный поиск - показываем крестик для очистки -->
                                     <a href="{{ url_for('load_table', funck='edit_spec') }}" class="clear-search" title="Очистить поиск">
                                         <i class="fas fa-times-circle"></i>
                                     </a>
                                 {% else %}
-
-                                    <!-- Если поиск не активен - показываем иконку лупы -->
                                     <i class="fas fa-search"></i>
                                 {% endif %}
                             </div>
-
                         </div>
-
                     </div>
-
-                    <!-- ==================== ОСНОВНАЯ ТАБЛИЦА ==================== -->
                     <div class="table-responsive">
                         <table class="all-table">
-
-                            <!-- Шапка таблицы -->
                             <thead>
                                 <tr>
                                     <th>Действия</th>
@@ -1144,23 +971,13 @@ function exportToPDF() {
                                     <th>Наименование отделения</th>
                                 </tr>
                             </thead>
-
-                            <!-- ТЕЛО ТАБЛИЦЫ: выводим данные из БД -->
                             <tbody>
-
-                                <!-- Цикл по всем записям -->
                                 {% for spec in table_info %}
                                     <tr>
-
-                                        <!-- ==================== КОЛОНКА ДЕЙСТВИЙ ==================== -->
                                         <td class="actions-cell">
-
-                                            <!-- Кнопка редактирования -->
                                             <a href="{{ url_for('edit_info', funck='edit_spec', id_specialty=spec.id_specialty) }}" class="icon-btn edit" title="Редактировать">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-
-                                            <!-- Форма удаления -->
                                             <a href="{{ url_for('delete_recording', id=spec.id_specialty, funck='edit_spec') }}" 
                                             class="icon-btn delete" 
                                             title="Удалить" 
@@ -1168,8 +985,6 @@ function exportToPDF() {
                                                     <i class="fas fa-trash-alt"></i>
                                             </a>
                                         </td>
-
-                                        <!-- ==================== КОЛОНКА: ID ==================== -->
                                         <td>
                                             <div class="user-info">
                                                 <div class="user-avatar">
@@ -1178,8 +993,6 @@ function exportToPDF() {
                                                 <span>{{ spec.id_specialty }}</span>
                                             </div>
                                         </td>
-
-                                        <!-- ==================== ОСТАЛЬНЫЕ КОЛОНКИ ==================== -->
                                         <td>{{ spec.specialty_name }}</td>
                                         <td>{{ spec.department_name }}</td>
                                     </tr>
@@ -1189,20 +1002,90 @@ function exportToPDF() {
                                 </tr>
                                 {% endfor %}
                             </tbody>
-
                         </table>
-
                     </div>
+                {% endif %} 
+            </div>
+        {% endif %}
 
-            {% endif %} 
-        
-        </div>
-    
-    {% endif %}
 
+<!-- ВЕДОМОСТИ -->
+        {% if funck == 'edit_statement' %}
+            <div class="table-responsive">
+                {% if funck == 'edit_statement' %}
+                        <div class="table-header">
+                            <h2><i class="fas fa-database"></i> Управление ведомостями</h2>
+                            <div class="table-actions">
+                                <a href="{{ url_for('add_info', funck='edit_statement') }}" class="action-btn add-btn"></a>
+                                    <i class="fas fa-plus"></i> Редактировать ведомость
+                                </a>
+                                <div class="search-box">
+                                    <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                                        <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                                        <input type="hidden" name="funck" value="edit_statements">
+                                        <button type="submit" style="display: none;">Найти</button>
+                                    </form>
+                                    {% if request.args.get('search') and funck == 'edit_statements' %}
+                                    <a href="{{ url_for('load_table', funck='edit_statements') }}" class="clear-search" title="Очистить поиск"></a>
+                                            <i class="fas fa-times-circle"></i>
+                                        </a>
+                                    {% else %}
+                                        <i class="fas fa-search"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="all-table">
+                                <thead>
+                                    <tr>
+                                        <th>Действия</th>
+                                        <th>Код ведомости</th>
+                                        <th>Наименование дисциплины</th>
+                                        <th>Номер группы</th>
+                                        <th>Семестр</th>
+                                        <th>Статус</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for statement in table_info %}
+                                    <tr>
+                                        <td class="actions-cell">
+                                            <a href="{{ url_for('edit_info', funck='edit_statements', id_student=statement.id_statement) }}" class="icon-btn edit" title="Редактировать"></a>
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('delete_recording', id=statement.id_statement, funck='edit_statements') }}" 
+                                            class="icon-btn delete" 
+                                            title="Удалить" 
+                                            onclick="return confirm('Вы уверены, что хотите удалить ведомость {{ statement.id_statement }}?');">
+                                                    <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                <div class="user-avatar">
+                                                    <i class="fas fa-users"></i> 
+                                                </div>
+                                                <span>{{statement.id_statement}}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ statement.full_name }}</td>
+                                        <td>{{ statement.id_group }}</td>
+                                        <td>{{ statement.full_name }}</td>
+                                        <td>{{ statement.id_group }}</td>                                    
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="11" style="text-align: center;">Нет данных для отображения</td>  
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                {% endif %}
+            </div>
+        {% endif %} 
     </div>
-    
     {% endif %}
-
 </div>
 {% endblock %}

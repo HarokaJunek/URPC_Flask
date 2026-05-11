@@ -880,68 +880,40 @@
 
 
 
-    <!-- ==================== ЗАВЕДУЮЩИЙ ==================== -->
-
+    <!-- ЗАВЕДУЮЩИЙ -->
     {% if session.is_zav %}
-     
     <div class="blocks">
-            <!-- Приветственное сообщение с именем пользователя из сессии -->
-            <h2>👋 Добро пожаловать, {{ session.full_name }}! Заведующий отделением</h2>
-
-            <!-- ==================== СЕТКА БАННЕРОВ ==================== -->
+            <h2>👋 Добро пожаловать, {{ session.full_name }}!</h2>
             <div class="banner-grid">
-
-
-                <!-- ==================== СТУДЕНТЫ ==================== -->
-
+                <!-- СТУДЕНТЫ -->
                 <a href="{{ url_for('load_table', funck='edit_students') }}" class="banner-card">
-                    <!-- БЛОК ИКОНКИ: визуальное оформление карточки -->
                     <div class="banner-icon">
                         <i class="fas fa-users"></i>
                     </div>
-
-                    <!-- БЛОК КОНТЕНТА: текстовое содержимое карточки -->
                     <div class="banner-content">
-                        <!-- Заголовок карточки: название раздела -->
                         <h3>Студенты</h3>
-
-                        <!-- Описание: краткое пояснение функционала раздела -->
                         <p>Редактирование студентов в системе</p>
-
-                        <!-- Ссылка-подпись -->
                         <span class="banner-link">
                             Перейти
                             <i class="fas fa-arrow-right"></i>
                         </span>
                     </div>
                 </a> 
-                
-
-                <!-- ==================== ТИП ВЕДОМОСТИ ==================== -->
-
+                <!-- ТИП ВЕДОМОСТИ -->
                 <a href="{{ url_for('load_table', funck='edit_typesved') }}" class="banner-card">
-                    <!-- БЛОК ИКОНКИ: визуальное оформление карточки -->
                     <div class="banner-icon">
                         <i class="fas fa-users"></i>
                     </div>
-
-                    <!-- БЛОК КОНТЕНТА: текстовое содержимое карточки -->
                     <div class="banner-content">
-                        <!-- Заголовок карточки: название раздела -->
                         <h3>Типы ведомости</h3>
-
-                        <!-- Описание: краткое пояснение функционала раздела -->
                         <p>Редактирование типов ведомост в системе</p>
-
-                        <!-- Ссылка-подпись -->
                         <span class="banner-link">
                             Перейти
                             <i class="fas fa-arrow-right"></i>
                         </span>
                     </div>
                 </a> 
-
-                <!-- ==================== ГРУППЫ ==================== -->
+                <!-- ГРУППЫ -->
                 <a href="{{ url_for('load_table', funck='edit_groups') }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
@@ -952,50 +924,64 @@
                         <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
                 </a> 
-
-
-
             </div>
-
             <div class="banner-grid">
-        
-                <!-- ==================== ФОРМА ОБУЧЕНИЯ ==================== -->
+                <!-- ФОРМА ОБУЧЕНИЯ -->
                 <a href="{{ url_for('load_table', funck='edit_formobuch') }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
-
                     <div class="banner-content">
                         <h3>Формы обучения</h3>
                         <p>Редактирование форм обучения в системе</p>
                         <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
-
                 </a>
-
-                <!-- ==================== СПЕЦИАЛЬНОСТИ ==================== -->
+                <!-- СПЕЦИАЛЬНОСТИ -->
                 <a href="{{ url_for('load_table', funck='edit_spec') }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
-
                     <div class="banner-content">
                         <h3>Специальности</h3>
                         <p>Редактирование специальностей в системе</p>
                         <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
-
                 </a>
-
             </div>
-
+            <div class="banner-grid">
+                <!-- ВЕДОМОСТЬ -->
+                <a href="{{ url_for('load_table', funck='edit_statement') }}" class="banner-card">
+                    <div class="banner-icon">
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                    </div>
+                    <div class="banner-content">
+                        <h3>Ведомости</h3>
+                        <p>Редактирование ведомостей в системе</p>
+                        <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+            </div>
         </div>
     {% endif %}
 
-<!-- ==================== ПРЕПОДАВАТЕЛЬ ==================== -->
+    <!-- ПРЕПОДАВАТЕЛЬ -->
     {% if session.is_prepod %}
         <div class="blocks">
         <h2>👋 Добро пожаловать, {{ session.full_name }}! Преподаватель</h2>
+            <div class="banner-grid">
+                <!-- ВЕДОМОСТЬ -->
+                <a href="{{ url_for('load_table', funck='edit_statement') }}" class="banner-card">
+                    <div class="banner-icon">
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                    </div>
+                    <div class="banner-content">
+                        <h3>Ведомости</h3>
+                        <p>Редактирование ведомостей в системе</p>
+                        <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+            </div>
         </div>
     {% endif %}
 
