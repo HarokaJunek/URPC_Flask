@@ -618,5 +618,477 @@
 </script>
 {% endif %}
 
+
+<!-- СТУДЕНТЫ -->
+
+{% if funck == 'edit_students' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-edit"></i> Редактирование студента</h2>
+            <div class="header-actions">
+                <span class="record-id">ID: {{ student.id_student }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_students', id_student=student.id_student) }}" class="edit-form">
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-book"></i> Информация о студенте
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="full_name" class="required">
+                            <i class="fas fa-graduation-cap"></i> ФИО студента
+                        </label>
+                        <input type="text" id="full_name" name="full_name"
+                               value="{{ form_data.get('full_name', student.full_name) if form_data else student.full_name }}"
+                               placeholder="Например: Иванов Иван Иванович" required>
+                        <div class="form-hint">Буквы (русские/латинские), пробелы, дефисы (макс. 50 символов)</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_group" class="required">
+                            <i class="fas fa-layer-group"></i> Группа
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="id_group" name="id_group" required>
+                                <option value="" disabled>Выберите группу</option>
+                                {% for group_item in groups %}
+                                    <option value="{{ group_item.id_group }}"
+                                        {% if form_data %}
+                                            {% if form_data.get('id_group') == group_item.id_group %}selected{% endif %}
+                                        {% else %}
+                                            {% if student.id_group == group_item.id_group %}selected{% endif %}
+                                        {% endif %}>
+                                        {{ group_item.id_group }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                        <div class="form-hint">Выберите группу, к которой относится студент</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fullNameInput = document.getElementById('full_name');
+        
+        if (fullNameInput) {
+            fullNameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                // Разрешаем буквы, пробелы, дефисы, точки
+                let cleaned = value.replace(/[^а-яА-Яa-zA-Z\s\-\.]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                if (cleaned.length > 50) {
+                    e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<!-- ВИДЫ ВЕДОМОСТИ -->
+
+{% if funck == 'edit_typesved' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-edit"></i> Редактирование вида ведомости</h2>
+            <div class="header-actions">
+                <span class="record-id">ID: {{ typeved.id_type }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_typesved', id_type=typeved.id_type) }}" class="edit-form">
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-book"></i> Информация о типе ведомости
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="type_name" class="required">
+                            <i class="fas fa-graduation-cap"></i> Название вида ведомости
+                        </label>
+                        <input type="text" id="type_name" name="type_name"
+                               value="{{ form_data.get('type_name', typeved.type_name) if form_data else typeved.type_name }}"
+                               placeholder="Например: Экзамен" required>
+                        <div class="form-hint">Буквы (русские/латинские), пробелы, дефисы (макс. 50 символов)</div>
+                    </div>
+                </div>
+
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeNameInput = document.getElementById('type_name');
+        
+        if (typeNameInput) {
+            typeNameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                // Разрешаем буквы, пробелы, дефисы, точки
+                let cleaned = value.replace(/[^а-яА-Яa-zA-Z\s\-\.]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                if (cleaned.length > 50) {
+                    e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<!-- ГРУППЫ -->
+    {% if funck == 'edit_groups' %}
+    <div class="blocks">
+        <div class="edit-form-container">
+            <div class="form-header">
+                <h2><i class="fas fa-edit"></i> Редактирование группы</h2>
+                <div class="header-actions">
+                    <span class="record-id">ID: {{ group.id_group }}</span>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('edit_info', funck='edit_groups') }}" class="edit-form">
+                <!-- Скрытое поле для старого ID -->
+                <input type="hidden" name="id_group_old" value="{{ group.id_group }}">
+                
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-book"></i> Информация о группе
+                    </h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_group" class="required">
+                                <i class="fas fa-graduation-cap"></i> Код группы
+                            </label>
+                            <input type="text" id="id_group" name="id_group"
+                                value="{{ form_data.get('id_group', group.id_group) if form_data else group.id_group }}"
+                                placeholder="Например: 21/МТ-201" required>
+                            <div class="form-hint">Буквы, цифры, пробелы, дефисы, точки, слэш (макс. 50 символов)</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="course_number" class="required">
+                                <i class="fas fa-graduation-cap"></i> Номер курса
+                            </label>
+                            <input type="number" id="course_number" name="course_number"
+                                value="{{ form_data.get('course_number', group.course_number) if form_data else group.course_number }}"
+                                min="1" max="5" required>
+                            <div class="form-hint">Номер курса от 1 до 5</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_study_form" class="required">
+                                <i class="fas fa-layer-group"></i> Форма обучения
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="id_study_form" name="id_study_form" required>
+                                    <option value="" disabled>Выберите форму обучения</option>
+                                    {% for studyform in studyform_list %}
+                                        <option value="{{ studyform.id_form }}"
+                                            {% if form_data %}
+                                                {% if form_data.get('id_study_form')|int == studyform.id_form %}selected{% endif %}
+                                            {% else %}
+                                                {% if group.id_study_form == studyform.id_form %}selected{% endif %}
+                                            {% endif %}>
+                                            {{ studyform.form_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                            <div class="form-hint">Выберите форму обучения</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_classteach" class="required">
+                                <i class="fas fa-layer-group"></i> Классный руководитель
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="id_classteach" name="id_classteach" required>
+                                    <option value="" disabled>Выберите классного руководителя</option>
+                                    {% for classteach in classteach_list %}
+                                        <option value="{{ classteach.id_user }}"
+                                            {% if form_data %}
+                                                {% if form_data.get('id_classteach')|int == classteach.id_user %}selected{% endif %}
+                                            {% else %}
+                                                {% if group.id_class_teacher == classteach.id_user %}selected{% endif %}
+                                            {% endif %}>
+                                            {{ classteach.full_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                            <div class="form-hint">Выберите классного руководителя</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_spec" class="required">
+                                <i class="fas fa-layer-group"></i> Специальность
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="id_spec" name="id_spec" required>
+                                    <option value="" disabled>Выберите специальность</option>
+                                    {% for spec in spec_list %}
+                                        <option value="{{ spec.id_specialty }}"
+                                            {% if form_data %}
+                                                {% if form_data.get('id_spec') == spec.id_specialty %}selected{% endif %}
+                                            {% else %}
+                                                {% if group.id_specialty == spec.id_specialty %}selected{% endif %}
+                                            {% endif %}>
+                                            {{ spec.specialty_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                            <div class="form-hint">Выберите специальность</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Сохранить изменения
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const groupNameInput = document.getElementById('id_group');
+            
+            if (groupNameInput) {
+                groupNameInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    let cleaned = value.replace(/[^а-яА-Яa-zA-Z0-9\s\-\.\/]/g, '');
+                    if (cleaned !== value) {
+                        e.target.value = cleaned;
+                    }
+                    if (cleaned.length > 50) {
+                        e.target.value = cleaned.substring(0, 50);
+                    }
+                });
+            }
+        });
+    </script>
+    {% endif %}
+
+<!-- ФОРМА ОБУЧЕНИЯ -->
+{% if funck == 'edit_formobuch' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-edit"></i> Редактирование формы обучения</h2>
+            <div class="header-actions">
+                <span class="record-id">ID: {{ formobuch.id_form }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_formobuch') }}" class="edit-form">
+            <input type="hidden" name="id_form" value="{{ formobuch.id_form }}">
+            
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-book"></i> Информация о форме обучения
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="form_name" class="required">
+                            <i class="fas fa-graduation-cap"></i> Название формы обучения
+                        </label>
+                        <input type="text" id="form_name" name="form_name"
+                               value="{{ form_data.get('form_name', formobuch.form_name) if form_data else formobuch.form_name }}"
+                               placeholder="Например: Очная" required>
+                        <div class="form-hint">Буквы, пробелы (макс. 50 символов)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formNameInput = document.getElementById('form_name');
+        
+        if (formNameInput) {
+            formNameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                let cleaned = value.replace(/[^а-яА-Яa-zA-Z\s\-\.]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                if (cleaned.length > 50) {
+                    e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<!-- СПЕЦИАЛЬНОСТЬ  -->
+
+{% if funck == 'edit_spec' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-edit"></i> Редактирование специальности</h2>
+            <div class="header-actions">
+                <span class="record-id">ID: {{ spec.id_specialty }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_spec', id_specialty=spec.id_specialty) }}" class="edit-form">
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-book"></i> Информация о специальности
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_specialty" class="required">
+                            <i class="fas fa-graduation-cap"></i> Код специальности
+                        </label>
+                        <input type="text" id="id_specialty" name="id_specialty"
+                               value="{{ spec.id_specialty }}"
+                               placeholder="Например: 09.02.07" required>
+                        <div class="form-hint">Только цифры и точки (макс. 50 символов)</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="specialty_name" class="required">
+                            <i class="fas fa-graduation-cap"></i> Название специальности
+                        </label>
+                        <input type="text" id="specialty_name" name="specialty_name"
+                               value="{{ spec.specialty_name }}"
+                               placeholder="Например: Экономика и бухгалтерский учет" required>
+                        <div class="form-hint">Буквы, пробелы, дефисы и точки (макс. 100 символов)</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_department" class="required">
+                            <i class="fas fa-layer-group"></i> Отделение
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="id_department" name="id_department" required>
+                                <option value="" disabled>Выберите отделение</option>
+                                {% for department_item in departments %}
+                                    <option value="{{ department_item.id_department }}"
+                                        {% if spec.id_department == department_item.id_department %}selected{% endif %}>
+                                        {{ department_item.department_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                        <div class="form-hint">Выберите отделение, к которому относится специальность</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const idSpecialtyInput = document.getElementById('id_specialty');
+        const specialtyNameInput = document.getElementById('specialty_name');
+        
+        // Валидация кода специальности
+        if (idSpecialtyInput) {
+            idSpecialtyInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                let cleaned = value.replace(/[^\d\.]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                if (cleaned.length > 50) {
+                    e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        }
+        
+        // Валидация названия специальности
+        if (specialtyNameInput) {
+            specialtyNameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                let cleaned = value.replace(/[^а-яА-Яa-zA-Z\s\-\.]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+                if (cleaned.length > 100) {
+                    e.target.value = cleaned.substring(0, 100);
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
 {% endif %}
 {% endblock %}

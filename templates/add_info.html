@@ -639,7 +639,7 @@
         <form method="POST" action="{{ url_for('add_info', funck='edit_groups') }}" class="edit-form">
             <div class="form-group">
                 <label for="group_name" class="required">
-                    <i class="fas fa-chalkboard-teacher"></i> Название группы
+                    <i class="fas fa-chalkboard-teacher"></i> Код группы
                 </label>
                 <input type="text" id="group_name" name="group_name"
                        placeholder="Например: 21/МТ-201"
@@ -647,8 +647,8 @@
                 <div class="form-hint">Буквы (русские/латинские), цифры, пробелы, дефисы, точки, слэш (макс. 50 символов)</div>
             </div>
 
-            <!-- выпадающий список форма обучения -->
-            <div class="studyform-group">
+            <!-- выпадающий список -->
+            <div class="form-group">
                 <label for="id_study_form" class="required">
                     <i class="fas fa-chalkboard-teacher"></i> Форма обучения
                 </label>
@@ -671,8 +671,8 @@
                 <div class="form-hint">Выберите форму обучения, к которой относится группа</div>
             </div>
 
-            <!-- выпадающий список классный руководитель -->               
-            <div class="classteach-group">
+            <!-- выпадающий список -->               
+            <div class="form-group">
                 <label for="id_classteach" class="required">
                     <i class="fas fa-chalkboard-teacher"></i> Классный руководитель
                 </label>
@@ -695,8 +695,8 @@
                 <div class="form-hint">Выберите классного руководителя группы</div>
             </div>
             
-            <!-- выпадающий список специальность -->
-            <div class="spec-group">
+            <!-- выпадающий список -->
+            <div class="form-group">
                 <label for="id_spec" class="required">
                     <i class="fas fa-chalkboard-teacher"></i> Специальность
                 </label>

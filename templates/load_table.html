@@ -718,13 +718,9 @@ function exportToPDF() {
                                 <td class="actions-cell">
 
                                     <!-- Кнопка редактирования -->
-                                    <form method="post" 
-                                    style="display:inline;" 
-                                    onsubmit="return confirm('Вы уверены, что хотите отредактировать ведомость {{ student.id_student }}?');">
-                                        <button type="submit" class="icon-btn edit" title="Редактировать">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </form>
+                                    <a href="{{ url_for('edit_info', funck='edit_students', id_student=student.id_student) }}" class="icon-btn edit" title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
 
                                     <!-- Форма удаления -->
                                     <a href="{{ url_for('delete_recording', id=student.id_student, funck='edit_students') }}" 
@@ -842,13 +838,9 @@ function exportToPDF() {
                                 <td class="actions-cell">
 
                                     <!-- Кнопка редактирования -->
-                                    <form method="post" 
-                                    style="display:inline;" 
-                                    onsubmit="return confirm('Вы уверены, что хотите отредактировать тип ведомости {{ typesved.id_type }}?');">
-                                        <button type="submit" class="icon-btn edit" title="Редактировать">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </form>
+                                    <a href="{{ url_for('edit_info', funck='edit_typesved', id_type=typesved.id_type) }}" class="icon-btn edit" title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
 
                                     <!-- Форма удаления -->
                                     <a href="{{ url_for('delete_recording', id=typesved.id_type, funck='edit_typesved') }}" 
@@ -929,11 +921,11 @@ function exportToPDF() {
                         <tr>
                             <td class="actions-cell">
                                 <!-- Кнопка редактирования -->
-                                <form method="post" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите отредактировать группу {{ group.id_group }}?');">
-                                    <button type="submit" class="icon-btn edit" title="Редактировать">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </form>
+                                <a href="{{ url_for('edit_info', funck='edit_groups', id_group=group.id_group) }}" 
+                                class="icon-btn edit" title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
                                <!-- Форма удаления -->
                                 <a href="{{ url_for('delete_recording', id=group.id_group, funck='edit_groups') }}" 
                                 class="icon-btn delete" 
@@ -1046,13 +1038,9 @@ function exportToPDF() {
                                     <td class="actions-cell">
 
                                         <!-- Кнопка редактирования -->
-                                        <form method="post" 
-                                        style="display:inline;" 
-                                        onsubmit="return confirm('Вы уверены, что хотите отредактировать тип ведомости {{ formobuch.id_form }}?');">
-                                            <button type="submit" class="icon-btn edit" title="Редактировать">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                        </form>
+                                        <a href="{{ url_for('edit_info', funck='edit_formobuch', id_form=formobuch.id_form) }}" class="icon-btn edit" title="Редактировать">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
 
                                     <!-- Форма удаления -->
                                     <a href="{{ url_for('delete_recording', id=formobuch.id_form, funck='edit_formobuch') }}" 
@@ -1126,7 +1114,6 @@ function exportToPDF() {
                                     <button type="submit" style="display: none;">Найти</button>
                                 </form>
 
-                                <!-- Иконка поиска/очистки -->
                                 {% if request.args.get('search') and funck == 'edit_spec' %}
 
                                     <!-- Если есть активный поиск - показываем крестик для очистки -->
@@ -1154,6 +1141,7 @@ function exportToPDF() {
                                     <th>Действия</th>
                                     <th>Код специальности</th>
                                     <th>Наименование специальности</th>
+                                    <th>Наименование отделения</th>
                                 </tr>
                             </thead>
 
@@ -1168,13 +1156,9 @@ function exportToPDF() {
                                         <td class="actions-cell">
 
                                             <!-- Кнопка редактирования -->
-                                            <form method="post" 
-                                            style="display:inline;" 
-                                            onsubmit="return confirm('Вы уверены, что хотите отредактировать специальность {{ spec.id_specialty }}?');">
-                                                <button type="submit" class="icon-btn edit" title="Редактировать">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                            </form>
+                                            <a href="{{ url_for('edit_info', funck='edit_spec', id_specialty=spec.id_specialty) }}" class="icon-btn edit" title="Редактировать">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
 
                                             <!-- Форма удаления -->
                                             <a href="{{ url_for('delete_recording', id=spec.id_specialty, funck='edit_spec') }}" 
@@ -1210,11 +1194,11 @@ function exportToPDF() {
 
                     </div>
 
-            {% endif %} <!-- Конец проверки -->
+            {% endif %} 
         
         </div>
     
-    {% endif %} <!-- Конец основного блока -->
+    {% endif %}
 
     </div>
     
