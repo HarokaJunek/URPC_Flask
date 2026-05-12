@@ -1010,81 +1010,77 @@ function exportToPDF() {
 
 
 <!-- ВЕДОМОСТИ -->
-        {% if funck == 'edit_statement' %}
-            <div class="table-responsive">
-                {% if funck == 'edit_statement' %}
-                        <div class="table-header">
-                            <h2><i class="fas fa-database"></i> Управление ведомостями</h2>
-                            <div class="table-actions">
-                                <a href="{{ url_for('add_info', funck='edit_statement') }}" class="action-btn add-btn"></a>
-                                    <i class="fas fa-plus"></i> Редактировать ведомость
-                                </a>
-                                <div class="search-box">
-                                    <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
-                                        <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
-                                        <input type="hidden" name="funck" value="edit_statements">
-                                        <button type="submit" style="display: none;">Найти</button>
-                                    </form>
-                                    {% if request.args.get('search') and funck == 'edit_statements' %}
-                                    <a href="{{ url_for('load_table', funck='edit_statements') }}" class="clear-search" title="Очистить поиск"></a>
-                                            <i class="fas fa-times-circle"></i>
-                                        </a>
-                                    {% else %}
-                                        <i class="fas fa-search"></i>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="all-table">
-                                <thead>
-                                    <tr>
-                                        <th>Действия</th>
-                                        <th>Код ведомости</th>
-                                        <th>Наименование дисциплины</th>
-                                        <th>Номер группы</th>
-                                        <th>Семестр</th>
-                                        <th>Статус</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for statement in table_info %}
-                                    <tr>
-                                        <td class="actions-cell">
-                                            <a href="{{ url_for('edit_info', funck='edit_statements', id_student=statement.id_statement) }}" class="icon-btn edit" title="Редактировать"></a>
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="{{ url_for('delete_recording', id=statement.id_statement, funck='edit_statements') }}" 
-                                            class="icon-btn delete" 
-                                            title="Удалить" 
-                                            onclick="return confirm('Вы уверены, что хотите удалить ведомость {{ statement.id_statement }}?');">
-                                                    <i class="fas fa-trash-alt"></i>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <div class="user-info">
-                                                <div class="user-avatar">
-                                                    <i class="fas fa-users"></i> 
-                                                </div>
-                                                <span>{{statement.id_statement}}</span>
-                                            </div>
-                                        </td>
-                                        <td>{{ statement.full_name }}</td>
-                                        <td>{{ statement.id_group }}</td>
-                                        <td>{{ statement.full_name }}</td>
-                                        <td>{{ statement.id_group }}</td>                                    
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="11" style="text-align: center;">Нет данных для отображения</td>  
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+{% if funck == 'edit_statement' %}
+<div class="table-responsive">
+    <div class="table-header">
+        <h2><i class="fas fa-database"></i> Управление ведомостями</h2>
+        <div class="table-actions">
+            <a href="{{ url_for('add_info', funck='edit_statement') }}" class="action-btn add-btn">
+                <i class="fas fa-plus"></i> Редактировать ведомость
+            </a>
+            <div class="search-box">
+                <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                    <input type="hidden" name="funck" value="edit_statement">
+                    <button type="submit" style="display: none;">Найти</button>
+                </form>
+                {% if request.args.get('search') and funck == 'edit_statement' %}
+                <a href="{{ url_for('load_table', funck='edit_statement') }}" class="clear-search" title="Очистить поиск">
+                    <i class="fas fa-times-circle"></i>
+                </a>
+                {% else %}
+                    <i class="fas fa-search"></i>
                 {% endif %}
             </div>
-        {% endif %} 
+        </div>
+    </div>
+    <table class="all-table">
+        <thead>
+            <tr>
+                <th>Действия</th>
+                <th>Код ведомости</th>
+                <th>Наименование дисциплины</th>
+                <th>Номер группы</th>
+                <th>Семестр</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for statement in table_info %}
+            <tr>
+                <td class="actions-cell">
+                    <a href="{{ url_for('edit_info', funck='edit_statement', id_student=statement.id_statement) }}" class="icon-btn edit" title="Редактировать">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{{ url_for('delete_recording', id=statement.id_statement, funck='edit_statement') }}" 
+                       class="icon-btn delete" 
+                       title="Удалить" 
+                       onclick="return confirm('Вы уверены, что хотите удалить ведомость {{ statement.id_statement }}?');">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </td>
+                <td>
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-users"></i> 
+                        </div>
+                        <span>{{ statement.id_statement }}</span>
+                    </div>
+                </td>
+                <td>{{ statement.discipline_name }}</td>
+                <td>{{ statement.id_group }}</td>
+                <td>{{ statement.semester }}</td>
+                <td>{{ statement.status }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center;">Нет данных для отображения</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %} 
     </div>
     {% endif %}
 </div>
