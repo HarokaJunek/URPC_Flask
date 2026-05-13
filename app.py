@@ -774,24 +774,24 @@ def load_table():
                 conn = get_db_connection()
                 query = '''
                     SELECT 
-                        statements.id_statement,
-                        disciplines.discipline_name,
-                        groups.id_group,
-                        statements.semester,
+                        users.full_name,
+                        disciplines.discipline_name, 
+                        workload.id_group, 
+                        statements.semester, 
                         statements.status
-                    FROM statements 
-                    INNER JOIN disciplines ON statements.id_discipline = disciplines.id_discipline
-                    INNER JOIN workload ON statements.id_discipline = workload.id_discipline
-                    INNER JOIN groups ON workload.id_group = groups.id_group
+                    FROM statements
+                    INNER JOIN workload ON statements.id_discipline = workload.id_load
+                    INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+                    INNER JOIN users ON workload.id_teacher = users.id_user
                     '''
                 params = []
                 if search_query:
                     query += ''' WHERE (
-                        statements.id_statement LIKE ? OR
+                        users.full_name LIKE ? OR
                         disciplines.discipline_name LIKE ? OR
-                        groups.id_group LIKE ? OR
-                        statements.semester LIKE ? OR
-                        statements.status LIKE ?
+                        workload.id_group LIKE ? OR
+                        statements.semester LIKE ? OR 
+                        statements.status LIKE ? 
                         )'''
                     like_pattern = f'%{search_query}%'
                     params.extend([like_pattern, like_pattern, like_pattern, like_pattern, like_pattern])

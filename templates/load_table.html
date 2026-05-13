@@ -1015,9 +1015,6 @@ function exportToPDF() {
     <div class="table-header">
         <h2><i class="fas fa-database"></i> Управление ведомостями</h2>
         <div class="table-actions">
-            <a href="{{ url_for('add_info', funck='edit_statement') }}" class="action-btn add-btn">
-                <i class="fas fa-plus"></i> Редактировать ведомость
-            </a>
             <div class="search-box">
                 <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
                     <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
@@ -1038,9 +1035,9 @@ function exportToPDF() {
         <thead>
             <tr>
                 <th>Действия</th>
-                <th>Код ведомости</th>
-                <th>Наименование дисциплины</th>
-                <th>Номер группы</th>
+                <th>ФИО преподавателя</th>
+                <th>Дисциплина</th>
+                <th>Группа</th>
                 <th>Семестр</th>
                 <th>Статус</th>
             </tr>
@@ -1059,18 +1056,17 @@ function exportToPDF() {
                         <i class="fas fa-trash-alt"></i>
                     </a>
                 </td>
-                <td>
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <i class="fas fa-users"></i> 
-                        </div>
-                        <span>{{ statement.id_statement }}</span>
-                    </div>
-                </td>
+                <td>{{ statement.full_name }}</td>
                 <td>{{ statement.discipline_name }}</td>
                 <td>{{ statement.id_group }}</td>
                 <td>{{ statement.semester }}</td>
-                <td>{{ statement.status }}</td>
+                <td>
+                    {% if statement.status == 1 %}
+                        Сдано
+                    {% else %}
+                        Не сдана
+                    {% endif %}
+                </td>
             </tr>
             {% else %}
             <tr>
