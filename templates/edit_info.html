@@ -1174,7 +1174,6 @@
 {% endif %}
 
 <!-- ВЕДОМОСТИ (препод)-->
-
 {% if funck == 'edit_statement' %}
 <div class="blocks">
     <div class="edit-form-container">
@@ -1185,12 +1184,13 @@
         </div>
 
         <form method="POST" action="{{ url_for('edit_info', funck='edit_statement', id_statement=statement.id_statement) }}" class="edit-form">
-            <!-- Основная информация -->
-            <div class="form-section">
+            
+            <!-- СЕКЦИЯ 1: Основные параметры ведомости -->
+            <div class="mb-4">
                 <h3 class="section-title">
-                    <i class="fas fa-book"></i> Информация о ведомости
+                    <i class="fas fa-info-circle"></i> Основные параметры ведомости
                 </h3>
-
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="specialty_name" class="required">
@@ -1254,6 +1254,14 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- СЕКЦИЯ 2: Список студентов и успеваемость -->
+            <div class="mb-4">
+                <h3 class="section-title">
+                    <i class="fas fa-users"></i> Список студентов и успеваемость
+                </h3>
+
                 <table class="all-table">
                     <thead>
                         <tr>
@@ -1263,18 +1271,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for student in table_info %}
+                        {% for student in students %}
                         <tr>
-                            <td>{{ students.full_name }}</td>
-                            <td>{{ students.id_student }}</td>
+                            <td>{{ student.full_name }}</td>
+                            <td>{{ student.id_student }}</td>
                             <td>
                                 <select name="grade_{{ student.id_student }}" class="form-control form-control-sm">
                                     <option value="">--</option>
-                                    <option value="5" {% if student.grade == '5' %}selected{% endif %}>5 (отл.)</option>
-                                    <option value="4" {% if student.grade == '4' %}selected{% endif %}>4 (хор.)</option>
-                                    <option value="3" {% if student.grade == '3' %}selected{% endif %}>3 (удовл.)</option>
-                                    <option value="2" {% if student.grade == '2' %}selected{% endif %}>2 (неудовл.)</option>
-                                    <option value="0" {% if student.grade == '0' %}selected{% endif %}>Н/Я</option>
+                                    <option value="5" {% if student.grade == 5 %}selected{% endif %}>5 (отл.)</option>
+                                    <option value="4" {% if student.grade == 4 %}selected{% endif %}>4 (хор.)</option>
+                                    <option value="3" {% if student.grade == 3 %}selected{% endif %}>3 (удовл.)</option>
+                                    <option value="2" {% if student.grade == 2 %}selected{% endif %}>2 (неудовл.)</option>
+                                    <option value="0" {% if student.grade == 0 %}selected{% endif %}>Н/Я</option>
                                 </select>
                             </td>
                         </tr>
@@ -1285,7 +1293,15 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <div class="card mb-3">
+            </div>
+
+            <!-- СЕКЦИЯ 3: Сводная статистика -->
+            <div class="mb-4">
+                <h3 class="section-title">
+                    <i class="fas fa-chart-bar"></i> Сводная статистика
+                </h3>
+
+                <div class="card">
                     <div class="card-body">
                         <div class="form-row">
                             <div class="form-group col-6">
@@ -1293,70 +1309,72 @@
                                     <i class="fas fa-user-times"></i> 
                                 </label>
                                 <input type="text" id="not_been" name="not_been"
-                                    value="{{ statement.not_been }}" readonly>
+                                    value="{{ not_been }}" readonly>
                             </div>
                             <div class="form-group col-6">
                                 <label for="grades_all">
-                                    <i class="fas fa-graduation-cap"></i> Получено оценок
+                                    Получено оценок
                                 </label>
                                 <input type="text" id="grades_all" name="grades_all"
-                                    value="{{ statement.grades_all }}" readonly>
+                                    value="{{ grades_all }}" readonly>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-6">
                                 <label for="not_been_excused">
-                                    <i class="fas fa-users"></i> По уважительной причине
+                                    По уважительной причине
                                 </label>
                                 <input type="text" 
-                                    name="{{ not_been_excused }}" 
+                                    name="not_been_excused" 
                                     value="{{ statement.not_been_excused }}" 
                                     class="form-control form-control-sm" 
                                     placeholder="Количество н\я по уважительной причине">
                             </div>
                             <div class="form-group col-6">
                                 <label for="grade_D">
-                                    <i class="fas fa-exclamation-triangle"></i> Неудовлетворительно
+                                    Неудовлетворительно
                                 </label>
                                 <input type="text" id="grade_D" name="grade_D"
-                                    value="{{ statement.grade_D }}" readonly>
+                                    value="{{ grade_D }}" readonly>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-6">
                                 <label for="not_been_unexcused">
-                                    <i class="fas fa-users"></i> По неуважительной причине
+                                    По неуважительной причине
                                 </label>
                                 <input type="text" 
-                                    name="{{ not_been_unexcused }}" 
+                                    name="not_been_unexcused" 
                                     value="{{ statement.not_been_unexcused }}" 
                                     class="form-control form-control-sm" 
                                     placeholder="Количество н\я по неуважительной причине">
                             </div>
                             <div class="form-group col-6">
                                 <label for="grade_C">
-                                    <i class="fas fa-check"></i> Удовлетворительно
+                                    Удовлетворительно
                                 </label>
                                 <input type="text" id="grade_C" name="grade_C"
-                                    value="{{ statement.grade_C }}" readonly>
+                                    value="{{ grade_C }}" readonly>
                             </div>
                         </div>
-                        <div class="form-row justify-content-end">
-                            <div class="form-group">
+                        <div class="form-row">
+                            <div class="form-group col-6"></div> 
+                            <div class="form-group col-6">
                                 <label for="grade_B">
-                                    <i class="fas fa-thumbs-up"></i> Хорошо
+                                    Хорошо
                                 </label>
                                 <input type="text" id="grade_B" name="grade_B"
-                                    value="{{ statement.grade_B }}" readonly>
+                                    value="{{ grade_B }}" readonly>
                             </div>
-                        </div>          
-                        <div class="form-row justify-content-end">
-                            <div class="form-group">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-6"></div> 
+                            <div class="form-group col-6">
                                 <label for="grade_A">
-                                    <i class="fas fa-star"></i> Отлично
+                                    Отлично
                                 </label>
                                 <input type="text" id="grade_A" name="grade_A"
-                                    value="{{ statement.grade_A }}" readonly>
+                                    value="{{ grade_A }}" readonly>
                             </div>
                         </div>
                     </div>

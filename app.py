@@ -3132,6 +3132,7 @@ def edit_info():
             if request.method == 'GET':
                 statement = conn.execute('''
                     SELECT 
+                        statements.id_statement,
                         specialties.specialty_name,
                         academic_year.year_name,
                         groups.course_number,
@@ -3150,13 +3151,38 @@ def edit_info():
                 ''', (id_statement,)).fetchone()
 
                 student = conn.execute('''
-                    SELECT 
-                        students.id_student
-                    FROM students
-                    LEFT JOIN grades ON students.id_student = grades.id_student 
-                    AND grades.id_statement = ?''', (id_statement,)).fetchall()
-            
+                        SELECT 
+                            students.full_name,
+                            students.id_student,
+                            grades.grade
+                        FROM students
+                        LEFT JOIN grades ON students.id_student = grades.id_student 
+                            AND grades.id_statement = ?
+                        WHERE students.id_group = ?''', (id_statement, statement['id_group'])).fetchall()
+                
+                # Иницилизация счетчиков
+                grade_A = 0
+                grade_B = 0
+                grade_C = 0
+                grade_D = 0
+                grades_all = 0
+                not_been = 0
+    
+                for stud in student:
+                    if stud['grade'] == 5:
+                        grade_A += 1
+                    elif stud['grade'] == 4:
+                        grade_B += 1
+                    elif stud['grade'] == 3:
+                        grade_C += 1
+                    elif stud['grade'] == 2:
+                        grade_D += 1
+                    elif stud['grade'] == 0:
+                        not_been += 1
+                grades_all = grade_A + grade_B + grade_C + grade_D
+
                 conn.close()
+
 
                 if not statement:
                     flash('Ведомость не найдена.', 'danger')
@@ -3165,7 +3191,13 @@ def edit_info():
                 return render_template('edit_info.html',
                                     funck=funck,
                                     statement=statement,
-                                    student=student,
+                                    students=student,
+                                    grade_A=grade_A,
+                                    grade_B=grade_B,
+                                    grade_C=grade_C,
+                                    grade_D=grade_D,
+                                    grades_all=grades_all,
+                                    not_been=not_been,
                                     session=session)
 
             # POST — сохраняем изменения
@@ -3185,12 +3217,12 @@ def edit_info():
                 elif not re.match(r'^[\d]+$', not_been_unexcused):
                     errors.append('Количество н/я по неуважительной причине может содержать только цифры и числа')
 
-                if not id_grade:
-                    errors.append('Выберите оценку')
+
 
                 if errors:
                     statement = conn.execute('''
                         SELECT 
+                            statements.id_statement,
                             specialties.specialty_name,
                             academic_year.year_name,
                             groups.course_number,
@@ -3211,11 +3243,13 @@ def edit_info():
                     student = conn.execute('''
                         SELECT 
                             students.full_name,
-                            students.id_student
+                            students.id_student,
+                            grades.grade
                         FROM students
                         LEFT JOIN grades ON students.id_student = grades.id_student 
-                        AND grades.id_statement = ?''', (id_statement,)).fetchall()
-
+                            AND grades.id_statement = ?
+                        WHERE students.id_group = ?''', (id_statement, statement['id_group'])).fetchall()
+                        
                 else:
                     student = conn.execute('''
                         SELECT students.id_student FROM students WHERE students.id_group = ?''', (statement['id_group'],)).fetchall()
