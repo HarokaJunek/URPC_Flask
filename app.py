@@ -774,6 +774,7 @@ def load_table():
                 conn = get_db_connection()
                 query = '''
                     SELECT 
+                        statements.id_statement, 
                         users.full_name,
                         disciplines.discipline_name, 
                         workload.id_group, 
@@ -3131,20 +3132,20 @@ def edit_info():
             if request.method == 'GET':
                 statement = conn.execute('''
                     SELECT 
-                        speciality.speciality_name,
+                        specialties.specialty_name,
                         academic_year.year_name,
                         groups.course_number,
                         workload.id_group,
                         statements.semester,
                         disciplines.discipline_name,
                         users.full_name
-                        statements.
                         FROM statements
-                        INNER JOIN workload ON statements.id_workload = workload.id_load
-                        INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
-                        INNER JOIN groups ON workload.id_group = groups.id_group 
-                        INNER JOIN users ON workload.id_teacher = users.id_user
-                        INNER JOIN specialities ON groups.specialty_id = specialities.id_specialty
+                        LEFT JOIN workload ON statements.id_discipline = workload.id_load
+                        LEFT JOIN academic_year ON workload.id_year = academic_year.id_year
+                        LEFT JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+                        LEFT JOIN groups ON workload.id_group = groups.id_group 
+                        LEFT JOIN users ON workload.id_teacher = users.id_user
+                        LEFT JOIN specialties ON groups.id_specialty = specialties.id_specialty
                         WHERE statements.id_statement = ?
                 ''', (id_statement,)).fetchone()
 
@@ -3154,6 +3155,7 @@ def edit_info():
                     FROM students
                     LEFT JOIN grades ON students.id_student = grades.id_student 
                     AND grades.id_statement = ?''', (id_statement,)).fetchall()
+            
                 conn.close()
 
                 if not statement:
@@ -3187,56 +3189,51 @@ def edit_info():
                     errors.append('Выберите оценку')
 
                 if errors:
-                    # Получаем данные для повторного отображения
-                    statement = {
-                        'id_specialty': id_specialty_new,
-                        'specialty_name': specialty_name,
-                        'id_department': int(id_department) if id_department else None
-                    }
+                    statement = conn.execute('''
+                        SELECT 
+                            specialties.specialty_name,
+                            academic_year.year_name,
+                            groups.course_number,
+                            workload.id_group,
+                            statements.semester,
+                            disciplines.discipline_name,
+                            users.full_name
+                            FROM statements
+                            INNER JOIN workload ON statements.id_discipline = workload.id_load
+                            INNER JOIN academic_year ON workload.id_year = academic_year.id_year
+                            INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+                            INNER JOIN groups ON workload.id_group = groups.id_group 
+                            INNER JOIN users ON workload.id_teacher = users.id_user
+                            INNER JOIN specialties ON groups.specialty_id = specialties.id_specialty
+                            WHERE statements.id_statement = ?
+                    ''', (id_statement,)).fetchone()
+
                     student = conn.execute('''
                         SELECT 
+                            students.full_name,
                             students.id_student
                         FROM students
                         LEFT JOIN grades ON students.id_student = grades.id_student 
                         AND grades.id_statement = ?''', (id_statement,)).fetchall()
-                    conn.close()
-                    
-                    for error in errors:
-                        flash(error, 'danger')
-                    return render_template('edit_info.html',
-                                        funck=funck,
-                                        statement=statement,
-                                        student=student,
-                                        session=session)
 
-                # Обновление в базе
-                try:
-                    conn.execute('''
-                        UPDATE specialties
-                        SET id_specialty = ?, specialty_name = ?, id_department = ?
-                        WHERE id_specialty = ?
-                    ''', (id_specialty_new, specialty_name, int(id_department), id_specialty_old))
+                else:
+                    student = conn.execute('''
+                        SELECT students.id_student FROM students WHERE students.id_group = ?''', (statement['id_group'],)).fetchall()
+
+                    for stud in student:
+                        id_stud = stud['id_student']
+                        key = f"grade_{id_stud}"
+                        grade_value = request.form.get(key, '')
+                        if grade_value != "":
+                            conn.execute('''
+                                INSERT OR REPLACE INTO grades (id_student, id_statement, grade) VALUES (?, ?, ?)
+                                ''', (id_stud, id_statement, grade_value,))
+                    conn.execute(''' UPDATE statements SET excused = ?, unexcused = ? WHERE id_statement = ?''', 
+                                (not_been_excused, not_been_unexcused, id_statement,))
                     conn.commit()
-                    flash('Данные специальности успешно обновлены', 'success')
                     conn.close()
+                    flash('Ведомость успешно сохранена!', 'success')
                     return redirect(url_for('load_table', funck='edit_statement'))
-                except sqlite3.Error as e:
-                    conn.rollback()
-                    flash(f'Ошибка базы данных: {str(e)}', 'danger')
-                    
-                    specialty = {
-                        'id_specialty': id_specialty_new,
-                        'specialty_name': specialty_name,
-                        'id_department': int(id_department) if id_department else None
-                    }
-                    departments = conn.execute('SELECT id_department, department_name FROM departments ORDER BY department_name').fetchall()
-                    conn.close()
-                    
-                    return render_template('edit_info.html',
-                                        funck=funck,
-                                        spec=specialty,
-                                        departments=departments,
-                                        session=session)
 
         else:
             flash('У вас нет прав доступа.', 'danger')

@@ -1245,11 +1245,11 @@
                         </div>          
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="full_name_prep">
+                                <label for="full_name">
                                     <i class="fas fa-chalkboard-teacher"></i> Преподаватель
                                 </label>
-                                <input type="text" id="full_name_prep" name="full_name_prep"
-                                    value="{{ statement.full_name_prep }}" readonly>
+                                <input type="text" id="full_name" name="full_name"
+                                    value="{{ statement.full_name }}" readonly>
                             </div>
                         </div>
                     </div>
@@ -1265,8 +1265,8 @@
                     <tbody>
                         {% for student in table_info %}
                         <tr>
-                            <td>{{ student.full_name_student }}</td>
-                            <td>{{ student.id_student }}</td>
+                            <td>{{ students.full_name }}</td>
+                            <td>{{ students.id_student }}</td>
                             <td>
                                 <select name="grade_{{ student.id_student }}" class="form-control form-control-sm">
                                     <option value="">--</option>

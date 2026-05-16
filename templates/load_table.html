@@ -1035,6 +1035,7 @@ function exportToPDF() {
         <thead>
             <tr>
                 <th>Действия</th>
+                <th>Код ведомости</th>
                 <th>ФИО преподавателя</th>
                 <th>Дисциплина</th>
                 <th>Группа</th>
@@ -1046,7 +1047,7 @@ function exportToPDF() {
             {% for statement in table_info %}
             <tr>
                 <td class="actions-cell">
-                    <a href="{{ url_for('edit_info', funck='edit_statement', id_student=statement.id_statement) }}" class="icon-btn edit" title="Редактировать">
+                    <a href="{{ url_for('edit_info', funck='edit_statement', id_statement=statement.id_statement) }}" class="icon-btn edit" title="Редактировать">
                         <i class="fas fa-edit"></i>
                     </a>
                     <a href="{{ url_for('delete_recording', id=statement.id_statement, funck='edit_statement') }}" 
@@ -1055,6 +1056,14 @@ function exportToPDF() {
                        onclick="return confirm('Вы уверены, что хотите удалить ведомость {{ statement.id_statement }}?');">
                         <i class="fas fa-trash-alt"></i>
                     </a>
+                </td>
+                <td>
+                    <div class="user-info">
+                        <div class="user-avatar">
+                        <i class="fas fa-users"></i> 
+                        </div>
+                    <span>{{ statement.id_statement }}</span>
+                    </div>
                 </td>
                 <td>{{ statement.full_name }}</td>
                 <td>{{ statement.discipline_name }}</td>
