@@ -702,6 +702,20 @@
                     e.target.value = cleaned.substring(0, 50);
                 }
             });
+        
+            // Валидация при потере фокуса
+            fullNameInput.addEventListener('blur', function(e) {
+                const value = this.value.trim();
+
+                // Проверка, что поле не пустое
+                if (value === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('ФИО студента не может быть пустым');
+                } else {
+                    this.style.borderColor = '';
+                    this.setCustomValidity('');
+                }
+            });
         }
     });
 </script>
@@ -762,6 +776,20 @@
                 }
                 if (cleaned.length > 50) {
                     e.target.value = cleaned.substring(0, 50);
+                }
+            });
+            
+            // Валидация при потере фокуса
+            typeNameInput.addEventListener('blur', function(e) {
+                const value = this.value.trim();
+
+                // Проверка, что поле не пустое
+                if (value === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('Тип ведомости не может быть пустым');
+                } else {
+                    this.style.borderColor = '';
+                    this.setCustomValidity('');
                 }
             });
         }
@@ -913,6 +941,20 @@
                         e.target.value = cleaned.substring(0, 50);
                     }
                 });
+                
+                // Валидация при потере фокуса
+                groupNameInput.addEventListener('blur', function(e) {
+                    const value = this.value.trim();
+
+                    // Проверка, что поле не пустое
+                    if (value === '') {
+                        this.style.borderColor = '#dc3545';
+                        this.setCustomValidity('Код группы не может быть пустым');
+                    } else {
+                        this.style.borderColor = '';
+                        this.setCustomValidity('');
+                    }
+                });
             }
         });
     </script>
@@ -972,6 +1014,19 @@
                 }
                 if (cleaned.length > 50) {
                     e.target.value = cleaned.substring(0, 50);
+                }
+            });
+        // Валидация при потере фокуса
+            formNameInput.addEventListener('blur', function(e) {
+                const value = this.value.trim();
+
+                // Проверка, что поле не пустое
+                if (value === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('Форма обучения не может быть пустой');
+                } else {
+                    this.style.borderColor = '';
+                    this.setCustomValidity('');
                 }
             });
         }
@@ -1071,6 +1126,21 @@
                     e.target.value = cleaned.substring(0, 50);
                 }
             });
+         
+            // Валидация при потере фокуса
+            idSpecialtyInput.addEventListener('blur', function(e) {
+                const value = this.value.trim();
+
+                // Проверка, что поле не пустое
+                if (value === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('Код специальности не может быть пустым');
+                } else {
+                    this.style.borderColor = '';
+                    this.setCustomValidity('');
+                }
+            });
+
         }
         
         // Валидация названия специальности
@@ -1083,6 +1153,277 @@
                 }
                 if (cleaned.length > 100) {
                     e.target.value = cleaned.substring(0, 100);
+                }
+            });
+                        // Валидация при потере фокуса
+            specialtyNameInput.addEventListener('blur', function(e) {
+                const value = this.value.trim();
+
+                // Проверка, что поле не пустое
+                if (value === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('Название специальности не может быть пустым');
+                } else {
+                    this.style.borderColor = '';
+                    this.setCustomValidity('');
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
+<!-- ВЕДОМОСТИ (препод)-->
+
+{% if funck == 'edit_statement' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-edit"></i> Редактирование ведомости</h2>
+            <div class="header-actions">
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_statement', id_statement=statement.id_statement) }}" class="edit-form">
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-book"></i> Информация о ведомости
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="specialty_name" class="required">
+                            <i class="fas fa-graduation-cap"></i> Направление подготовки (специальность)
+                        </label>
+                        <input type="text" id="specialty_name" name="specialty_name"
+                               value="{{ statement.specialty_name }}" readonly>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="year_name">
+                                    <i class="fas fa-calendar-alt"></i> Учебный год
+                                </label>
+                                <input type="text" id="year_name" name="year_name"
+                                    value="{{ statement.year_name }}" readonly>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="course_number">
+                                    <i class="fas fa-graduation-cap"></i> Курс
+                                </label>
+                                <input type="text" id="course_number" name="course_number"
+                                    value="{{ statement.course_number }}" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="id_group">
+                                    <i class="fas fa-users"></i> Группа
+                                </label>
+                                <input type="text" id="id_group" name="id_group"
+                                    value="{{ statement.id_group }}" readonly>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="semester">
+                                    <i class="fas fa-hourglass-half"></i> Семестр
+                                </label>
+                                <input type="text" id="semester" name="semester"
+                                    value="{{ statement.semester }}" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="discipline_name">
+                                    <i class="fas fa-book"></i> Дисциплина
+                                </label>
+                                <input type="text" id="discipline_name" name="discipline_name"
+                                    value="{{ statement.discipline_name }}" readonly>
+                            </div>
+                        </div>          
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="full_name_prep">
+                                    <i class="fas fa-chalkboard-teacher"></i> Преподаватель
+                                </label>
+                                <input type="text" id="full_name_prep" name="full_name_prep"
+                                    value="{{ statement.full_name_prep }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="all-table">
+                    <thead>
+                        <tr>
+                            <th>ФИО студента</th>
+                            <th>№ зачетной книжки</th>
+                            <th>Оценка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in table_info %}
+                        <tr>
+                            <td>{{ student.full_name_student }}</td>
+                            <td>{{ student.id_student }}</td>
+                            <td>
+                                <select name="grade_{{ student.id_student }}" class="form-control form-control-sm">
+                                    <option value="">--</option>
+                                    <option value="5" {% if student.grade == '5' %}selected{% endif %}>5 (отл.)</option>
+                                    <option value="4" {% if student.grade == '4' %}selected{% endif %}>4 (хор.)</option>
+                                    <option value="3" {% if student.grade == '3' %}selected{% endif %}>3 (удовл.)</option>
+                                    <option value="2" {% if student.grade == '2' %}selected{% endif %}>2 (неудовл.)</option>
+                                    <option value="0" {% if student.grade == '0' %}selected{% endif %}>Н/Я</option>
+                                </select>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align: center;">Нет данных для отображения</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="not_been"> Не явилось
+                                    <i class="fas fa-user-times"></i> 
+                                </label>
+                                <input type="text" id="not_been" name="not_been"
+                                    value="{{ statement.not_been }}" readonly>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="grades_all">
+                                    <i class="fas fa-graduation-cap"></i> Получено оценок
+                                </label>
+                                <input type="text" id="grades_all" name="grades_all"
+                                    value="{{ statement.grades_all }}" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="not_been_uvag">
+                                    <i class="fas fa-users"></i> По уважительной причине
+                                </label>
+                                <input type="text" 
+                                    name="{{ not_been_uvag }}" 
+                                    value="{{ statement.not_been_uvag }}" 
+                                    class="form-control form-control-sm" 
+                                    placeholder="Количество н\я по уважительной причине">
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="grade_D">
+                                    <i class="fas fa-exclamation-triangle"></i> Неудовлетворительно
+                                </label>
+                                <input type="text" id="grade_D" name="grade_D"
+                                    value="{{ statement.grade_D }}" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="not_been_notuvag">
+                                    <i class="fas fa-users"></i> По неуважительной причине
+                                </label>
+                                <input type="text" 
+                                    name="{{ not_been_notuvag }}" 
+                                    value="{{ statement.not_been_notuvag }}" 
+                                    class="form-control form-control-sm" 
+                                    placeholder="Количество н\я по неуважительной причине">
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="grade_C">
+                                    <i class="fas fa-check"></i> Удовлетворительно
+                                </label>
+                                <input type="text" id="grade_C" name="grade_C"
+                                    value="{{ statement.grade_C }}" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row justify-content-end">
+                            <div class="form-group">
+                                <label for="grade_B">
+                                    <i class="fas fa-thumbs-up"></i> Хорошо
+                                </label>
+                                <input type="text" id="grade_B" name="grade_B"
+                                    value="{{ statement.grade_B }}" readonly>
+                            </div>
+                        </div>          
+                        <div class="form-row justify-content-end">
+                            <div class="form-group">
+                                <label for="grade_A">
+                                    <i class="fas fa-star"></i> Отлично
+                                </label>
+                                <input type="text" id="grade_A" name="grade_A"
+                                    value="{{ statement.grade_A }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const UvagInput = document.getElementById('not_been_uvag');
+        const notUvagInput = document.getElementById('not_been_notuvag');
+        
+        // Валидация неявок по уважительной причине
+        if (UvagInput) {
+            UvagInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                let cleaned = value.replace(/[^\d]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+            });
+        
+            // Валидация при потере фокуса
+            UvagInput.addEventListener('blur', function(e) {
+                const value = this.value.trim();
+
+                // Проверка, что поле не пустое
+                if (value === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('Количество неявок по уважительной причине не может быть пустым');
+                } else {
+                    this.style.borderColor = '';
+                    this.setCustomValidity('');
+                }
+            });
+        }
+        
+        // Валидация неявок по неуважительной причине
+        if (notUvagInput) {
+            notUvagInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                let cleaned = value.replace(/[^\d]/g, '');
+                if (cleaned !== value) {
+                    e.target.value = cleaned;
+                }
+            });
+        
+            // Валидация при потере фокуса
+            notUvagInput.addEventListener('blur', function(e) {
+                const value = this.value.trim();
+
+                // Проверка, что поле не пустое
+                if (value === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('Количество неявок по неуважительной причине не может быть пустым');
+                } else {
+                    this.style.borderColor = '';
+                    this.setCustomValidity('');
                 }
             });
         }
