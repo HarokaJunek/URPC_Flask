@@ -3115,6 +3115,133 @@ def edit_info():
             flash('У вас нет прав доступа.', 'danger')
             return redirect(url_for('index'))
         
+# ВЕДОМОСТЬ #
+
+    if funck == 'edit_statement':
+        if session.get('is_zav', False) or session.get('is_prepod', False):
+            # Получаем ID из разных источников
+            id_statement = request.args.get('id_statement')
+            if not id_statement:
+                flash('Не указан ID ведомости', 'danger')
+                return redirect(url_for('load_table', funck='edit_statement'))
+                
+            conn = get_db_connection()
+            
+            # GET — показываем форму
+            if request.method == 'GET':
+                statement = conn.execute('''
+                    SELECT 
+                        speciality.speciality_name,
+                        academic_year.year_name,
+                        groups.course_number,
+                        workload.id_group,
+                        statements.semester,
+                        disciplines.discipline_name,
+                        users.full_name
+                        statements.
+                        FROM statements
+                        INNER JOIN workload ON statements.id_workload = workload.id_load
+                        INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+                        INNER JOIN groups ON workload.id_group = groups.id_group 
+                        INNER JOIN users ON workload.id_teacher = users.id_user
+                        INNER JOIN specialities ON groups.specialty_id = specialities.id_specialty
+                        WHERE statements.id_statement = ?
+                ''', (id_statement,)).fetchone()
+
+                student = conn.execute('''
+                    SELECT 
+                        students.id_student
+                    FROM students
+                    LEFT JOIN grades ON students.id_student = grades.id_student 
+                    AND grades.id_statement = ?''', (id_statement,)).fetchall()
+                conn.close()
+
+                if not statement:
+                    flash('Ведомость не найдена.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_statement'))
+
+                return render_template('edit_info.html',
+                                    funck=funck,
+                                    statement=statement,
+                                    student=student,
+                                    session=session)
+
+            # POST — сохраняем изменения
+            if request.method == 'POST':
+                not_been_excused = request.form.get('not_been_excused', '')
+                not_been_unexcused = request.form.get('not_been_unexcused', '')
+                id_grade = request.form.get('id_grade', '')
+
+                errors = []
+                if not not_been_excused:
+                    errors.append('Количество н/я по уважительной причине обязательно')
+                elif not re.match(r'^[\d]+$', not_been_excused):
+                    errors.append('Количество н/я по уважительной причине может содержать только цифры и числа')
+                
+                if not not_been_unexcused:
+                    errors.append('Количество н/я по неуважительной причине обязательно')
+                elif not re.match(r'^[\d]+$', not_been_unexcused):
+                    errors.append('Количество н/я по неуважительной причине может содержать только цифры и числа')
+
+                if not id_grade:
+                    errors.append('Выберите оценку')
+
+                if errors:
+                    # Получаем данные для повторного отображения
+                    statement = {
+                        'id_specialty': id_specialty_new,
+                        'specialty_name': specialty_name,
+                        'id_department': int(id_department) if id_department else None
+                    }
+                    student = conn.execute('''
+                        SELECT 
+                            students.id_student
+                        FROM students
+                        LEFT JOIN grades ON students.id_student = grades.id_student 
+                        AND grades.id_statement = ?''', (id_statement,)).fetchall()
+                    conn.close()
+                    
+                    for error in errors:
+                        flash(error, 'danger')
+                    return render_template('edit_info.html',
+                                        funck=funck,
+                                        statement=statement,
+                                        student=student,
+                                        session=session)
+
+                # Обновление в базе
+                try:
+                    conn.execute('''
+                        UPDATE specialties
+                        SET id_specialty = ?, specialty_name = ?, id_department = ?
+                        WHERE id_specialty = ?
+                    ''', (id_specialty_new, specialty_name, int(id_department), id_specialty_old))
+                    conn.commit()
+                    flash('Данные специальности успешно обновлены', 'success')
+                    conn.close()
+                    return redirect(url_for('load_table', funck='edit_statement'))
+                except sqlite3.Error as e:
+                    conn.rollback()
+                    flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                    
+                    specialty = {
+                        'id_specialty': id_specialty_new,
+                        'specialty_name': specialty_name,
+                        'id_department': int(id_department) if id_department else None
+                    }
+                    departments = conn.execute('SELECT id_department, department_name FROM departments ORDER BY department_name').fetchall()
+                    conn.close()
+                    
+                    return render_template('edit_info.html',
+                                        funck=funck,
+                                        spec=specialty,
+                                        departments=departments,
+                                        session=session)
+
+        else:
+            flash('У вас нет прав доступа.', 'danger')
+            return redirect(url_for('index'))
+        
 if __name__ == '__main__':
     if not os.path.exists(DATABASE):
         print("❌ Ошибка базы данных: База данных не найдена")
