@@ -915,7 +915,7 @@ def delete_recording(id):
                 return redirect(url_for('load_table', funck='edit_nagruzka'))
             
 
-            # ============================ СТУДЕНТЫ ================================ #
+# СТУДЕНТЫ #
 
             case 'edit_students':
                 if not session.get('is_zav', False):
@@ -928,7 +928,7 @@ def delete_recording(id):
                 return redirect(url_for('load_table', funck='edit_students'))
             
 
-            # ==================== ВИДЫ ВЕДОМОСТИ ==================== #
+# ВИДЫ ВЕДОМОСТИ #
 
             case 'edit_typesved':
                 if not session.get('is_zav', False):
@@ -941,7 +941,7 @@ def delete_recording(id):
                 return redirect(url_for('load_table', funck='edit_typesved'))
             
 
-            # ==================== ГРУППЫ ==================== #
+# ГРУППЫ #
 
             case 'edit_groups':
                 if not (session.get('is_zav', False)):
@@ -955,7 +955,7 @@ def delete_recording(id):
                 return redirect(url_for('load_table', funck='edit_groups'))
             
 
-            # ==================== ФОРМА ОБУЧЕНИЯ ==================== #
+# ФОРМА ОБУЧЕНИЯ #
 
             case 'edit_formobuch':
                 if not session.get('is_zav', False):
@@ -967,8 +967,7 @@ def delete_recording(id):
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_formobuch'))
             
-
-            # ==================== СПЕЦИАЛЬНОСТЬ ==================== #
+# СПЕЦИАЛЬНОСТЬ #
 
             case 'edit_spec':
                 if not session.get('is_zav', False):
@@ -1471,7 +1470,7 @@ def add_info():
             flash('У вас нет прав для добавления ПЦК', 'danger')
             return redirect(url_for('index'))
         
-# ============================ СТУДЕНТЫ ================================ #    
+# СТУДЕНТЫ #    
     
     if funck == 'edit_students':
         if session.get('is_zav', False):
@@ -1563,7 +1562,7 @@ def add_info():
 
     
 
-# ============================ ВИДЫ ВЕДОМОСТИ ================================ #   
+# ВИДЫ ВЕДОМОСТИ #   
 
     if funck == 'edit_typesved':
 
@@ -1637,7 +1636,7 @@ def add_info():
             flash('У вас нет прав для добавления типа ведомости', 'danger')
             return redirect(url_for('index'))
 
-#============================ ГРУППЫ ================================ #
+# ГРУППЫ #
 
     if funck == 'edit_groups':
         if session.get('is_zav', False):
@@ -1777,7 +1776,7 @@ def add_info():
             flash('У вас нет прав для добавления группы', 'danger')
             return redirect(url_for('index'))
     
-# ============================ ФОРМА ОБУЧЕНИЯ ================================ #
+# ФОРМА ОБУЧЕНИЯ #
 
     if funck == 'edit_formobuch':
 
@@ -1845,7 +1844,7 @@ def add_info():
             flash('У вас нет прав для добавления форм обучения', 'danger')
             return redirect(url_for('index'))
 
-# ============================ СПЕЦИАЛЬНОСТИ ================================ #
+# СПЕЦИАЛЬНОСТИ #
 
     if funck == 'edit_spec':
         if session.get('is_zav', False):
@@ -3236,7 +3235,7 @@ def edit_info():
                             INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
                             INNER JOIN groups ON workload.id_group = groups.id_group 
                             INNER JOIN users ON workload.id_teacher = users.id_user
-                            INNER JOIN specialties ON groups.specialty_id = specialties.id_specialty
+                            INNER JOIN specialties ON groups.id_specialty = specialties.id_specialty
                             WHERE statements.id_statement = ?
                     ''', (id_statement,)).fetchone()
 
@@ -3251,6 +3250,26 @@ def edit_info():
                         WHERE students.id_group = ?''', (id_statement, statement['id_group'])).fetchall()
                         
                 else:
+                    statement = conn.execute('''
+                        SELECT 
+                            statements.id_statement,
+                            specialties.specialty_name,
+                            academic_year.year_name,
+                            groups.course_number,
+                            workload.id_group,
+                            statements.semester,
+                            disciplines.discipline_name,
+                            users.full_name
+                            FROM statements
+                            INNER JOIN workload ON statements.id_discipline = workload.id_load
+                            INNER JOIN academic_year ON workload.id_year = academic_year.id_year
+                            INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+                            INNER JOIN groups ON workload.id_group = groups.id_group 
+                            INNER JOIN users ON workload.id_teacher = users.id_user
+                            INNER JOIN specialties ON groups.id_specialty = specialties.id_specialty
+                            WHERE statements.id_statement = ?
+                    ''', (id_statement,)).fetchone()
+
                     student = conn.execute('''
                         SELECT students.id_student FROM students WHERE students.id_group = ?''', (statement['id_group'],)).fetchall()
 
