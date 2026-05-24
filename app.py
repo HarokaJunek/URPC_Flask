@@ -988,7 +988,7 @@ def delete_recording(id):
 
             case 'edit_formobuch':
                 if not session.get('is_zav', False):
-                    flash('У вас нет прав на формы обучения.', 'danger')
+                    flash('У вас нет прав на удаление формы обучения.', 'danger')
                     return redirect(url_for('load_table', funck='edit_formobuch'))
 
                 conn.execute('DELETE FROM study_form WHERE id_form = ?', (id,))
@@ -1000,7 +1000,7 @@ def delete_recording(id):
 
             case 'edit_spec':
                 if not session.get('is_zav', False):
-                    flash('У вас нет прав на формы обучения.', 'danger')
+                    flash('У вас нет прав на удаление специальности.', 'danger')
                     return redirect(url_for('load_table', funck='edit_spec'))
 
                 conn.execute('DELETE FROM specialties WHERE id_specialty = ?', (id,))
@@ -1563,7 +1563,6 @@ def add_info():
     if funck == 'edit_students':
         if session.get('is_zav', False):
 
-            # группа
             def get_groups():
                 conn = get_db_connection()
                 rows = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
@@ -1574,15 +1573,11 @@ def add_info():
                 groups = get_groups()
                 return render_template('add_info.html', funck=funck, group_list=groups)
   
-            # POST-запрос: обработка отправленной формы
-            # 1. Получаем данные
             full_name = request.form.get('full_name', '')
             id_group = request.form.get('id_group')
             
-            # 2. Валидация
             errors = []
-
-            # ФИО            
+         
             if not full_name:
                 errors.append('ФИО обязательно')
             elif len(full_name) > 50:
@@ -1590,7 +1585,6 @@ def add_info():
             elif not re.match(r'^[а-яА-Яa-zA-Z\s]+$', full_name):
                 errors.append('ФИО может содержать буквы (русские/латинские) и пробелы')
 
-            # Номер группы
             groups = get_groups()
             if session.get('is_zav', False):
                 valid_group_ids = [str(g['id']) for g in groups]
@@ -1607,10 +1601,8 @@ def add_info():
                     group_list=groups
                 )
             
-            # ПРОВЕРКА УНИКАЛЬНОСТИ ЗАПИСИ И ВСТАВКА
             conn = get_db_connection()
             try:
-                # Проверка уникальности
                 existing_student = conn.execute(
                     'SELECT id_student FROM students WHERE full_name = ? AND id_group = ?',
                     (full_name.strip(), id_group)
@@ -1624,8 +1616,7 @@ def add_info():
                         form_data=request.form,
                         group_list=groups
                     )
-            
-                # Вставка нового студента
+                
                 conn.execute('BEGIN TRANSACTION')
                 conn.execute(
                     'INSERT INTO students (full_name, id_group) VALUES (?, ?)',
@@ -1656,18 +1647,17 @@ def add_info():
 
         if session.get('is_zav', False):
 
-            # Если метод запроса GET - показываем форму для добавления
             if request.method == 'GET':
                 return render_template('add_info.html', funck=funck, session=session)
 
-            type_name = request.form.get('typeved_name', '').strip()  # Исправлено имя поля
+            type_name = request.form.get('typeved_name', '').strip()  
             errors = []
 
             if not type_name:
                 errors.append('Название типа ведомости обязательно')
             elif len(type_name) > 50:
                 errors.append('Название типа ведомости должно быть не более 50 символов')
-            elif not re.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.]+$', type_name):  # Исправлен вызов re.match
+            elif not re.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.]+$', type_name):  
                 errors.append(
                     'Название типа ведомости может содержать буквы (русские/латинские), цифры, пробелы, дефисы и точки')
 
@@ -1678,17 +1668,14 @@ def add_info():
                     'add_info.html',
                     funck=funck,
                     form_data=request.form,
-                    session=session  # Добавлена передача session
+                    session=session  
                 )
             
-
-            #  ПРОВЕРКА УНИКАЛЬНОСТИ ЗАПИСИ #
             conn = get_db_connection()
             try:
-                # Проверка уникальности
                 existing_type = conn.execute(
                     'SELECT id_type FROM statement_types WHERE type_name = ?',
-                    (type_name,)  # Исправлено: добавлена запятая для создания кортежа
+                    (type_name,) 
                 ).fetchone()
 
                 if existing_type:
@@ -1697,7 +1684,7 @@ def add_info():
                         'add_info.html',
                         funck=funck,
                         form_data=request.form,
-                        session=session  # Добавлена передача session
+                        session=session  
                     )
 
                 # Вставка новой записи
@@ -1716,7 +1703,7 @@ def add_info():
                     'add_info.html',
                     funck=funck,
                     form_data=request.form,
-                    session=session  # Добавлена передача session
+                    session=session
                 )
             finally:
                 conn.close()
@@ -1725,11 +1712,8 @@ def add_info():
             return redirect(url_for('index'))
 
 # ГРУППЫ #
-
     if funck == 'edit_groups':
         if session.get('is_zav', False):
-
-            # Вспомогательные функции
             def get_forms():
                 conn = get_db_connection()
                 rows = conn.execute('SELECT id_form, form_name FROM study_form ORDER BY form_name').fetchall()
@@ -1758,55 +1742,41 @@ def add_info():
                                     classteach_list=prepods,
                                     spec_list=specs,
                                     session=session)
-
-            # POST-запрос
-            # 1. Получаем данные из формы (имена полей как в HTML)
+            
             group_name = request.form.get('group_name', '').strip()  
             id_study_form = request.form.get('id_study_form', '')
             id_classteach = request.form.get('id_classteach', '')
             id_spec = request.form.get('id_spec', '')
 
-            # 2. Получаем списки для валидации
             forms = get_forms()
             prepods = get_prepod()
             specs = get_specs()
 
-            # 3. Валидация
             errors = []
-
-            # Валидация названия группы
             if not group_name:
                 errors.append('Код группы обязательно')
             elif len(group_name) > 50:
                 errors.append('Код группы должно быть не более 50 символов')
             elif not re.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.\/]+$', group_name):
                 errors.append('Код группы может содержать только буквы, цифры, пробелы, дефисы, точки и слэш')
-
-            # Валидация формы обучения
             if not id_study_form:
                 errors.append('Выберите форму обучения')
             else:
                 valid_form_ids = [str(f['id']) for f in forms]
                 if id_study_form not in valid_form_ids:
                     errors.append('Выберите корректную форму обучения')
-
-            # Валидация классного руководителя
             if not id_classteach:
                 errors.append('Выберите классного руководителя')
             else:
                 valid_prepod_ids = [str(p['id']) for p in prepods]
                 if id_classteach not in valid_prepod_ids:
                     errors.append('Выберите корректного классного руководителя')
-
-            # Валидация специальности
             if not id_spec:
                 errors.append('Выберите специальность')
             else:
                 valid_spec_ids = [str(s['id']) for s in specs]
                 if id_spec not in valid_spec_ids:
                     errors.append('Выберите корректную специальность')
-
-            # Если есть ошибки - возвращаем форму с ошибками
             if errors:
                 for error in errors:
                     flash(error, 'danger')
@@ -1818,10 +1788,8 @@ def add_info():
                                     spec_list=specs,
                                     session=session)
 
-            # 4. Проверка уникальности и вставка в БД
             conn = get_db_connection()
             try:
-                # Проверка уникальности группы
                 existing_group = conn.execute(
                     'SELECT id_group FROM groups WHERE id_group = ?', 
                     (group_name,)
@@ -1837,7 +1805,6 @@ def add_info():
                                         spec_list=specs,
                                         session=session)
 
-                # Вставка новой записи
                 conn.execute('''
                     INSERT INTO groups 
                     (id_group, course_number, id_study_form, id_class_teacher, id_specialty)
@@ -1865,7 +1832,6 @@ def add_info():
             return redirect(url_for('index'))
     
 # ФОРМА ОБУЧЕНИЯ #
-
     if funck == 'edit_formobuch':
 
         if session.get('is_zav', False):
@@ -1933,7 +1899,6 @@ def add_info():
             return redirect(url_for('index'))
 
 # СПЕЦИАЛЬНОСТИ #
-
     if funck == 'edit_spec':
         if session.get('is_zav', False):
 
@@ -1947,12 +1912,10 @@ def add_info():
                 departs = get_departs()
                 return render_template('add_info.html', funck=funck, department_list=departs, session=session)
 
-            # POST-запрос: обработка отправленной формы
             id_specialty = request.form.get('id_specialty', '').strip()
             specialty_name = request.form.get('specialty_name', '').strip()
             id_department = request.form.get('id_department', '')
 
-            # Валидация
             errors = []
 
             if not id_specialty:
@@ -1981,10 +1944,9 @@ def add_info():
                     session=session
                 )
 
-            # Проверка уникальности и вставка в БД
+
             conn = get_db_connection()
             try:
-                # Проверка уникальности кода специальности
                 existing_spec = conn.execute(
                     'SELECT id_specialty FROM specialties WHERE id_specialty = ?',
                     (id_specialty,)
@@ -2000,7 +1962,6 @@ def add_info():
                         session=session
                     )
 
-                # Вставка в таблицу specialties (не groups!)
                 conn.execute('''
                     INSERT INTO specialties (id_specialty, specialty_name, id_department)
                     VALUES (?, ?, ?)
@@ -2022,6 +1983,124 @@ def add_info():
                 )
             finally:
                 conn.close()
+
+# ГРУППЫ #
+    if funck == 'edit_statement':
+        if session.get('is_zav', False):
+            def get_forms():
+                conn = get_db_connection()
+                rows = conn.execute('SELECT id_form, form_name FROM study_form ORDER BY form_name').fetchall()
+                conn.close()
+                return [{'id': row['id_form'], 'name': row['form_name']} for row in rows]
+
+            def get_prepod():
+                conn = get_db_connection()
+                rows = conn.execute('SELECT id_user, full_name FROM users WHERE id_role = 4 ORDER BY full_name').fetchall()
+                conn.close()
+                return [{'id': row['id_user'], 'name': row['full_name']} for row in rows]
+
+            def get_specs():
+                conn = get_db_connection()
+                rows = conn.execute('SELECT id_specialty, specialty_name FROM specialties ORDER BY specialty_name').fetchall()
+                conn.close()
+                return [{'id': row['id_specialty'], 'name': row['specialty_name']} for row in rows]
+
+            if request.method == 'GET':
+                forms = get_forms()
+                prepods = get_prepod()
+                specs = get_specs()
+                return render_template('add_info.html', 
+                                    funck=funck, 
+                                    studyform_list=forms,
+                                    classteach_list=prepods,
+                                    spec_list=specs,
+                                    session=session)
+            
+            group_name = request.form.get('group_name', '').strip()  
+            id_study_form = request.form.get('id_study_form', '')
+            id_classteach = request.form.get('id_classteach', '')
+            id_spec = request.form.get('id_spec', '')
+
+            forms = get_forms()
+            prepods = get_prepod()
+            specs = get_specs()
+
+            errors = []
+            if not group_name:
+                errors.append('Код группы обязательно')
+            elif len(group_name) > 50:
+                errors.append('Код группы должно быть не более 50 символов')
+            elif not re.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.\/]+$', group_name):
+                errors.append('Код группы может содержать только буквы, цифры, пробелы, дефисы, точки и слэш')
+            if not id_study_form:
+                errors.append('Выберите форму обучения')
+            else:
+                valid_form_ids = [str(f['id']) for f in forms]
+                if id_study_form not in valid_form_ids:
+                    errors.append('Выберите корректную форму обучения')
+            if not id_classteach:
+                errors.append('Выберите классного руководителя')
+            else:
+                valid_prepod_ids = [str(p['id']) for p in prepods]
+                if id_classteach not in valid_prepod_ids:
+                    errors.append('Выберите корректного классного руководителя')
+            if not id_spec:
+                errors.append('Выберите специальность')
+            else:
+                valid_spec_ids = [str(s['id']) for s in specs]
+                if id_spec not in valid_spec_ids:
+                    errors.append('Выберите корректную специальность')
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template('add_info.html',
+                                    funck=funck,
+                                    form_data=request.form,
+                                    studyform_list=forms,
+                                    classteach_list=prepods,
+                                    spec_list=specs,
+                                    session=session)
+
+            conn = get_db_connection()
+            try:
+                existing_group = conn.execute(
+                    'SELECT id_group FROM groups WHERE id_group = ?', 
+                    (group_name,)
+                ).fetchone()
+
+                if existing_group:
+                    flash('Такая группа уже существует', 'danger')
+                    return render_template('add_info.html',
+                                        funck=funck,
+                                        form_data=request.form,
+                                        studyform_list=forms,
+                                        classteach_list=prepods,
+                                        spec_list=specs,
+                                        session=session)
+
+                conn.execute('''
+                    INSERT INTO groups 
+                    (id_group, course_number, id_study_form, id_class_teacher, id_specialty)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (group_name, 1, int(id_study_form), int(id_classteach), id_spec))
+
+                conn.commit()
+                flash(f'Группа "{group_name}" успешно создана!', 'success')
+                return redirect(url_for('load_table', funck='edit_groups'))
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                return render_template('add_info.html',
+                                    funck=funck,
+                                    form_data=request.form,
+                                    studyform_list=forms,
+                                    classteach_list=prepods,
+                                    spec_list=specs,
+                                    session=session)
+            finally:
+                conn.close()
+    
         else:
             flash('У вас нет прав для добавления специальности', 'danger')
             return redirect(url_for('index'))
