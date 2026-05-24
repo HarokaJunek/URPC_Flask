@@ -1028,5 +1028,182 @@
 </script>
 {% endif %}
 
+<!-- ВЕДОМОСТЬ -->
+
+{% if funck == 'edit_statement' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            {% if session.is_zav %}
+                <h2><i class="fas fa-edit"></i>Добавление ведомости в систему</h2>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ url_for('add_info', funck='edit_statement') }}" class="edit-form">
+
+            <!-- выпадающий список: дисциплина -->
+            <div class="form-group">
+                <label for="id_study_form" class="required">
+                    <i class="fas fa-chalkboard-teacher"></i> Дисциплина
+                </label>
+                <div class="select-wrapper">
+                    <select id="id_discipline" name="id_discipline" required>
+                        <option value="" disabled {% if not form_data or not form_data.get('id_discipline') %}selected{% endif %}>Выберите дисциплину</option>
+                        {% if discipline_list %}
+                            {% for discipline in discipline_list %}
+                                <option value="{{ discipline.id }}"
+                                    {% if form_data and form_data.get('id_discipline')|int == discipline.id %}selected{% endif %}>
+                                    {{ discipline.name }}
+                                </option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled>Нет доступных дисциплина</option>
+                        {% endif %}
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="form-hint">Выберите дисциплину, к которой относится ведомость</div>
+            </div>
+
+            <!-- выпадающий список: группа -->
+            <div class="form-group">
+                    <label for="id_group" class="required">
+                        <i class="fas fa-chalkboard-teacher"></i> Код группы
+                    </label>
+                    <div class="select-wrapper">
+                        <select id="id_group" name="id_group" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('id_group') %}selected{% endif %}>Выберите группу</option>
+                            {% if group_list %}
+                                {% for group in group_list %}
+                                    <option value="{{ group.id }}"
+                                        {% if form_data and form_data.get('id_group')|int == group.id %}selected{% endif %}>
+                                        {{ group.id }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>Нет доступных групп</option>
+                            {% endif %}
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                    <div class="form-hint">Выберите группу, к которой относится ведомость</div>
+                </div>
+
+            <!-- выпадающий список: преподаватель -->
+                <div class="form-group">
+                    <label for="id_teacher" class="required">
+                        <i class="fas fa-chalkboard-teacher"></i> Преподаватель
+                    </label>
+                    <div class="select-wrapper">
+                        <select id="id_teacher" name="id_teacher" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('id_teacher') %}selected{% endif %}>Выберите преподавателя</option>
+                            {% if teacher_list %}
+                                {% for teacher in teacher_list %}
+                                    <option value="{{ teacher.id }}"
+                                        {% if form_data and form_data.get('id_teacher')|int == teacher.id %}selected{% endif %}>
+                                        {{ teacher.name }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>Нет доступных преподавателей</option>
+                            {% endif %}
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                    <div class="form-hint">Выберите преподавателя, к которрому относится ведомость</div>
+                </div>
+
+                <!-- выпадающий список: тип ведомости -->
+                <div class="form-group">
+                    <label for="id_typeved" class="required">
+                        <i class="fas fa-chalkboard-teacher"></i> Тип ведомости
+                    </label>
+                    <div class="select-wrapper">
+                        <select id="id_typeved" name="id_typeved" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('id_typeved') %}selected{% endif %}>Выберите тип ведомости</option>
+                            {% if typeved_list %}
+                                {% for typeved in typeved_list %}
+                                    <option value="{{ typeved.id }}"
+                                        {% if form_data and form_data.get('id_typeved')|int == typeved.id %}selected{% endif %}>
+                                        {{ typeved.name }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>Нет доступных типов ведомости</option>
+                            {% endif %}
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                    <div class="form-hint">Выберите тип ведомости, к которой относится ведомость</div>
+                </div>
+
+                <!-- семестр -->
+                <div class="form-group">
+                    <label for="id_semester" class="required">
+                        <i class="fas fa-chalkboard-teacher"></i> Семестр
+                    </label>
+                    <input type="number" id="id_semester" name="semester" min="1" max="8" value="" required>
+                    <div class="form-hint">Укажите семестр (от 1 до 8), к которому относится ведомость</div>
+                </div>
+                
+                <!-- флаг диплома -->
+                <div class="form-group">
+                    <label for="is_diploma">
+                        <i class="fas fa-check-circle"></i> Оценка идёт в диплом
+                    </label>
+                    <input type="checkbox" id="is_diploma" name="is_diploma" value="1">
+                    <div class="form-hint">Отметьте, если оценки из этой ведомости будут учитываться в приложении к диплому</div>
+                </div>
+
+            <button type="submit" id="submitBtn">Создать ведомость</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+ const idDiscipline = document.getElementById('id_discipline');
+                const idGroup = document.getElementById('id_group');
+                const idTeacher = document.getElementById('id_teacher');
+                const idTypeved = document.getElementById('id_typeved');
+                const idSemester = document.getElementById('id_semester');
+
+                let errors = [];
+
+                if (!idDiscipline || !idDiscipline.value) {
+                    errors.push('Пожалуйста, выберите дисциплину');
+                }
+
+                if (!idGroup || !idGroup.value) {
+                    errors.push('Пожалуйста, выберите группу');
+                }
+
+                if (!idTeacher || !idTeacher.value) {
+                    errors.push('Пожалуйста, выберите преподавателя');
+                }
+
+                if (!idTypeved || !idTypeved.value) {
+                    errors.push('Пожалуйста, выберите тип ведомости');
+                }
+
+                if (!idSemester || !idSemester.value) {
+                    errors.push('Пожалуйста, укажите семестр');
+                } else if (idSemester.value < 1 || idSemester.value > 8) {
+                    errors.push('Семестр должен быть от 1 до 8');
+                }
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alert(errors.join('\n'));
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
 {% endif %}
 {% endblock %}
