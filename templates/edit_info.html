@@ -20,10 +20,6 @@
         <form method="POST" action="{{ url_for('edit_info', funck='edit_users', user_id=user.id_user) }}" class="edit-form">
             <!-- Основная информация -->
             <div class="form-section">
-                <h3 class="section-title">
-                    <i class="fas fa-user"></i> Основная информация
-                </h3>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="fullName" class="required">
@@ -244,6 +240,64 @@
 </script>
 {% endif %}
 
+{% if funck == 'edit_otdel' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-edit"></i> Редактирование отделения</h2>
+            <div class="header-actions">
+                <span class="record-id">ID: {{ department.id_department }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_otdel', department_id=department.id_department) }}" class="edit-form">
+            <div class="form-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="department_name" class="required">
+                            <i class="fas fa-tag"></i> Название отделения
+                        </label>
+                        <input type="text" id="department_name" name="department_name"
+                               value="{{ department.department_name }}"
+                               placeholder="Введите название отделения" required maxlength="50">
+                        <div class="form-hint">Максимум 50 символов</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deptNameInput = document.getElementById('department_name');
+        if (deptNameInput) {
+            deptNameInput.addEventListener('input', function(e) {
+                if (this.value.length > 50) {
+                    this.value = this.value.substring(0, 50);
+                }
+            });
+            deptNameInput.addEventListener('blur', function(e) {
+                const value = this.value.trim();
+                if (value === '') {
+                    this.style.borderColor = '#dc3545';
+                    this.setCustomValidity('Название отделения не может быть пустым');
+                } else {
+                    this.style.borderColor = '';
+                    this.setCustomValidity('');
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
 {% if funck == 'edit_disciplines' %}
 <div class="blocks">
     <div class="edit-form-container">
@@ -257,10 +311,6 @@
         <form method="POST" action="{{ url_for('edit_info', funck='edit_disciplines', discipline_id=discipline.id_discipline) }}" class="edit-form">
             <!-- Основная информация -->
             <div class="form-section">
-                <h3 class="section-title">
-                    <i class="fas fa-book"></i> Информация о дисциплине
-                </h3>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="disciplineId" class="required">
@@ -375,10 +425,6 @@
         <form method="POST" action="{{ url_for('edit_info', funck='edit_years', year_id=academic_year.id_year) }}" class="edit-form">
             <!-- Основная информация -->
             <div class="form-section">
-                <h3 class="section-title">
-                    <i class="fas fa-calendar-alt"></i> Информация об учебном годе
-                </h3>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="yearName" class="required">
@@ -481,10 +527,6 @@
         <form method="POST" action="{{ url_for('edit_info', funck='edit_fgoss', fgos_id=fgos.id_fgos) }}" class="edit-form">
             <!-- Основная информация -->
             <div class="form-section">
-                <h3 class="section-title">
-                    <i class="fas fa-graduation-cap"></i> Информация о ФГОС
-                </h3>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="fgosName" class="required">
@@ -493,7 +535,7 @@
                         <input type="text" id="fgosName" name="fgosName"
                                value="{{ form_data.get('fgosName', fgos.name) if form_data else fgos.name }}"
                                placeholder="Например: ФГОС СПО 09.02.07" required>
-                        <div class="form-hint">Введите название ФГОС (максимум 50 символов)</div>
+                        <div class="form-hint">Максимум 50 символов</div>
                     </div>
                 </div>
             </div>
@@ -556,10 +598,6 @@
         <form method="POST" action="{{ url_for('edit_info', funck='edit_pck', pck_id=pck.id_pck) }}" class="edit-form">
             <!-- Основная информация -->
             <div class="form-section">
-                <h3 class="section-title">
-                    <i class="fas fa-layer-group"></i> Информация о ПЦК
-                </h3>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="pckName" class="required">

@@ -228,9 +228,7 @@ def index():
         login_input = request.form.get('username', '').strip()
         password = request.form.get('password', '')
 
-        print(f"📥 Получены данные для входа:")
-        print(f"   Логин: {login_input}")
-        print(f"   Пароль: {'*' * len(password)}")
+
 
         # ============================================
         # 2. ВАЛИДАЦИЯ ВХОДНЫХ ДАННЫХ
@@ -327,9 +325,7 @@ def index():
                 conn.rollback()
                 flash(f'Ошибка базы данных: {str(e)}', 'danger')
 
-            print(f"✅ Пользователь найден:")
-            print(f"   ID: {user['id_user']}")
-            print(f"   Username: {user['login']}")
+
 
             # ============================================
             # 6. ОБНОВЛЕНИЕ ПОСЛЕДНЕЙ АКТИВНОСТИ (опционально)
@@ -356,7 +352,7 @@ def index():
                 print("🚀 Перенаправление в админ-панель")
                 return redirect(url_for('admin_dashboard'))
             #else:
-            print("🏠 Перенаправление на главную")
+
             return redirect(url_for('index'))
 
         except sqlite3.Error as e:
@@ -605,6 +601,29 @@ def load_table():
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
+        case 'edit_otdel':
+            if session.get('is_admin', False):
+                conn = get_db_connection()
+
+                # Базовый запрос
+                query = 'SELECT * FROM departments'
+                params = []
+
+                # Если передан поисковый запрос, добавляем WHERE с условиями
+                if search_query:
+                    query += ' WHERE departments.id_department LIKE ? OR departments.department_name LIKE ?'
+                    like_pattern = f'%{search_query}%'
+                    params = [like_pattern, like_pattern]
+
+                cursor = conn.execute(query, params)
+                table_info = cursor.fetchall()  # Получаем все результаты в виде списка
+                conn.close()
+
+                return render_template('load_table.html', table_info=table_info, funck=funck)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+
         case 'edit_pck':
             if session.get('is_specialist', False):
                 conn = get_db_connection()
@@ -811,7 +830,7 @@ def load_table():
             return redirect(url_for('index'))
 
 
-@app.route('/delete_recording/<path:id>', methods=['GET', 'POST'])
+@app.route('/delete_recording/<id>', methods=['GET', 'POST'])
 def delete_recording(id):
     """
     Удаление пользователя по ID.
@@ -886,6 +905,16 @@ def delete_recording(id):
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_years'))
+
+            case 'edit_otdel':
+                if not session.get('is_admin', False):  # Исправлено: is_admin вместо is_specialist
+                    flash('У вас нет прав на удаление отдела.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_otdel'))
+
+                conn.execute('DELETE FROM departments WHERE id_department = ?', (id,))
+                conn.commit()
+                flash('Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_otdel'))
 
             case 'edit_fgoss':
                 if not session.get('is_specialist', False):
@@ -1012,12 +1041,6 @@ def delete_recording(id):
 @app.route('/add_info', methods=['GET', 'POST'])
 def add_info():
     funck = request.args.get('funck') or request.form.get('funck')
-
-    print(f"=== DEBUG ===")
-    print(f"funck: {funck}")
-    print(f"method: {request.method}")
-    print(f"args: {dict(request.args)}")
-    print(f"form: {dict(request.form)}")
 
     if not funck:
         flash('Не указан параметр функции', 'danger')
@@ -1155,6 +1178,71 @@ def add_info():
                 conn.close()
         else:
             flash('У вас нет прав для добавления пользователя', 'danger')
+            return redirect(url_for('index'))
+
+    if funck == 'edit_otdel':
+        if session.get('is_admin', False):
+            if request.method == 'GET':
+                return render_template('add_info.html', funck=funck)
+
+            # POST запрос - получаем funck из формы
+            funck = request.form.get('funck')  # ВАЖНО: получаем funck из формы
+
+            department_name = request.form.get('department_name', '').strip()
+            errors = []
+
+            if not department_name:
+                errors.append('Название отделения обязательно')
+            elif len(department_name) > 50:
+                errors.append('Название отделения должно быть не более 50 символов')
+
+            if errors:
+                for error in errors:
+                    flash(error, 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+
+            # Работа с БД
+            conn = get_db_connection()
+            try:
+                # Проверка уникальности
+                existing_department = conn.execute(
+                    'SELECT id_department FROM departments WHERE department_name = ?',
+                    (department_name,)
+                ).fetchone()
+
+                if existing_department:
+                    flash('Такое отделение уже существует', 'danger')
+                    return render_template(
+                        'add_info.html',
+                        funck=funck,
+                        form_data=request.form
+                    )
+
+                # Вставка нового отделения
+                conn.execute(
+                    'INSERT INTO departments (department_name) VALUES (?)',
+                    (department_name,)
+                )
+                conn.commit()
+                flash(f'Отделение "{department_name}" успешно создано!', 'success')
+                return redirect(url_for('load_table', funck='edit_otdel'))
+
+            except sqlite3.Error as e:
+                conn.rollback()
+                flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                return render_template(
+                    'add_info.html',
+                    funck=funck,
+                    form_data=request.form
+                )
+            finally:
+                conn.close()
+        else:
+            flash('У вас нет прав для добавления отделения', 'danger')
             return redirect(url_for('index'))
 
     if funck == 'edit_disciplines':
@@ -2128,6 +2216,72 @@ def edit_info():
                                            is_admin=session.get('is_admin', False),
                                            form_data=request.form)
 
+            else:
+                flash('У вас нет прав доступа.', 'danger')
+                return redirect(url_for('index'))
+
+        case 'edit_otdel':
+            if session.get('is_admin', False):
+                department_id = request.args.get('department_id', type=int)
+                if not department_id:
+                    flash('Не указан ID отдела', 'danger')
+                    return redirect(url_for('load_table', funck='edit_otdel'))
+
+                conn = get_db_connection()
+
+                if request.method == 'GET':
+                    department = conn.execute('''
+                               SELECT id_department, department_name
+                               FROM departments
+                               WHERE id_department = ?
+                           ''', (department_id,)).fetchone()
+                    conn.close()
+
+                    if not department:
+                        flash('Отдел не найден.', 'danger')
+                        return redirect(url_for('load_table', funck='edit_otdel'))
+
+                    return render_template('edit_info.html',
+                                           funck=funck,
+                                           department=department)
+
+                # POST — сохраняем изменения
+                if request.method == 'POST':
+                    department_name = request.form.get('department_name', '').strip()
+
+                    errors = []
+                    if not department_name:
+                        errors.append('Название отдела обязательно')
+                    elif len(department_name) > 50:
+                        errors.append('Название отдела не может быть длиннее 50 символов')
+
+                    if errors:
+                        for error in errors:
+                            flash(error, 'danger')
+                        conn.close()
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               department={'id_department': department_id,
+                                                           'department_name': department_name})
+
+                    try:
+                        conn.execute('''
+                                   UPDATE departments
+                                   SET department_name = ?
+                                   WHERE id_department = ?
+                               ''', (department_name, department_id))
+                        conn.commit()
+                        flash('Данные отдела успешно обновлены', 'success')
+                        conn.close()
+                        return redirect(url_for('load_table', funck='edit_otdel'))
+                    except sqlite3.Error as e:
+                        conn.rollback()
+                        flash(f'Ошибка базы данных: {str(e)}', 'danger')
+                        conn.close()
+                        return render_template('edit_info.html',
+                                               funck=funck,
+                                               department={'id_department': department_id,
+                                                           'department_name': department_name})
             else:
                 flash('У вас нет прав доступа.', 'danger')
                 return redirect(url_for('index'))

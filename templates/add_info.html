@@ -134,15 +134,71 @@
     </script>
     {% endif %}
 
+{% if funck == 'edit_otdel' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            {% if session.is_admin %}
+                <h2><i class="fas fa-building"></i> Добавление нового отделения</h2>
+            {% endif %}
+        </div>
+        <!-- ВАЖНО: добавляем скрытое поле с funck -->
+        <form method="POST" action="{{ url_for('add_info') }}" class="edit-form" onsubmit="return validateForm()">
+            <input type="hidden" name="funck" value="edit_otdel">
+            <div class="form-group">
+                <label for="department_name" class="required">
+                    <i class="fas fa-building"></i> Название отделения
+                </label>
+                <input type="text" id="department_name" name="department_name"
+                       placeholder="Название отделения"
+                       maxlength="50"
+                       value="{{ form_data.get('department_name', '') if form_data else '' }}">
+                <div class="form-hint">Например: Юридическое (максимум 50 символов)</div>
+            </div>
+            <button type="submit">Создать отделение</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function validateForm() {
+        const departmentNameInput = document.getElementById('department_name');
+        const departmentName = departmentNameInput ? departmentNameInput.value.trim() : '';
+
+        let errors = [];
+
+        if (!departmentName) {
+            errors.push('Пожалуйста, укажите название отделения');
+        } else if (departmentName.length > 50) {
+            errors.push('Название отделения не может быть длиннее 50 символов');
+        }
+
+        if (errors.length > 0) {
+            alert(errors.join('\n'));
+            return false;
+        }
+        return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const departmentNameInput = document.getElementById('department_name');
+        if (departmentNameInput) {
+            departmentNameInput.addEventListener('input', function(e) {
+                if (e.target.value.length > 50) {
+                    e.target.value = e.target.value.substring(0, 50);
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
+
     {% if funck == 'edit_disciplines' %}
     <div class="blocks">
         <div class="edit-form-container">
             <div class="form-header">
-                {% if session.is_admin %}
-                    <h2><i class="fas fa-edit"></i> Добавление дисциплины в систему</h2>
-                {% endif %}
                 {% if session.is_specialist %}
-                    <h2><i class="fas fa-edit"></i> Добавление новой дисциплины</h2>
+                    <h2><i class="fas fa-edit"></i> Добавление дисциплины в систему</h2>
                 {% endif %}
             </div>
             <form method="POST" action="{{ url_for('add_info', funck='edit_disciplines') }}" class="edit-form">
@@ -262,11 +318,8 @@
     <div class="blocks">
         <div class="edit-form-container">
             <div class="form-header">
-                {% if session.is_admin %}
-                    <h2><i class="fas fa-calendar-alt"></i> Добавление учебного года в систему</h2>
-                {% endif %}
                 {% if session.is_specialist %}
-                    <h2><i class="fas fa-calendar-alt"></i> Добавление нового учебного года</h2>
+                    <h2><i class="fas fa-calendar-alt"></i> Добавление учебного года в систему</h2>
                 {% endif %}
             </div>
             <form method="POST" action="{{ url_for('add_info', funck='edit_years') }}" class="edit-form">
@@ -326,11 +379,8 @@
 <div class="blocks">
     <div class="edit-form-container">
         <div class="form-header">
-            {% if session.is_admin %}
-                <h2><i class="fas fa-edit"></i> Добавление ФГОС в систему</h2>
-            {% endif %}
             {% if session.is_specialist %}
-                <h2><i class="fas fa-edit"></i> Добавление нового ФГОС</h2>
+                <h2><i class="fas fa-edit"></i> Добавление ФГОС в систему</h2>
             {% endif %}
         </div>
         <form method="POST" action="{{ url_for('add_info', funck='edit_fgoss') }}" class="edit-form">
@@ -341,7 +391,6 @@
                 <input type="text" id="fgos_name" name="fgos_name"
                        placeholder="Например: ТОП-50"
                        value="{{ form_data.get('fgos_name', '') if form_data else '' }}">
-                <div class="form-hint">Буквы (русские/латинские), цифры, пробелы, дефисы и точки (макс. 50 символов)</div>
             </div>
 
             <button type="submit" id="submitBtn">Создать ФГОС</button>
@@ -397,11 +446,8 @@
 <div class="blocks">
     <div class="edit-form-container">
         <div class="form-header">
-            {% if session.is_admin %}
-                <h2><i class="fas fa-edit"></i> Добавление ПЦК в систему</h2>
-            {% endif %}
             {% if session.is_specialist %}
-                <h2><i class="fas fa-edit"></i> Добавление новой ПЦК</h2>
+                <h2><i class="fas fa-edit"></i> Добавление ПЦК в систему</h2>
             {% endif %}
         </div>
         <form method="POST" action="{{ url_for('add_info', funck='edit_pck') }}" class="edit-form">
@@ -412,7 +458,6 @@
                 <input type="text" id="pck_name" name="pck_name"
                        placeholder="Например: Информационных технологий"
                        value="{{ form_data.get('pck_name', '') if form_data else '' }}">
-                <div class="form-hint">Буквы (русские/латинские), цифры, пробелы, дефисы и точки (макс. 50 символов)</div>
             </div>
 
             <button type="submit" id="submitBtn">Создать ПЦК</button>
