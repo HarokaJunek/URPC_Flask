@@ -392,7 +392,7 @@
 
         {% if funck == 'edit_nagruzka' %}
     <div class="table-header">
-        <h2><i class="fa-solid fa-gear"></i> Управление нагрузкой </h2>
+        <h2><i class="fas fa-database"></i> Перечень дисциплин</h2>
         <div class="table-actions">
             <a href="{{ url_for('add_info', funck='edit_nagruzka') }}" class="action-btn add-btn">
                 <i class="fas fa-plus"></i> Добавить запись
@@ -451,7 +451,7 @@
                 </div>
             </div>
             <div class="filters-actions">
-                <button type="button" class="apply-filters-btn" onclick="applyFilters()">Применить</button>
+                <a href="javascript:void(0);" class="apply-filters-btn" onclick="applyFilters()">Применить</a>
                 <a href="javascript:void(0);" class="reset-filters-btn" onclick="resetFilters()">Сбросить</a>
             </div>
         </div>
@@ -584,7 +584,6 @@ function applyFilters() {
     const teacherFilter = document.getElementById('filter-teacher').value.toLowerCase();
     const disciplineFilter = document.getElementById('filter-discipline').value.toLowerCase();
     const groupFilter = document.getElementById('filter-group').value;
-    const semesterFilter = document.getElementById('filter-semester').value;
 
     const rows = document.querySelectorAll('#readable-table tbody tr');
     let visibleCount = 0;
@@ -599,31 +598,6 @@ function applyFilters() {
         if (disciplineFilter && !row.dataset.discipline.toLowerCase().includes(disciplineFilter)) show = false;
         if (groupFilter && row.dataset.group !== groupFilter) show = false;
 
-        // Фильтр по семестру
-        if (show && semesterFilter) {
-            if (semesterFilter === 'winter') {
-                const winterCells = row.querySelectorAll('.winter-data');
-                let hasWinterData = false;
-                winterCells.forEach(cell => {
-                    const value = cell.textContent.trim();
-                    if (value && value !== '0' && value !== '—') {
-                        hasWinterData = true;
-                    }
-                });
-                if (!hasWinterData) show = false;
-            } else if (semesterFilter === 'summer') {
-                const summerCells = row.querySelectorAll('.summer-data');
-                let hasSummerData = false;
-                summerCells.forEach(cell => {
-                    const value = cell.textContent.trim();
-                    if (value && value !== '0' && value !== '—') {
-                        hasSummerData = true;
-                    }
-                });
-                if (!hasSummerData) show = false;
-            }
-        }
-
         row.style.display = show ? '' : 'none';
         if (show) visibleCount++;
     });
@@ -636,7 +610,6 @@ function resetFilters() {
     document.getElementById('filter-teacher').value = '';
     document.getElementById('filter-discipline').value = '';
     document.getElementById('filter-group').value = '';
-    document.getElementById('filter-semester').value = '';
 
     const rows = document.querySelectorAll('#readable-table tbody tr');
     rows.forEach(row => {
