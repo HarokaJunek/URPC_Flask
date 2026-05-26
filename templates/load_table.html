@@ -1009,6 +1009,9 @@ function exportToPDF() {
     <div class="table-header">
         <h2><i class="fa-solid fa-gear"></i> Управление ведомостями</h2>
         <div class="table-actions">
+                <a href="{{ url_for('add_info', funck='edit_statement') }}" class="action-btn add-btn">
+                    <i class="fas fa-plus"></i> Добавить ведомость
+                </a>
             <div class="search-box">
                 <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
                     <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">

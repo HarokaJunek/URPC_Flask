@@ -1558,8 +1558,7 @@ def add_info():
             flash('У вас нет прав для добавления ПЦК', 'danger')
             return redirect(url_for('index'))
         
-# СТУДЕНТЫ #    
-    
+# СТУДЕНТЫ     
     if funck == 'edit_students':
         if session.get('is_zav', False):
 
@@ -1641,8 +1640,7 @@ def add_info():
 
     
 
-# ВИДЫ ВЕДОМОСТИ #   
-
+# ВИДЫ ВЕДОМОСТИ  
     if funck == 'edit_typesved':
 
         if session.get('is_zav', False):
@@ -1711,7 +1709,7 @@ def add_info():
             flash('У вас нет прав для добавления типа ведомости', 'danger')
             return redirect(url_for('index'))
 
-# ГРУППЫ #
+# ГРУППЫ 
     if funck == 'edit_groups':
         if session.get('is_zav', False):
             def get_forms():
@@ -1831,7 +1829,7 @@ def add_info():
             flash('У вас нет прав для добавления группы', 'danger')
             return redirect(url_for('index'))
     
-# ФОРМА ОБУЧЕНИЯ #
+# ФОРМА ОБУЧЕНИЯ 
     if funck == 'edit_formobuch':
 
         if session.get('is_zav', False):
@@ -1898,7 +1896,7 @@ def add_info():
             flash('У вас нет прав для добавления форм обучения', 'danger')
             return redirect(url_for('index'))
 
-# СПЕЦИАЛЬНОСТИ #
+# СПЕЦИАЛЬНОСТИ 
     if funck == 'edit_spec':
         if session.get('is_zav', False):
 
@@ -1984,125 +1982,122 @@ def add_info():
             finally:
                 conn.close()
 
-# ГРУППЫ #
+# ВЕДОМОСТИ 
     if funck == 'edit_statement':
         if session.get('is_zav', False):
-            def get_forms():
-                conn = get_db_connection()
-                rows = conn.execute('SELECT id_form, form_name FROM study_form ORDER BY form_name').fetchall()
-                conn.close()
-                return [{'id': row['id_form'], 'name': row['form_name']} for row in rows]
 
-            def get_prepod():
-                conn = get_db_connection()
-                rows = conn.execute('SELECT id_user, full_name FROM users WHERE id_role = 4 ORDER BY full_name').fetchall()
-                conn.close()
-                return [{'id': row['id_user'], 'name': row['full_name']} for row in rows]
+                def get_workload():
+                    conn = get_db_connection()
+                    rows = conn.execute('''
+                            SELECT w.id_load, 
+                                d.discipline_name || ', ' || g.id_group || ', ' || u.full_name AS description
+                            FROM workload w
+                            INNER JOIN disciplines d ON w.id_discipline = d.id_discipline
+                            INNER JOIN groups g ON w.id_group = g.id_group
+                            INNER JOIN users u ON w.id_teacher = u.id_user
+                            ORDER BY description
+                    ''').fetchall()
+                    conn.close()
+                    return [{'id': row['id_load'], 'name': row['description']} for row in rows]
+                
+                def get_typeved():
+                    conn = get_db_connection()
+                    rows = conn.execute('SELECT id_type, type_name FROM statement_types ORDER BY type_name').fetchall()
+                    conn.close()
+                    return [{'id': row['id_type'], 'name': row['type_name']} for row in rows]
 
-            def get_specs():
-                conn = get_db_connection()
-                rows = conn.execute('SELECT id_specialty, specialty_name FROM specialties ORDER BY specialty_name').fetchall()
-                conn.close()
-                return [{'id': row['id_specialty'], 'name': row['specialty_name']} for row in rows]
-
-            if request.method == 'GET':
-                forms = get_forms()
-                prepods = get_prepod()
-                specs = get_specs()
-                return render_template('add_info.html', 
-                                    funck=funck, 
-                                    studyform_list=forms,
-                                    classteach_list=prepods,
-                                    spec_list=specs,
-                                    session=session)
+                if request.method == 'GET':
+                    workload = get_workload()
+                    typeveds = get_typeved()
+                    return render_template('add_info.html', 
+                                            funck=funck,
+                                            workload_list=workload,
+                                            typeved_list=typeveds,
+                                            session=session)
             
-            group_name = request.form.get('group_name', '').strip()  
-            id_study_form = request.form.get('id_study_form', '')
-            id_classteach = request.form.get('id_classteach', '')
-            id_spec = request.form.get('id_spec', '')
+                id_load = request.form.get('id_load', '')
+                id_typeved = request.form.get('id_typeved', '')
+                semester = request.form.get('semester', '')
+                is_diploma = request.form.get('is_diploma', '0') 
 
-            forms = get_forms()
-            prepods = get_prepod()
-            specs = get_specs()
+                workload = get_workload()
+                typesved = get_typeved()
+            
+                errors = []
+                if not id_load:
+                    errors.append('Выберите нагрузку')
+                else:
+                    valid_workload_ids = [str(w['id']) for w in workload]
+                    if id_load not in valid_workload_ids:
+                        errors.append('Выберите корректную нагрузку')
 
-            errors = []
-            if not group_name:
-                errors.append('Код группы обязательно')
-            elif len(group_name) > 50:
-                errors.append('Код группы должно быть не более 50 символов')
-            elif not re.match(r'^[а-яА-Яa-zA-Z0-9\s\-\.\/]+$', group_name):
-                errors.append('Код группы может содержать только буквы, цифры, пробелы, дефисы, точки и слэш')
-            if not id_study_form:
-                errors.append('Выберите форму обучения')
-            else:
-                valid_form_ids = [str(f['id']) for f in forms]
-                if id_study_form not in valid_form_ids:
-                    errors.append('Выберите корректную форму обучения')
-            if not id_classteach:
-                errors.append('Выберите классного руководителя')
-            else:
-                valid_prepod_ids = [str(p['id']) for p in prepods]
-                if id_classteach not in valid_prepod_ids:
-                    errors.append('Выберите корректного классного руководителя')
-            if not id_spec:
-                errors.append('Выберите специальность')
-            else:
-                valid_spec_ids = [str(s['id']) for s in specs]
-                if id_spec not in valid_spec_ids:
-                    errors.append('Выберите корректную специальность')
-            if errors:
-                for error in errors:
-                    flash(error, 'danger')
-                return render_template('add_info.html',
-                                    funck=funck,
-                                    form_data=request.form,
-                                    studyform_list=forms,
-                                    classteach_list=prepods,
-                                    spec_list=specs,
-                                    session=session)
+                if not id_typeved:
+                    errors.append('Выберите тип ведомости')
+                else:
+                    valid_typeved_ids = [str(t['id']) for t in typesved]
+                    if id_typeved not in valid_typeved_ids:
+                        errors.append('Выберите корректный тип ведомости')
+                
+                if not semester:
+                    errors.append('Укажите семестр')
+                else:
+                    try:
+                        sem = int(semester)
+                        if sem < 1 or sem > 8:
+                            errors.append('Семестр должен быть от 1 до 8')
+                    except ValueError:
+                        errors.append('Семестр должен быть числом')
 
-            conn = get_db_connection()
-            try:
-                existing_group = conn.execute(
-                    'SELECT id_group FROM groups WHERE id_group = ?', 
-                    (group_name,)
-                ).fetchone()
+                if errors:
+                    for error in errors:
+                        flash(error, 'danger')
+                    return render_template('add_info.html',
+                                            funck=funck,   
+                                            workload_list=workload,
+                                            typeved_list=typesved,
+                                            session=session)
 
-                if existing_group:
-                    flash('Такая группа уже существует', 'danger')
+                conn = get_db_connection()
+                try:
+                    existing_statement = conn.execute(
+                        'SELECT id_statement FROM statements WHERE id_load = ?, id_type = ?, semester = ?', 
+                        (id_load, id_typeved, semester)
+                    ).fetchone()
+
+                    if existing_statement:
+                        flash('Такая ведомость уже существует', 'danger')
+                        return render_template('add_info.html',
+                                            funck=funck,
+                                            form_data=request.form,
+                                            workload_list=workload,
+                                            typeved_list=typesved,
+                                            session=session)
+
+                    conn.execute('''
+                        INSERT INTO statements 
+                        (id_discipline, id_type, semester, is_diploma, created_at, status)
+                        VALUES (?, ?, ?, ?, DATE('now'), 1)
+                    ''', (id_load, id_typeved, semester, is_diploma))
+
+                    conn.commit()
+                    flash(f'Ведомость успешно создана!', 'success')
+                    return redirect(url_for('load_table', funck='edit_statement'))
+
+                except sqlite3.Error as e:
+                    conn.rollback()
+                    print(f"!!! SQL ERROR: {e}") 
+                    flash('Ошибка базы данных: {str(e)}', 'danger')
                     return render_template('add_info.html',
                                         funck=funck,
                                         form_data=request.form,
-                                        studyform_list=forms,
-                                        classteach_list=prepods,
-                                        spec_list=specs,
+                                        workload_list=workload,
+                                        typeved_list=typesved,
                                         session=session)
-
-                conn.execute('''
-                    INSERT INTO groups 
-                    (id_group, course_number, id_study_form, id_class_teacher, id_specialty)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (group_name, 1, int(id_study_form), int(id_classteach), id_spec))
-
-                conn.commit()
-                flash(f'Группа "{group_name}" успешно создана!', 'success')
-                return redirect(url_for('load_table', funck='edit_groups'))
-
-            except sqlite3.Error as e:
-                conn.rollback()
-                flash(f'Ошибка базы данных: {str(e)}', 'danger')
-                return render_template('add_info.html',
-                                    funck=funck,
-                                    form_data=request.form,
-                                    studyform_list=forms,
-                                    classteach_list=prepods,
-                                    spec_list=specs,
-                                    session=session)
-            finally:
-                conn.close()
-    
+                finally:
+                    conn.close()
+        
         else:
-            flash('У вас нет прав для добавления специальности', 'danger')
+            flash('У вас нет прав для добавления ведомости', 'danger')
             return redirect(url_for('index'))
 
 
