@@ -534,7 +534,7 @@ def load_table():
                     params.extend([like_pattern, like_pattern, like_pattern, like_pattern])
 
                 # Добавляем сортировку
-                query += ' ORDER BY ay.year_name DESC, d.discipline_name ASC'
+                query += 'ORDER BY ay.year_name DESC, d.discipline_name ASC'
 
                 workload_data = conn.execute(query, params).fetchall()
 
@@ -812,9 +812,20 @@ def load_table():
                         )'''
                     like_pattern = '%' + search_query + '%'
                     params.extend([like_pattern, like_pattern, like_pattern ])
+                
+                # Добавляем сортировку
+                query += ' ORDER BY users.full_name ASC, disciplines.discipline_name ASC'
+
+                # Получаем данные для фильтров
+                groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
+
                 table_info = conn.execute(query, params).fetchall()
                 conn.close()
-                return render_template('load_table.html', table_info=table_info, funck=funck)
+                return render_template('load_table.html', 
+                                       table_info=table_info, 
+                                       funck=funck,
+                                       groups=groups,
+                                       session=session)
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))

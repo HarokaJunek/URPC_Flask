@@ -1019,7 +1019,45 @@ function exportToPDF() {
             </div>
         </div>
     </div>
-    <table class="all-table">
+
+    <!-- Фильтры -->
+    <div class="filters-wrapper">
+        <input type="checkbox" id="toggle-filters" hidden>
+        <div class="filters-header">
+            <label for="toggle-filters" class="filters-toggle-btn">
+                <i class="fas fa-filter"></i> Фильтры
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </label>
+        </div>
+        <div class="filters-panel">
+            <div class="filters-grid">
+                <div class="filter-item">
+                    <label><i class="fas fa-chalkboard-teacher"></i> Преподаватель</label>
+                    <input type="text" class="filter-input" id="filter-teacher" placeholder="ФИО">
+                </div>
+                <div class="filter-item">
+                    <label><i class="fas fa-book"></i> Дисциплина</label>
+                    <input type="text" class="filter-input" id="filter-discipline" placeholder="Название">
+                </div>
+                <div class="filter-item">
+                    <label><i class="fas fa-users"></i> Группа</label>
+                    <select class="filter-select" id="filter-group">
+                        <option value="">Все</option>
+                        {% for group in groups %}
+                        <option value="{{ group.id_group }}">{{ group.id_group }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="filters-actions">
+                <a href="javascript:void(0);" class="apply-filters-btn" onclick="applyFilters()">Применить</a>
+                <a href="javascript:void(0);" class="reset-filters-btn" onclick="resetFilters()">Сбросить</a>
+            </div>
+        </div>
+    </div>
+
+
+    <table class="all-table" id="readable-table">
         <thead>
             <tr>
                 <th>Действия</th>
@@ -1033,7 +1071,12 @@ function exportToPDF() {
         </thead>
         <tbody>
             {% for statement in table_info %}
-            <tr>
+            <tr
+            data-teacher="{{ statement.full_name }}"
+            data-discipline="{{ statement.discipline_name }}"
+            data-group="{{ statement.id_group }}"
+            >
+
                 <td class="actions-cell">
                     <a href="{{ url_for('edit_info', funck='edit_statement', id_statement=statement.id_statement) }}" class="icon-btn edit" title="Редактировать">
                         <i class="fas fa-edit"></i>
@@ -1067,15 +1110,51 @@ function exportToPDF() {
             </tr>
             {% else %}
             <tr>
-                <td colspan="6" style="text-align: center;">Нет данных для отображения</td>
+                <td colspan="7" style="text-align: center;">Нет данных для отображения</td>
             </tr>
             {% endfor %}
         </tbody>
+    <div class="table-footer">
+        <div class="table-info">
+            Всего записей: <span class="total-count">{{ table_info|length }}</span>
+        </div>
+    </div>
     </table>
-</div>
+        </div>
+            <script>
+                function applyFilters() {
+                    const teacherFilter = document.getElementById('filter-teacher').value.toLowerCase();
+                    const disciplineFilter = document.getElementById('filter-discipline').value.toLowerCase();
+                    const groupFilter = document.getElementById('filter-group').value;
 
+                    const rows = document.querySelectorAll('#readable-table tbody tr');
+                    let visibleCount = 0;
+                    rows.forEach(row => {
+                        if (row.cells.length === 1) return;
 
-{% endif %}
+                        let show = true;
+                        if (teacherFilter && !row.dataset.teacher.toLowerCase().includes(teacherFilter)) show = false;
+                        if (disciplineFilter && !row.dataset.discipline.toLowerCase().includes(disciplineFilter)) show = false;
+                        if (groupFilter && row.dataset.group !== groupFilter) show = false;
+
+                        row.style.display = show ? '' : 'none';
+                        if (show) visibleCount++;
+                    });
+
+                    document.querySelector('.total-count').textContent = visibleCount;
+                }
+                function resetFilters() {
+                    document.getElementById('filter-teacher').value = '';
+                    document.getElementById('filter-discipline').value = '';
+                    document.getElementById('filter-group').value = '';
+                    const rows = document.querySelectorAll('#readable-table tbody tr');
+                    rows.forEach(row => {
+                        row.style.display = '';
+                    });
+                    document.querySelector('.total-count').textContent = rows.length;
+                }
+            </script>
+        {% endif %}
     </div>
     {% endif %}
 </div>
