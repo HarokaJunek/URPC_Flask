@@ -655,7 +655,6 @@ def load_table():
                 conn = get_db_connection()
                 query = '''
                     SELECT 
-                        students.id_student,
                         students.full_name,
                         groups.id_group
                     FROM students
@@ -809,13 +808,10 @@ def load_table():
                     query += ''' WHERE (
                         users.full_name LIKE ? OR
                         disciplines.discipline_name LIKE ? OR
-                        workload.id_group LIKE ? OR
-                        statements.semester LIKE ? OR 
-                        statements.status LIKE ? 
+                        workload.id_group LIKE ? 
                         )'''
-                    like_pattern = f'%{search_query}%'
-                    params.extend([like_pattern, like_pattern, like_pattern, like_pattern, like_pattern])
-                query += ' ORDER BY statements.id_statement'
+                    like_pattern = '%' + search_query + '%'
+                    params.extend([like_pattern, like_pattern, like_pattern ])
                 table_info = conn.execute(query, params).fetchall()
                 conn.close()
                 return render_template('load_table.html', table_info=table_info, funck=funck)
@@ -957,35 +953,27 @@ def delete_recording(id):
                 return redirect(url_for('load_table', funck='edit_students'))
             
 
-# ВИДЫ ВЕДОМОСТИ #
-
+# ВИДЫ ВЕДОМОСТИ 
             case 'edit_typesved':
                 if not session.get('is_zav', False):
                     flash('У вас нет прав на удаление типа ведомости.', 'danger')
                     return redirect(url_for('load_table', funck='edit_typesved'))
-
+                
                 conn.execute('DELETE FROM statement_types WHERE id_type = ?', (id,))
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_typesved'))
-            
-
-# ГРУППЫ #
-
+# ГРУППЫ 
             case 'edit_groups':
                 if not (session.get('is_zav', False)):
                     flash('У вас нет прав на удаление группы.', 'danger')
                     return redirect(url_for('load_table', funck='edit_groups'))
-
-                # ИСПРАВЛЕНО: groups -> id_group (название колонки)
+                
                 conn.execute('DELETE FROM groups WHERE id_group = ?', (id,))
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_groups'))
-            
-
-# ФОРМА ОБУЧЕНИЯ #
-
+# ФОРМА ОБУЧЕНИЯ 
             case 'edit_formobuch':
                 if not session.get('is_zav', False):
                     flash('У вас нет прав на удаление формы обучения.', 'danger')
@@ -994,10 +982,8 @@ def delete_recording(id):
                 conn.execute('DELETE FROM study_form WHERE id_form = ?', (id,))
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
-                return redirect(url_for('load_table', funck='edit_formobuch'))
-            
-# СПЕЦИАЛЬНОСТЬ #
-
+                return redirect(url_for('load_table', funck='edit_formobuch'))        
+# СПЕЦИАЛЬНОСТЬ 
             case 'edit_spec':
                 if not session.get('is_zav', False):
                     flash('У вас нет прав на удаление специальности.', 'danger')
@@ -1007,18 +993,16 @@ def delete_recording(id):
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
                 return redirect(url_for('load_table', funck='edit_spec'))
+# ВЕДОМОСТЬ 
+            case 'edit_statement':
+                if not session.get('is_zav', False):
+                    flash('У вас нет прав на удаление ведомости.', 'danger')
+                    return redirect(url_for('load_table', funck='edit_ved'))
 
-            # ==================== ВЕДОМОСТЬ (С ОЦЕНКАМИ) ==================== #
-
-            # case 'edit_ved':
-            #     if not session.get('is_zav', False):
-            #         flash('У вас нет прав на формы обучения.', 'danger')
-            #         return redirect(url_for('load_table', funck='edit_ved'))
-
-            #     conn.execute('DELETE FROM statement WHERE id_statement = ?', (id,))
-            #     conn.commit()
-            #     flash(f'Запись успешно удалена!', 'success')
-            #     return redirect(url_for('load_table', funck='edit_ved'))
+                conn.execute('DELETE FROM statements WHERE id_statement = ?', (id,))
+                conn.commit()
+                flash(f'Запись успешно удалена!', 'success')
+                return redirect(url_for('load_table', funck='edit_statement'))
 
             # Обработка других значений funck (если есть)
             case _:
