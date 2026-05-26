@@ -888,6 +888,7 @@
     {% if session.is_zav %}
     <div class="blocks">
             <h2>👋 Добро пожаловать, {{ session.full_name }}!</h2>
+            <h3 style="margin-top: 40px;">Учебный процесс</h3>
             <div class="banner-grid">
                 <!-- СТУДЕНТЫ -->
                 <a href="{{ url_for('load_table', funck='edit_students') }}" class="banner-card">
@@ -952,8 +953,6 @@
                         <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
                 </a>
-            </div>
-            <div class="banner-grid">
                 <!-- ВЕДОМОСТЬ -->
                 <a href="{{ url_for('load_table', funck='edit_statement') }}" class="banner-card">
                     <div class="banner-icon">
@@ -966,6 +965,49 @@
                     </div>
                 </a>
             </div>
+            <h3 style="margin-top: 40px;">Отчеты</h3>
+            <div class="banner-grid">
+                <!-- ОТЧЕТ ПО ГРУППЕ ЗА СЕМЕСТР -->
+                <a href="{{ url_for('load_table', funck='edit_report') }}" class="banner-card">
+                    <div class="banner-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="banner-content">
+                        <h3>Семестровая успеваемость</h3>
+                        <p>Просмотр оценок по группе за семестр в системе</p>
+                        <span class="banner-link">
+                            Перейти
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </div>
+                </a> 
+                <!-- ИТОГОВАЯ УСПЕВАЕМОСТЬ -->
+                <a href="{{ url_for('load_table', funck='edit_final') }}" class="banner-card">
+                    <div class="banner-icon">
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                    </div>
+                    <div class="banner-content">
+                        <h3>Итоговая успеваемость</h3>
+                        <p>Просмотр итоговой успеваемости в системе</p>
+                        <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a> 
+                <!-- ПРИЛОЖЕНИЕ К ДИПЛОМУ -->
+                <a href="{{ url_for('load_table', funck='edit_pkd') }}" class="banner-card">
+                    <div class="banner-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="banner-content">
+                        <h3>Приложение к диплому</h3>
+                        <p>Просмотр приложения к диплому в системе</p>
+                        <span class="banner-link">
+                            Перейти
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </div>
+                </a> 
+            </div>
+
         </div>
     {% endif %}
 

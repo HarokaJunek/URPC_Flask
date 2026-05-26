@@ -1157,5 +1157,225 @@ function exportToPDF() {
         {% endif %}
     </div>
     {% endif %}
+
+    <!-- ОТЧЕТ ПО ГРУППЕ ЗА СЕМЕСТР
+    {% if funck == 'edit_report' %}
+        <div class="table-responsive">
+            {% if funck == 'edit_report' %}
+                    <div class="table-header">
+                        <h2><i class="fa-solid fa-gear"></i> Управление специальностями</h2>
+                        <div class="table-actions">
+                            <a href="{{ url_for('add_info', funck='edit_report') }}" class="action-btn add-btn">
+                                <i class="fas fa-plus"></i> Добавить специальность
+                            </a>
+                            <div class="search-box">
+                                <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                                    <input type="hidden" name="funck" value="edit_spec">
+                                    <button type="submit" style="display: none;">Найти</button>
+                                </form>
+                                {% if request.args.get('search') and funck == 'edit_spec' %}
+                                    <a href="{{ url_for('load_table', funck='edit_spec') }}" class="clear-search" title="Очистить поиск">
+                                        <i class="fas fa-times-circle"></i>
+                                    </a>
+                                {% else %}
+                                    <i class="fas fa-search"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="all-table">
+                            <thead>
+                                <tr>
+                                    <th>Действия</th>
+                                    <th>Код специальности</th>
+                                    <th>Наименование специальности</th>
+                                    <th>Наименование отделения</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for spec in table_info %}
+                                    <tr>
+                                        <td class="actions-cell">
+                                            <a href="{{ url_for('edit_info', funck='edit_spec', id_specialty=spec.id_specialty) }}" class="icon-btn edit" title="Редактировать">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('delete_recording', id=spec.id_specialty, funck='edit_spec') }}"
+                                            class="icon-btn delete"
+                                            title="Удалить"
+                                            onclick="return confirm('Вы уверены, что хотите удалить специальность {{ spec.id_specialty }}?');">
+                                                    <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                <div class="user-avatar">
+                                                    <i class="fas fa-users"></i>
+                                                </div>
+                                                <span>{{ spec.id_specialty }}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ spec.specialty_name }}</td>
+                                        <td>{{ spec.department_name }}</td>
+                                    </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="11" style="text-align: center;">Нет данных для отображения</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+<!-- ИТОГОВАЯ УСПЕВАЕМОСТЬ -->
+    {% if funck == 'edit_spec' %}
+        <div class="table-responsive">
+            {% if funck == 'edit_spec' %}
+                    <div class="table-header">
+                        <h2><i class="fa-solid fa-gear"></i> Управление специальностями</h2>
+                        <div class="table-actions">
+                            <a href="{{ url_for('add_info', funck='edit_spec') }}" class="action-btn add-btn">
+                                <i class="fas fa-plus"></i> Добавить специальность
+                            </a>
+                            <div class="search-box">
+                                <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                                    <input type="hidden" name="funck" value="edit_spec">
+                                    <button type="submit" style="display: none;">Найти</button>
+                                </form>
+                                {% if request.args.get('search') and funck == 'edit_spec' %}
+                                    <a href="{{ url_for('load_table', funck='edit_spec') }}" class="clear-search" title="Очистить поиск">
+                                        <i class="fas fa-times-circle"></i>
+                                    </a>
+                                {% else %}
+                                    <i class="fas fa-search"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="all-table">
+                            <thead>
+                                <tr>
+                                    <th>Действия</th>
+                                    <th>Код специальности</th>
+                                    <th>Наименование специальности</th>
+                                    <th>Наименование отделения</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for spec in table_info %}
+                                    <tr>
+                                        <td class="actions-cell">
+                                            <a href="{{ url_for('edit_info', funck='edit_spec', id_specialty=spec.id_specialty) }}" class="icon-btn edit" title="Редактировать">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('delete_recording', id=spec.id_specialty, funck='edit_spec') }}"
+                                            class="icon-btn delete"
+                                            title="Удалить"
+                                            onclick="return confirm('Вы уверены, что хотите удалить специальность {{ spec.id_specialty }}?');">
+                                                    <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                <div class="user-avatar">
+                                                    <i class="fas fa-users"></i>
+                                                </div>
+                                                <span>{{ spec.id_specialty }}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ spec.specialty_name }}</td>
+                                        <td>{{ spec.department_name }}</td>
+                                    </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="11" style="text-align: center;">Нет данных для отображения</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+<!-- ПРИЛОЖЕНИЕ К ДИПЛОМУ -->
+    {% if funck == 'edit_spec' %}
+        <div class="table-responsive">
+            {% if funck == 'edit_spec' %}
+                    <div class="table-header">
+                        <h2><i class="fa-solid fa-gear"></i> Управление специальностями</h2>
+                        <div class="table-actions">
+                            <a href="{{ url_for('add_info', funck='edit_spec') }}" class="action-btn add-btn">
+                                <i class="fas fa-plus"></i> Добавить специальность
+                            </a>
+                            <div class="search-box">
+                                <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
+                                    <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
+                                    <input type="hidden" name="funck" value="edit_spec">
+                                    <button type="submit" style="display: none;">Найти</button>
+                                </form>
+                                {% if request.args.get('search') and funck == 'edit_spec' %}
+                                    <a href="{{ url_for('load_table', funck='edit_spec') }}" class="clear-search" title="Очистить поиск">
+                                        <i class="fas fa-times-circle"></i>
+                                    </a>
+                                {% else %}
+                                    <i class="fas fa-search"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="all-table">
+                            <thead>
+                                <tr>
+                                    <th>Действия</th>
+                                    <th>Код специальности</th>
+                                    <th>Наименование специальности</th>
+                                    <th>Наименование отделения</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for spec in table_info %}
+                                    <tr>
+                                        <td class="actions-cell">
+                                            <a href="{{ url_for('edit_info', funck='edit_spec', id_specialty=spec.id_specialty) }}" class="icon-btn edit" title="Редактировать">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('delete_recording', id=spec.id_specialty, funck='edit_spec') }}"
+                                            class="icon-btn delete"
+                                            title="Удалить"
+                                            onclick="return confirm('Вы уверены, что хотите удалить специальность {{ spec.id_specialty }}?');">
+                                                    <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                <div class="user-avatar">
+                                                    <i class="fas fa-users"></i>
+                                                </div>
+                                                <span>{{ spec.id_specialty }}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ spec.specialty_name }}</td>
+                                        <td>{{ spec.department_name }}</td>
+                                    </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="11" style="text-align: center;">Нет данных для отображения</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %} -->
+
 </div>
 {% endblock %}
