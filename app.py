@@ -2060,7 +2060,8 @@ def add_info():
                 conn = get_db_connection()
                 try:
                     existing_statement = conn.execute(
-                        'SELECT id_statement FROM statements WHERE id_load = ?, id_type = ?, semester = ?', 
+                        '''SELECT id_statement FROM statements 
+                        WHERE id_discipline = ? AND id_type = ? AND semester = ?''', 
                         (id_load, id_typeved, semester)
                     ).fetchone()
 
