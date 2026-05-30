@@ -954,7 +954,7 @@
                     </div>
                 </a>
                 <!-- ВЕДОМОСТЬ -->
-                <a href="{{ url_for('load_table', funck='edit_statement') }}" class="banner-card">
+                <a href="{{ url_for('load_table', funck='edit_statement', status=0)}}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
@@ -967,20 +967,20 @@
             </div>
             <h3 style="margin-top: 40px;">Отчеты</h3>
             <div class="banner-grid"> 
-                <!-- ИТОГОВАЯ УСПЕВАЕМОСТЬ -->
-                <a href="{{ url_for('load_report', funck='edit_stat') }}" class="banner-card">
+                <!-- ИТОГОВАЯ ВЕДОМОСТЬ -->
+                <a href="{{ url_for('load_table', funck='edit_statement', status=1) }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
                     <div class="banner-content">
-                        <h3>Ведомость</h3>
+                        <h3>Ведомости</h3>
                         <p>Просмотр ведомостей в системе</p>
                         <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
                 </a> 
 
                 <!-- ИТОГОВАЯ УСПЕВАЕМОСТЬ -->
-                <a href="{{ url_for('load_table', funck='edit_final') }}" class="banner-card">
+                <a href="{{ url_for('load_table', funck='edit_semester_report') }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
@@ -991,7 +991,7 @@
                     </div>
                 </a> 
                 <!-- ПРИЛОЖЕНИЕ К ДИПЛОМУ -->
-                <a href="{{ url_for('load_table', funck='edit_pkd') }}" class="banner-card">
+                <a href="{{ url_for('load_table', funck='edit_diploma_report') }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fas fa-users"></i>
                     </div>

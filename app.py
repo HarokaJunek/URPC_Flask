@@ -793,19 +793,22 @@ def load_table():
                         statements.semester, 
                         statements.status
                     FROM statements
+
                     INNER JOIN workload ON statements.id_discipline = workload.id_load
                     INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
                     INNER JOIN users ON workload.id_teacher = users.id_user
                     '''
                 params = []
-                if search_query:
-                    query += ''' WHERE (
-                        users.full_name LIKE ? OR
-                        disciplines.discipline_name LIKE ? OR
-                        workload.id_group LIKE ? 
-                        )'''
+                
+                # Фильтрация по статусу
+                status_filter = request.args.get('status', '')
+                if status_filter:
+                    query += ' WHERE statements.status = ?'
+                    params.append(status_filter)
+                elif search_query:
+                    query += ' WHERE (users.full_name LIKE ? OR disciplines.discipline_name LIKE ? OR workload.id_group LIKE ?)'
                     like_pattern = '%' + search_query + '%'
-                    params.extend([like_pattern, like_pattern, like_pattern ])
+                    params.extend([like_pattern, like_pattern, like_pattern])
                 
                 # Добавляем сортировку
                 query += ' ORDER BY users.full_name ASC, disciplines.discipline_name ASC'
@@ -816,13 +819,14 @@ def load_table():
                 table_info = conn.execute(query, params).fetchall()
                 conn.close()
                 return render_template('load_table.html', 
-                                       table_info=table_info, 
-                                       funck=funck,
-                                       groups=groups,
-                                       session=session)
+                                    table_info=table_info, 
+                                    funck=funck,
+                                    groups=groups,
+                                    session=session)
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
+            
         # Обработка других значений funck (если есть)
         case _:
             # Обработка неизвестного параметра функции
@@ -3222,7 +3226,7 @@ def edit_info():
                 flash('У вас нет прав доступа.', 'danger')
                 return redirect(url_for('index'))
 
-# СПЕЦИАЛЬНОСТЬ #
+# СПЕЦИАЛЬНОСТЬ 
 
         case 'edit_spec':
             if session.get('is_zav', False):
@@ -3355,7 +3359,10 @@ def edit_info():
                             workload.id_group,
                             statements.semester,
                             disciplines.discipline_name,
-                            users.full_name
+                            users.full_name,
+                            statements.status,   
+                            statements.excused,
+                            statements.unexcused   
                             FROM statements
                             LEFT JOIN workload ON statements.id_discipline = workload.id_load
                             LEFT JOIN academic_year ON workload.id_year = academic_year.id_year
@@ -3445,7 +3452,10 @@ def edit_info():
                                 workload.id_group,
                                 statements.semester,
                                 disciplines.discipline_name,
-                                users.full_name
+                                users.full_name,
+                                statements.status,   
+                                statements.excused,
+                                statements.unexcused   
                                 FROM statements
                                 INNER JOIN workload ON statements.id_discipline = workload.id_load
                                 INNER JOIN academic_year ON workload.id_year = academic_year.id_year
