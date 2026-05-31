@@ -979,8 +979,8 @@
                     </div>
                 </a> 
 
-                <!-- ИТОГОВАЯ УСПЕВАЕМОСТЬ -->
-                <a href="{{ url_for('load_table', funck='edit_semester_report') }}" class="banner-card">
+                <!-- УСПЕВАЕМОСТЬ -->
+                <a href="{{ url_for('load_table', funck='edit_report', is_diploma=0) }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
@@ -991,7 +991,7 @@
                     </div>
                 </a> 
                 <!-- ПРИЛОЖЕНИЕ К ДИПЛОМУ -->
-                <a href="{{ url_for('load_table', funck='edit_diploma_report') }}" class="banner-card">
+                <a href="{{ url_for('load_table', funck='edit_report', is_diploma=1) }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fas fa-users"></i>
                     </div>

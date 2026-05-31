@@ -1155,7 +1155,126 @@ function exportToPDF() {
                 }
             </script>
         {% endif %}
-    </div>
+
+<!-- УСПЕВАЕМОСТЬ -->
+ {% if funck == 'edit_report' %}
+        <div class="table-responsive">
+            <div class="table-header">
+                <h2><i class="fa-solid fa-gear"></i> Итоговая успеваемость</h2>
+
+            <!-- Фильтры -->
+            <form method = "get" action="{{ url_for('load_table', funck='edit_report') }}">
+                <input type="hidden" name="funck" value="edit_report">
+                <div class="filters-wrapper">
+                    <input type="checkbox" id="toggle-filters" hidden>
+                    <div class="filters-header">
+                        <label for="toggle-filters" class="filters-toggle-btn">
+                            <i class="fas fa-filter"></i> Фильтры
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </label>
+                    </div>
+                    <div class="filters-panel">
+                        <div class="filters-grid">
+                            <div class="filter-item">
+                                <label><i class="fas fa-users"></i> Группа</label>
+                                <select class="filter-select" id="filter-group" name="group">
+                                    <option value="">Все</option>
+                                    {% for group in groups %}
+                                    <option value="{{ group.id_group }}">{{ group.id_group }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label><i class="fas fa-users"></i> Семестр</label>
+                            <select class="filter-select" id="filter-semester" name="semester">
+                                <option value="">Все</option>
+                                {% for i in range(1, 9) %}
+                                <option value="{{ i }}">{{ i }} семестр</option>
+                                {% endfor %}
+                            </select>
+                            </div>
+                        </div>
+                        <div class="filters-actions">
+                            <button type="submit" class="apply-filters-btn">Сформировать</button>
+                            <a href="{{ url_for('load_table', funck='edit_report') }}" class="reset-filters-btn">Сбросить</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+                <table class="all-table">
+                    <thead>
+                        <!-- Верхний уровень: семестр -->
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th colspan="2">{{ semester_filter }} семестр</th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            {% for type in control_types %}
+                            <th colspan="{{ type.disciplines|length }}">{{ type.name or '—' }}</th>
+                            {% endfor %}
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <th>№ п/п</th>
+                            <th>ФИО студента</th>
+                            {% for type in control_types %}
+                            {% for discipline in type.disciplines %}
+                            <th>{{ discipline.name  or '—' }}</th>
+                            {% endfor %}
+                            {% endfor %}
+                            <th></th>
+                        </tr>
+                        <!-- Третий уровень: средний балл по дисциплине -->
+                        <tr>
+                            <th style="text-align: right;">Ср. балл</th>
+                            <th>по дисциплине</th>
+                            {% for type in control_types %}
+                            {% for discipline in type.disciplines %}
+                            <th>{{ discipline.avg_grade }}</th>
+                            {% endfor %}
+                            {% endfor %}
+                            <th>Ср. балл по студента</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ student.full_name }}</td>
+                            {% for type in control_types %}
+                            {% for discipline in type.disciplines %}
+                            <td>{{ student.grades.get(discipline.id, '—') }}</td>
+                            {% endfor %}
+                            {% endfor %}
+                            <td>{{ student.avg_grade }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="{{ total_cols + 3 }}" style="text-align: center;">Нет данных для отображения</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- Кнопки действий -->
+            <div class="export-buttons">
+                <button class="export-btn" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="export-btn" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+            </div>
+            </div>
+            <script>
+                function exportToExcel() {
+                    alert('Экспорт в Excel будет реализован');
+                }
+                function exportToPDF() {
+                    alert('Экспорт в PDF будет реализован');
+                }
+            </script>
+        </div>
+    {% endif %}
     {% endif %}
 </div>
 {% endblock %}

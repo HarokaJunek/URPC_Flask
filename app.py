@@ -826,7 +826,112 @@ def load_table():
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
-            
+
+# УСПЕВАЕМОСТЬ
+        case 'edit_report':
+            if (session.get('is_zav', False)):
+                group_filter = request.args.get('group', '')
+                semester_filter = request.args.get('semester', '')
+                table_info = []
+                
+                conn = get_db_connection()
+                groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
+                if group_filter and semester_filter:
+                    print(f"DEBUG: group_filter = '{group_filter}', semester_filter = '{semester_filter}'")
+                    table_info = conn.execute('''
+                        SELECT 
+                            students.id_student,
+                            students.full_name, 
+                            grades.grade,
+                            disciplines.discipline_name, 
+                            workload.id_group, 
+                            statements.semester,
+                            statement_types.type_name
+                        FROM students
+                        INNER JOIN grades ON students.id_student = grades.id_student
+                        INNER JOIN statements ON grades.id_statement = statements.id_statement
+                        INNER JOIN statement_types ON statements.id_type = statement_types.id_type
+                        INNER JOIN workload ON statements.id_discipline = workload.id_load
+                        INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+                        WHERE workload.id_group = ?
+                        AND statements.semester = ?
+                        ''', (group_filter, semester_filter)).fetchall()
+                    print(f"DEBUG: table_info = {table_info}")
+                else:
+                    table_info = []
+                print(table_info)
+
+                # Подготавливаем control_types для сложной шапки
+                control_types_dict = {}
+                for row in table_info:
+                    type_name = row['type_name'] or 'Без типа'
+                    disc_name = row['discipline_name']
+                    
+                    if type_name not in control_types_dict:
+                        control_types_dict[type_name] = []
+                    
+                    # Проверяем, нет ли уже такой дисциплины в этом типе
+                    if disc_name not in [d['name'] for d in control_types_dict[type_name]]:
+                        control_types_dict[type_name].append({
+                            'id': disc_name, 
+                            'name': disc_name, 
+                            'avg_grade': 0
+                        })
+
+                # Преобразуем в список для шаблона
+                control_types = []
+                total_cols = 0
+                for type_name, discs in control_types_dict.items():
+                    control_types.append({
+                        'name': type_name,
+                        'disciplines': discs
+                    })
+                    total_cols += len(discs)
+
+                # Группируем оценки по студентам
+                students_dict = {}
+                for row in table_info:
+                    sid = row['id_student']
+                    if sid not in students_dict:
+                        students_dict[sid] = {
+                            'full_name': row['full_name'], 
+                            'grades': {}
+                        }
+                    students_dict[sid]['grades'][row['discipline_name']] = row['grade']
+
+                # Считаем средний балл для каждого студента
+                students = []
+                for sid, s_data in students_dict.items():
+                    grades_list = [g if g != 0 else 1 for g in s_data['grades'].values() if g is not None]
+                    avg = round(sum(grades_list) / len(grades_list), 2) if grades_list else 0
+                    s_data['avg_grade'] = avg
+                    students.append(s_data)
+                
+                # Считаем средний балл по каждой дисциплине
+                for type_item in control_types:
+                    for disc in type_item['disciplines']:
+                        all_grades = []
+                        for student in students:
+                            grade = student['grades'].get(disc['id'], None)
+                            if grade is not None:
+                                if grade == 0:
+                                    all_grades.append(1)
+                                elif grade > 0:
+                                    all_grades.append(grade)
+                        disc['avg_grade'] = round(sum(all_grades) / len(all_grades), 2) if all_grades else 0
+                # Передаём в шаблон
+                return render_template('load_table.html', 
+                        funck=funck, 
+                        groups=groups, 
+                        students=students, 
+                        control_types=control_types,
+                        total_cols=total_cols,
+                        semester_filter=semester_filter,
+                        session=session)
+            else:
+                flash('У вас нет прав доступа к этому разделу.', 'danger')
+                return redirect(url_for('index'))
+                
         # Обработка других значений funck (если есть)
         case _:
             # Обработка неизвестного параметра функции
