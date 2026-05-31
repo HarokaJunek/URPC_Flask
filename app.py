@@ -832,13 +832,13 @@ def load_table():
             if (session.get('is_zav', False)):
                 group_filter = request.args.get('group', '')
                 semester_filter = request.args.get('semester', '')
+                is_diploma = request.args.get('is_diploma', '')
                 table_info = []
                 
                 conn = get_db_connection()
                 groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
                 if group_filter and semester_filter:
-                    print(f"DEBUG: group_filter = '{group_filter}', semester_filter = '{semester_filter}'")
-                    table_info = conn.execute('''
+                    query = '''
                         SELECT 
                             students.id_student,
                             students.full_name, 
@@ -855,11 +855,15 @@ def load_table():
                         INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
                         WHERE workload.id_group = ?
                         AND statements.semester = ?
-                        ''', (group_filter, semester_filter)).fetchall()
-                    print(f"DEBUG: table_info = {table_info}")
+                    '''
+                    params = [group_filter, semester_filter]
+                    
+                    if is_diploma:
+                        query += ' AND statements.is_diploma = 1'
+                    
+                    table_info = conn.execute(query, params).fetchall()
                 else:
                     table_info = []
-                print(table_info)
 
                 # Подготавливаем control_types для сложной шапки
                 control_types_dict = {}
