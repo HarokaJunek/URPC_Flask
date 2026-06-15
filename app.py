@@ -1596,7 +1596,7 @@ def add_info():
                     conn.commit()
                     conn.close()
 
-                    flash('Нагрузка успешно добавлена!', 'success')
+                    flash('Запись успешно добавлена!', 'success')
                     return redirect(url_for('load_table', funck='edit_nagruzka'))
 
                 except Exception as e:
