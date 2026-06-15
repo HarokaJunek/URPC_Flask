@@ -20,7 +20,7 @@ app = Flask(__name__)
 app.secret_key = 'your-secret-key-123-change-this'
 
 # База будет искаться в папке instance рядом с main.py
-DATABASE = os.path.join('instance', 'nagruzka_DEMO.db')
+DATABASE = os.path.join('instance', 'nagruzka_DEMO (1).db')
 
 
 # ============================================================================
@@ -1463,6 +1463,147 @@ def add_info():
                 conn.close()
         else:
             flash('У вас нет прав для добавления дисциплины', 'danger')
+            return redirect(url_for('index'))
+
+    # ДОБАВЛЕНИЕ НАГРУЗКИ
+    if funck == 'edit_nagruzka':
+        if session.get('is_specialist', False):
+            # Вспомогательные функции для загрузки данных из БД
+            def get_academic_years():
+                conn = get_db_connection()
+                rows = conn.execute(
+                    'SELECT id_year, year_name, winter_week, summer_week FROM academic_year ORDER BY year_name').fetchall()
+                conn.close()
+                return [{'id_year': row['id_year'], 'year_name': row['year_name'],
+                         'winter_week': row['winter_week'], 'summer_week': row['summer_week']} for row in rows]
+
+            def get_teachers():
+                conn = get_db_connection()
+                rows = conn.execute(
+                    'SELECT id_user, full_name FROM users WHERE id_role = 4 ORDER BY full_name').fetchall()
+                conn.close()
+                return [{'id_user': row['id_user'], 'full_name': row['full_name']} for row in rows]
+
+            def get_groups():
+                conn = get_db_connection()
+                rows = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
+                conn.close()
+                return [{'id_group': row['id_group']} for row in rows]
+
+            def get_disciplines():
+                conn = get_db_connection()
+                rows = conn.execute(
+                    'SELECT id_discipline, discipline_name FROM disciplines ORDER BY discipline_name').fetchall()
+                conn.close()
+                return [{'id_discipline': row['id_discipline'], 'discipline_name': row['discipline_name']} for row in
+                        rows]
+
+            def get_fgos_list():
+                conn = get_db_connection()
+                rows = conn.execute('SELECT id_fgos, name FROM fgoss ORDER BY name').fetchall()
+                conn.close()
+                return [{'id_fgos': row['id_fgos'], 'name': row['name']} for row in rows]
+
+            # GET-запрос: показываем форму
+            if request.method == 'GET':
+                academic_years = get_academic_years()
+                teachers = get_teachers()
+                groups = get_groups()
+                disciplines = get_disciplines()
+                fgos_list = get_fgos_list()
+
+                return render_template('add_info.html',
+                                       funck=funck,
+                                       academic_years=academic_years,
+                                       teachers=teachers,
+                                       groups=groups,
+                                       disciplines=disciplines,
+                                       fgos_list=fgos_list)
+
+            # POST-запрос: обработка отправленной формы
+            if request.method == 'POST':
+                try:
+                    # Получаем данные из формы
+                    id_year = request.form.get('id_year')
+                    id_teacher = request.form.get('id_teacher')
+                    id_group = request.form.get('id_group')
+                    id_discipline = request.form.get('id_discipline')
+                    id_fgos = request.form.get('id_fgos')
+
+                    # Получаем weeks_winter и weeks_summer из формы (теперь они скрытые поля)
+                    weeks_winter = int(request.form.get('weeks_winter', 0))
+                    weeks_summer = int(request.form.get('weeks_summer', 0))
+
+                    # Зимний семестр
+                    independent_winter = int(request.form.get('independent_winter', 0))
+                    consultations_winter = int(request.form.get('consultations_winter', 0))
+                    lectures_winter = int(request.form.get('lectures_winter', 0))
+                    practice_winter = int(request.form.get('practice_winter', 0))
+                    labs_winter = int(request.form.get('labs_winter', 0))
+                    seminars_winter = int(request.form.get('seminars_winter', 0))
+                    course_project_winter = int(request.form.get('course_project_winter', 0))
+                    attestation_winter = int(request.form.get('attestation_winter', 0))
+
+                    # Летний семестр
+                    independent_summer = int(request.form.get('independent_summer', 0))
+                    consultations_summer = int(request.form.get('consultations_summer', 0))
+                    lectures_summer = int(request.form.get('lectures_summer', 0))
+                    practice_summer = int(request.form.get('practice_summer', 0))
+                    labs_summer = int(request.form.get('labs_summer', 0))
+                    seminars_summer = int(request.form.get('seminars_summer', 0))
+                    course_project_summer = int(request.form.get('course_project_summer', 0))
+                    attestation_summer = int(request.form.get('attestation_summer', 0))
+
+                    # Валидация
+                    if not all([id_year, id_teacher, id_group, id_discipline, id_fgos]):
+                        flash('Заполните все обязательные поля', 'danger')
+                        return redirect(url_for('add_info', funck='edit_nagruzka'))
+
+                    conn = get_db_connection()
+
+                    # Проверка на дубликат
+                    existing = conn.execute('''
+                        SELECT id_load FROM workload 
+                        WHERE id_year = ? AND id_teacher = ? AND id_group = ? AND id_discipline = ?
+                    ''', (id_year, id_teacher, id_group, id_discipline)).fetchone()
+
+                    if existing:
+                        flash('Такая запись нагрузки уже существует для данной дисциплины, группы и преподавателя',
+                              'danger')
+                        conn.close()
+                        return redirect(url_for('add_info', funck='edit_nagruzka'))
+
+                    # Вставка новой записи (без weeks_winter и weeks_summer, они опциональны)
+                    conn.execute('''
+                        INSERT INTO workload (
+                            id_year, id_teacher, id_group, id_discipline, id_fgos,
+                            weeks_winter, independent_winter, consultations_winter, 
+                            lectures_winter, practice_winter, labs_winter, seminars_winter, 
+                            course_project_winter, attestation_winter,
+                            weeks_summer, independent_summer, consultations_summer,
+                            lectures_summer, practice_summer, labs_summer, seminars_summer,
+                            course_project_summer, attestation_summer
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        id_year, id_teacher, id_group, id_discipline, id_fgos,
+                        weeks_winter, independent_winter, consultations_winter,
+                        lectures_winter, practice_winter, labs_winter, seminars_winter,
+                        course_project_winter, attestation_winter,
+                        weeks_summer, independent_summer, consultations_summer,
+                        lectures_summer, practice_summer, labs_summer, seminars_summer,
+                        course_project_summer, attestation_summer
+                    ))
+                    conn.commit()
+                    conn.close()
+
+                    flash('Нагрузка успешно добавлена!', 'success')
+                    return redirect(url_for('load_table', funck='edit_nagruzka'))
+
+                except Exception as e:
+                    flash(f'Ошибка при добавлении нагрузки: {str(e)}', 'danger')
+                    return redirect(url_for('add_info', funck='edit_nagruzka'))
+        else:
+            flash('У вас нет прав для добавления нагрузки', 'danger')
             return redirect(url_for('index'))
 
     if funck == 'edit_years':

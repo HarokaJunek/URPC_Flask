@@ -193,187 +193,368 @@
 </script>
 {% endif %}
 
-    {% if funck == 'edit_disciplines' %}
-    <div class="blocks">
-        <div class="edit-form-container">
-            <div class="form-header">
-                {% if session.is_specialist %}
-                    <h2><i class="fas fa-edit"></i> Добавление дисциплины в систему</h2>
-                {% endif %}
-            </div>
-            <form method="POST" action="{{ url_for('add_info', funck='edit_disciplines') }}" class="edit-form">
-                <div class="form-group">
-                    <label for="discipline_id" class="required">
-                        <i class="fas fa-hashtag"></i> ID дисциплины
-                    </label>
-                    <input type="text" id="discipline_id" name="discipline_id"
-                           placeholder="Например: СГ.01"
-                           value="{{ form_data.get('discipline_id', '') if form_data else '' }}">
-                    <div class="form-hint">Буквы (русские/латинские), цифры и точки (макс. 50 символов)</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="discipline_name" class="required">
-                        <i class="fas fa-book"></i> Название дисциплины
-                    </label>
-                    <input type="text" id="discipline_name" name="discipline_name"
-                           placeholder="Введите полное название дисциплины"
-                           value="{{ form_data.get('discipline_name', '') if form_data else '' }}">
-                    <div class="form-hint">Например: Высшая математика, Программирование и т.д.</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="id_pck" class="required">
-                        <i class="fas fa-chalkboard-teacher"></i> ПЦК (Предметно-цикловая комиссия)
-                    </label>
-                    <div class="select-wrapper">
-                        <select id="id_pck" name="id_pck" required>
-                            <option value="" disabled {% if not form_data or not form_data.get('id_pck') %}selected{% endif %}>Выберите ПЦК</option>
-                            {% if pck_list %}
-                                {% for pck in pck_list %}
-                                    <option value="{{ pck.id }}"
-                                        {% if form_data and form_data.get('id_pck')|int == pck.id %}selected{% endif %}>
-                                        {{ pck.name }}
+    {% if funck == 'edit_nagruzka' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-plus-circle"></i> Добавление учебной нагрузки</h2>
+        </div>
+        <form method="POST" action="{{ url_for('add_info', funck='edit_nagruzka') }}" class="edit-form">
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3>Основная информация</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_year" class="required">Год обучения</label>
+                        <div class="select-wrapper">
+                            <select id="id_year" name="id_year" required>
+                                <option value="" disabled selected>Выберите год обучения</option>
+                                {% for year in academic_years %}
+                                    <option value="{{ year.id_year }}"
+                                            data-winter-week="{{ year.winter_week }}"
+                                            data-summer-week="{{ year.summer_week }}">
+                                        {{ year.year_name }}
                                     </option>
                                 {% endfor %}
-                            {% else %}
-                                <option value="" disabled>Нет доступных ПЦК</option>
-                            {% endif %}
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
                     </div>
-                    <div class="form-hint">Выберите предметно-цикловую комиссию, к которой относится дисциплина</div>
+
+                    <div class="form-group">
+                        <label for="id_teacher" class="required">Преподаватель</label>
+                        <div class="select-wrapper">
+                            <select id="id_teacher" name="id_teacher" required>
+                                <option value="" disabled selected>Выберите преподавателя</option>
+                                {% for teacher in teachers %}
+                                    <option value="{{ teacher.id_user }}">{{ teacher.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_group" class="required">Группа</label>
+                        <div class="select-wrapper">
+                            <select id="id_group" name="id_group" required>
+                                <option value="" disabled selected>Выберите группу</option>
+                                {% for group in groups %}
+                                    <option value="{{ group.id_group }}">{{ group.id_group }}</option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
                 </div>
 
-                <button type="submit" id="submitBtn">Создать дисциплину</button>
-            </form>
-        </div>
-    </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_discipline" class="required">Дисциплина</label>
+                        <div class="select-wrapper">
+                            <select id="id_discipline" name="id_discipline" required>
+                                <option value="" disabled selected>Выберите дисциплину</option>
+                                {% for discipline in disciplines %}
+                                    <option value="{{ discipline.id_discipline }}">{{ discipline.discipline_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const disciplineIdInput = document.getElementById('discipline_id');
-            const disciplineNameInput = document.getElementById('discipline_name');
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (disciplineIdInput) {
-                disciplineIdInput.addEventListener('input', function(e) {
-                    let value = e.target.value;
-                    let cleaned = value.replace(/[^а-яА-Яa-zA-Z0-9.]/g, '');
-                    if (cleaned !== value) {
-                        e.target.value = cleaned;
-                    }
-                    if (cleaned.length > 50) {
-                        e.target.value = cleaned.substring(0, 50);
-                    }
-                });
-            }
-
-            if (disciplineNameInput) {
-                disciplineNameInput.addEventListener('input', function(e) {
-                    if (e.target.value.length > 50) {
-                        e.target.value = e.target.value.substring(0, 50);
-                    }
-                });
-            }
-
-            if (submitBtn) {
-                submitBtn.addEventListener('click', function(e) {
-                    const disciplineId = disciplineIdInput ? disciplineIdInput.value.trim() : '';
-                    const disciplineName = disciplineNameInput ? disciplineNameInput.value.trim() : '';
-                    const idPckSelect = document.getElementById('id_pck');
-                    const idPck = idPckSelect ? idPckSelect.value : '';
-
-                    let errors = [];
-
-                    if (!disciplineId) {
-                        errors.push('Пожалуйста, укажите ID дисциплины');
-                    } else if (disciplineId.length > 50) {
-                        errors.push('ID дисциплины не может быть длиннее 50 символов');
-                    } else if (!/^[а-яА-Яa-zA-Z0-9.]+$/.test(disciplineId)) {
-                        errors.push('ID дисциплины может содержать только буквы (русские/латинские), цифры и точки');
-                    }
-
-                    if (!disciplineName) {
-                        errors.push('Пожалуйста, укажите название дисциплины');
-                    } else if (disciplineName.length > 50) {
-                        errors.push('Название дисциплины не может быть длиннее 50 символов');
-                    }
-
-                    if (!idPck) {
-                        errors.push('Пожалуйста, выберите ПЦК');
-                    }
-
-                    if (errors.length > 0) {
-                        e.preventDefault();
-                        alert(errors.join('\n'));
-                    }
-                });
-            }
-        });
-    </script>
-    {% endif %}
-
-    {% if funck == 'edit_years' %}
-    <div class="blocks">
-        <div class="edit-form-container">
-            <div class="form-header">
-                {% if session.is_specialist %}
-                    <h2><i class="fas fa-calendar-alt"></i> Добавление учебного года в систему</h2>
-                {% endif %}
+                    <div class="form-group">
+                        <label for="id_fgos" class="required">ФГОС</label>
+                        <div class="select-wrapper">
+                            <select id="id_fgos" name="id_fgos" required>
+                                <option value="" disabled selected>Выберите ФГОС</option>
+                                {% for fgos in fgos_list %}
+                                    <option value="{{ fgos.id_fgos }}">{{ fgos.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <form method="POST" action="{{ url_for('add_info', funck='edit_years') }}" class="edit-form">
-                <div class="form-group">
-                    <label for="year_name" class="required">
-                        <i class="fas fa-calendar-alt"></i> Учебный год
-                    </label>
-                    <input type="text" id="year_name" name="year_name"
-                           placeholder="Формат: ГГГГ-ГГГГ"
-                           value="{{ form_data.get('year_name', '') if form_data else '' }}">
-                    <div class="form-hint">Например: 2023-2024</div>
+
+            <!-- Скрытые поля для weeks_winter и weeks_summer -->
+            <input type="hidden" id="weeks_winter" name="weeks_winter" value="0">
+            <input type="hidden" id="weeks_summer" name="weeks_summer" value="0">
+
+            <!-- Информация о неделях (только для отображения) -->
+            <div class="form-section">
+                <h3>Информация о семестрах</h3>
+                <div class="info-panel" id="weeksInfo">
+                    <p>Выберите год обучения, чтобы увидеть количество недель</p>
                 </div>
+            </div>
 
-                <button type="submit" id="submitBtn">Создать учебный год</button>
-            </form>
-        </div>
+            <!-- Зимний семестр -->
+            <div class="form-section">
+                <h3>Зимний семестр</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Самостоятельная работа</label>
+                        <input type="number" name="independent_winter" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Консультации</label>
+                        <input type="number" name="consultations_winter" class="form-control" value="0" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Лекции</label>
+                        <input type="number" name="lectures_winter" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Практические занятия</label>
+                        <input type="number" name="practice_winter" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Лабораторные занятия</label>
+                        <input type="number" name="labs_winter" class="form-control" value="0" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Семинарские занятия</label>
+                        <input type="number" name="seminars_winter" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Курсовой проект</label>
+                        <input type="number" name="course_project_winter" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Аттестация</label>
+                        <input type="number" name="attestation_winter" class="form-control" value="0" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Летний семестр -->
+            <div class="form-section">
+                <h3>Летний семестр</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Самостоятельная работа</label>
+                        <input type="number" name="independent_summer" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Консультации</label>
+                        <input type="number" name="consultations_summer" class="form-control" value="0" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Лекции</label>
+                        <input type="number" name="lectures_summer" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Практические занятия</label>
+                        <input type="number" name="practice_summer" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Лабораторные занятия</label>
+                        <input type="number" name="labs_summer" class="form-control" value="0" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Семинарские занятия</label>
+                        <input type="number" name="seminars_summer" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Курсовой проект</label>
+                        <input type="number" name="course_project_summer" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Аттестация</label>
+                        <input type="number" name="attestation_summer" class="form-control" value="0" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">Добавить нагрузку</button>
+            <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="cancel-btn">Отмена</a>
+        </form>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const yearNameInput = document.getElementById('year_name');
-            const submitBtn = document.getElementById('submitBtn');
+<style>
+.form-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid #e0e0e0;
+}
+.form-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.2rem;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.form-group input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+.form-group input[type="number"]:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+.select-wrapper {
+    position: relative;
+}
+.select-wrapper select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    appearance: none;
+    background: white;
+}
+.select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #666;
+}
+.required:after {
+    content: " *";
+    color: red;
+}
+.info-panel {
+    background: #e7f3ff;
+    border-left: 4px solid #007bff;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #004085;
+}
+.info-panel strong {
+    color: #007bff;
+}
+button[type="submit"] {
+    background: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px;
+}
+button[type="submit"]:hover {
+    background: #0056b3;
+}
+.cancel-btn {
+    background: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+    display: inline-block;
+}
+.cancel-btn:hover {
+    background: #545b62;
+    color: white;
+}
+</style>
 
-            if (yearNameInput) {
-                yearNameInput.addEventListener('input', function(e) {
-                    if (e.target.value.length > 50) {
-                        e.target.value = e.target.value.substring(0, 50);
-                    }
-                });
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitBtn = document.getElementById('submitBtn');
+        const yearSelect = document.getElementById('id_year');
+        const weeksWinterInput = document.getElementById('weeks_winter');
+        const weeksSummerInput = document.getElementById('weeks_summer');
+        const weeksInfoDiv = document.getElementById('weeksInfo');
+
+        // Функция обновления информации о неделях
+        function updateWeeksInfo() {
+            const selectedOption = yearSelect.options[yearSelect.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                const winterWeek = selectedOption.getAttribute('data-winter-week') || 0;
+                const summerWeek = selectedOption.getAttribute('data-summer-week') || 0;
+
+                // Устанавливаем значения в скрытые поля
+                weeksWinterInput.value = winterWeek;
+                weeksSummerInput.value = summerWeek;
+
+                // Отображаем информацию для пользователя
+                weeksInfoDiv.innerHTML = `
+                    <strong>✓ Количество недель в семестрах:</strong><br>
+                    Зимний семестр: ${winterWeek} недель<br>
+                    Летний семестр: ${summerWeek} недель
+                `;
+            } else {
+                weeksWinterInput.value = '0';
+                weeksSummerInput.value = '0';
+                weeksInfoDiv.innerHTML = '<p>Выберите год обучения, чтобы увидеть количество недель</p>';
             }
+        }
 
-            if (submitBtn) {
-                submitBtn.addEventListener('click', function(e) {
-                    const yearName = yearNameInput ? yearNameInput.value.trim() : '';
+        // Слушаем изменение выбора года
+        if (yearSelect) {
+            yearSelect.addEventListener('change', updateWeeksInfo);
 
-                    let errors = [];
-
-                    if (!yearName) {
-                        errors.push('Пожалуйста, укажите название учебного года');
-                    } else if (yearName.length > 50) {
-                        errors.push('Название учебного года не может быть длиннее 50 символов');
-                    } else if (!/^\d{4}-\d{4}$/.test(yearName)) {
-                        errors.push('Название учебного года должно быть в формате ГГГГ-ГГГГ (например, 2023-2024)');
-                    }
-
-                    if (errors.length > 0) {
-                        e.preventDefault();
-                        alert(errors.join('\n'));
-                    }
-                });
+            // Если год уже выбран, обновляем информацию
+            if (yearSelect.value) {
+                updateWeeksInfo();
             }
-        });
-    </script>
-    {% endif %}
+        }
+
+        // Валидация перед отправкой
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                const id_year = document.getElementById('id_year').value;
+                const id_teacher = document.getElementById('id_teacher').value;
+                const id_group = document.getElementById('id_group').value;
+                const id_discipline = document.getElementById('id_discipline').value;
+                const id_fgos = document.getElementById('id_fgos').value;
+
+                let errors = [];
+
+                if (!id_year) errors.push('Выберите год обучения');
+                if (!id_teacher) errors.push('Выберите преподавателя');
+                if (!id_group) errors.push('Выберите группу');
+                if (!id_discipline) errors.push('Выберите дисциплину');
+                if (!id_fgos) errors.push('Выберите ФГОС');
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alert(errors.join('\n'));
+                }
+            });
+        }
+    });
+</script>
+{% endif %}
 
     {% if funck == 'edit_fgoss' %}
 <div class="blocks">
@@ -650,9 +831,9 @@
     if (submitBtn) {
         submitBtn.addEventListener('click', function(e) {
             const type_name = typevedNameInput ? typevedNameInput.value.trim() : '';
-            
+
             let errors = [];
-            
+
             if (!type_name) {
                 errors.push('Пожалуйста, укажите название типа ведомости');
             } else if (type_name.length > 50) {
@@ -660,7 +841,7 @@
             } else if (!/^[а-яА-Яa-zA-Z0-9\s\-\/]+$/.test(type_name)) {
                 errors.push('Название типа ведомости может содержать только буквы (русские/латинские), цифры, пробелы, дефисы и косые черты ');
             }
-            
+
             if (errors.length > 0) {
                 e.preventDefault();
                 alert(errors.join('\n'));
@@ -716,7 +897,7 @@
                 <div class="form-hint">Выберите форму обучения, к которой относится группа</div>
             </div>
 
-            <!-- выпадающий список -->               
+            <!-- выпадающий список -->
             <div class="form-group">
                 <label for="id_classteach" class="required">
                     <i class="fas fa-chalkboard-teacher"></i> Классный руководитель
@@ -739,7 +920,7 @@
                 </div>
                 <div class="form-hint">Выберите классного руководителя группы</div>
             </div>
-            
+
             <!-- выпадающий список -->
             <div class="form-group">
                 <label for="id_spec" class="required">
@@ -812,11 +993,11 @@
                 if (!idStudyForm) {
                     errors.push('Пожалуйста, выберите форму обучения');
                 }
-                
+
                 if (!idClassTeach) {
                     errors.push('Пожалуйста, выберите классного руководителя');
                 }
-                
+
                 if (!idSpec) {
                     errors.push('Пожалуйста, выберите специальность');
                 }
@@ -880,9 +1061,9 @@
         if (submitBtn) {
             submitBtn.addEventListener('click', function(e) {
                 const formobuch_name = formobuchNameInput ? formobuchNameInput.value.trim() : '';
-                
+
                 let errors = [];
-                
+
                 if (!formobuch_name) {
                     errors.push('Пожалуйста, укажите название формы обучения');
                 } else if (formobuch_name.length > 50) {
@@ -890,7 +1071,7 @@
                 } else if (!/^[а-яА-Яa-zA-Z\s\-]+$/.test(formobuch_name)) {
                     errors.push('Название формы обучения может содержать только буквы, пробелы и дефисы');
                 }
-                
+
                 if (errors.length > 0) {
                     e.preventDefault();
                     alert(errors.join('\n'));
@@ -1096,7 +1277,7 @@
                     <input type="number" id="id_semester" name="semester" min="1" max="8" value="" required>
                     <div class="form-hint">Укажите семестр (от 1 до 8), к которому относится ведомость</div>
                 </div>
-                
+
                 <!-- флаг диплома -->
                 <div class="form-group">
                     <label for="is_diploma">
@@ -1136,7 +1317,7 @@
                 } else if (semester.value < 1 || semester.value > 8) {
                     errors.push('Семестр должен быть от 1 до 8');
                 }
-              
+
                 if (errors.length > 0) {
                     e.preventDefault();
                     alert(errors.join('\n'));

@@ -390,7 +390,7 @@
 
     <!-- НАГРУЗКА -->
 
-        {% if funck == 'edit_nagruzka' %}
+     {% if funck == 'edit_nagruzka' %}
     <div class="table-header">
         <h2><i class="fas fa-database"></i> Перечень дисциплин</h2>
         <div class="table-actions">
@@ -468,6 +468,8 @@
                     <th rowspan="3">Наименование дисциплин</th>
                     <th rowspan="3">Группы</th>
                     <th rowspan="3">Год обучения</th>
+                    <th rowspan="3" style="writing-mode: vertical-rl; text-orientation: mixed; height: 80px;">Недель (зима)</th>
+                    <th rowspan="3" style="writing-mode: vertical-rl; text-orientation: mixed; height: 80px;">Недель (лето)</th>
                     <th colspan="11">1 семестр</th>
                     <th colspan="11">2 семестр</th>
                     <th rowspan="3">Нагр. препод.</th>
@@ -492,6 +494,7 @@
                 {% set consultations_winter = load.consultations_winter or 0 %}
                 {% set course_project_winter = load.course_project_winter or 0 %}
                 {% set weeks_winter = load.weeks_winter or 1 %}
+                {% set attestation_winter = load.attestation_winter or 0 %}
 
                 {% set lectures_summer = load.lectures_summer or 0 %}
                 {% set practice_summer = load.practice_summer or 0 %}
@@ -501,19 +504,22 @@
                 {% set consultations_summer = load.consultations_summer or 0 %}
                 {% set course_project_summer = load.course_project_summer or 0 %}
                 {% set weeks_summer = load.weeks_summer or 1 %}
+                {% set attestation_summer = load.attestation_summer or 0 %}
 
-                {# Расчет часов #}
-                {% set winter_hours = lectures_winter + practice_winter + labs_winter + seminars_winter %}
-                {% set summer_hours = lectures_summer + practice_summer + labs_summer + seminars_summer %}
-                {% set total_hours = winter_hours + summer_hours %}
+                {# Объем ОП (самостоятельная + консультации + все виды занятий + курсовой проект) #}
+                {% set winter_total_hours = independent_winter + consultations_winter + lectures_winter + practice_winter + labs_winter + seminars_winter + course_project_winter %}
+                {% set summer_total_hours = independent_summer + consultations_summer + lectures_summer + practice_summer + labs_summer + seminars_summer + course_project_summer %}
 
-                {# Расчет нагрузки в неделю #}
-                {% set winter_weekly = (winter_hours / weeks_winter) | round(1) if winter_hours > 0 else 0 %}
-                {% set summer_weekly = (summer_hours / weeks_summer) | round(1) if summer_hours > 0 else 0 %}
+                {# Объем с преподавателем (Объем ОП - самостоятельная работа) #}
+                {% set winter_with_teacher = winter_total_hours - independent_winter %}
+                {% set summer_with_teacher = summer_total_hours - independent_summer %}
 
-                {# Определение аттестации #}
-                {% set attestation_winter = 'Экзамен' if load.exam else ('Диф. зачёт' if load.diff_credit else ('Зачёт' if load.credit else '—')) %}
-                {% set attestation_summer = 'Экзамен' if load.exam else ('Диф. зачёт' if load.diff_credit else ('Зачёт' if load.credit else '—')) %}
+                {# Нагрузка в неделю (Объем с преподавателем / количество недель) #}
+                {% set winter_weekly = (winter_with_teacher / weeks_winter) | round(1) if winter_with_teacher > 0 and weeks_winter > 0 else 0 %}
+                {% set summer_weekly = (summer_with_teacher / weeks_summer) | round(1) if summer_with_teacher > 0 and weeks_summer > 0 else 0 %}
+
+                {# Общая нагрузка преподавателя (зимний объем с преподавателем + летний объем с преподавателем) #}
+                {% set total_teacher_load = winter_with_teacher + summer_with_teacher %}
 
                 <tr data-group="{{ load.id_group }}" data-year="{{ load.id_year }}" data-teacher="{{ load.teacher_full_name or '' }}" data-discipline="{{ load.discipline_name or '' }}">
                     <td class="actions-cell">
@@ -529,37 +535,43 @@
                     <td>{{ load.discipline_name or '' }}</td>
                     <td>{{ load.id_group or '' }}</td>
                     <td>{{ load.year_name or '' }}</td>
-                    <!-- Зимний семестр -->
-                    <td class="winter-data">{{ winter_hours }}</td>
+                    <td>{{ weeks_winter }}</td>
+                    <td>{{ weeks_summer }}</td>
+
+                    <!-- Зимний семестр (11 столбцов) -->
+                    <td class="winter-data">{{ winter_total_hours }}</td>
                     <td class="winter-data">{{ independent_winter }}</td>
                     <td class="winter-data">{{ consultations_winter }}</td>
-                    <td class="winter-data">{{ winter_hours }}</td>
+                    <td class="winter-data">{{ winter_with_teacher }}</td>
                     <td class="winter-data">{{ winter_weekly }}</td>
                     <td class="winter-data">{{ lectures_winter }}</td>
                     <td class="winter-data">{{ practice_winter }}</td>
                     <td class="winter-data">{{ labs_winter }}</td>
                     <td class="winter-data">{{ seminars_winter }}</td>
                     <td class="winter-data">{{ course_project_winter }}</td>
-                    <td class="winter-data">{{ attestation_winter }}</td>
-                    <!-- Летний семестр -->
-                    <td class="summer-data">{{ summer_hours }}</td>
+                    <td class="winter-data">{% if attestation_winter != 0 %}{{ attestation_winter }}{% endif %}</td>
+
+                    <!-- Летний семестр (11 столбцов) -->
+                    <td class="summer-data">{{ summer_total_hours }}</td>
                     <td class="summer-data">{{ independent_summer }}</td>
                     <td class="summer-data">{{ consultations_summer }}</td>
-                    <td class="summer-data">{{ summer_hours }}</td>
+                    <td class="summer-data">{{ summer_with_teacher }}</td>
                     <td class="summer-data">{{ summer_weekly }}</td>
                     <td class="summer-data">{{ lectures_summer }}</td>
                     <td class="summer-data">{{ practice_summer }}</td>
                     <td class="summer-data">{{ labs_summer }}</td>
                     <td class="summer-data">{{ seminars_summer }}</td>
                     <td class="summer-data">{{ course_project_summer }}</td>
-                    <td class="summer-data">{{ attestation_summer }}</td>
-                    <td>{{ total_hours }}</td>
+                    <td class="summer-data">{% if attestation_summer != 0 %}{{ attestation_summer }}{% endif %}</td>
+
+                    <!-- Итоговые столбцы -->
+                    <td class="total-load">{{ total_teacher_load }}</td>
                     <td>{{ load.teacher_full_name or '' }}</td>
                     <td>{{ load.pck_name or '—' }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="28" style="text-align: center;">Нет данных для отображения</td>
+                    <td colspan="32" style="text-align: center;">Нет данных для отображения</td>
                 </tr>
                 {% endfor %}
             </tbody>
