@@ -197,361 +197,565 @@
 <div class="blocks">
     <div class="edit-form-container">
         <div class="form-header">
-            <h2><i class="fas fa-plus-circle"></i> Добавление учебной нагрузки</h2>
+            {% if session.is_specialist %}
+                <h2><i class="fas fa-plus-circle"></i> Добавление учебной нагрузки</h2>
+            {% endif %}
         </div>
-        <form method="POST" action="{{ url_for('add_info', funck='edit_nagruzka') }}" class="edit-form">
-            <!-- Основная информация -->
-            <div class="form-section">
-                <h3>Основная информация</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_year" class="required">Год обучения</label>
-                        <div class="select-wrapper">
-                            <select id="id_year" name="id_year" required>
-                                <option value="" disabled selected>Выберите год обучения</option>
-                                {% for year in academic_years %}
-                                    <option value="{{ year.id_year }}"
-                                            data-winter-week="{{ year.winter_week }}"
-                                            data-summer-week="{{ year.summer_week }}">
-                                        {{ year.year_name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
-                    </div>
+        <form method="POST" action="{{ url_for('add_info') }}" class="edit-form" onsubmit="return validateForm()">
+            <input type="hidden" name="funck" value="edit_nagruzka">
 
-                    <div class="form-group">
-                        <label for="id_teacher" class="required">Преподаватель</label>
-                        <div class="select-wrapper">
-                            <select id="id_teacher" name="id_teacher" required>
-                                <option value="" disabled selected>Выберите преподавателя</option>
-                                {% for teacher in teachers %}
-                                    <option value="{{ teacher.id_user }}">{{ teacher.full_name }}</option>
-                                {% endfor %}
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
+            <!-- Панель 1: Основная информация -->
+            <div class="form-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-info-circle"></i>
                     </div>
-
-                    <div class="form-group">
-                        <label for="id_group" class="required">Группа</label>
-                        <div class="select-wrapper">
-                            <select id="id_group" name="id_group" required>
-                                <option value="" disabled selected>Выберите группу</option>
-                                {% for group in groups %}
-                                    <option value="{{ group.id_group }}">{{ group.id_group }}</option>
-                                {% endfor %}
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
-                    </div>
+                    <h3 class="card-title">Основная информация</h3>
                 </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_year" class="required">
+                                <i class="fas fa-calendar-alt"></i> Год обучения
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="id_year" name="id_year" required>
+                                    <option value="" disabled selected>Выберите год обучения</option>
+                                    {% for year in academic_years %}
+                                        <option value="{{ year.id_year }}"
+                                                data-winter-week="{{ year.winter_week }}"
+                                                data-summer-week="{{ year.summer_week }}">
+                                            {{ year.year_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_discipline" class="required">Дисциплина</label>
-                        <div class="select-wrapper">
-                            <select id="id_discipline" name="id_discipline" required>
-                                <option value="" disabled selected>Выберите дисциплину</option>
-                                {% for discipline in disciplines %}
-                                    <option value="{{ discipline.id_discipline }}">{{ discipline.discipline_name }}</option>
-                                {% endfor %}
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
+                        <div class="form-group">
+                            <label for="id_teacher" class="required">
+                                <i class="fas fa-chalkboard-teacher"></i> Преподаватель
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="id_teacher" name="id_teacher" required>
+                                    <option value="" disabled selected>Выберите преподавателя</option>
+                                    {% for teacher in teachers %}
+                                        <option value="{{ teacher.id_user }}">{{ teacher.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_group" class="required">
+                                <i class="fas fa-users"></i> Группа
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="id_group" name="id_group" required>
+                                    <option value="" disabled selected>Выберите группу</option>
+                                    {% for group in groups %}
+                                        <option value="{{ group.id_group }}">{{ group.id_group }}</option>
+                                    {% endfor %}
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="id_fgos" class="required">ФГОС</label>
-                        <div class="select-wrapper">
-                            <select id="id_fgos" name="id_fgos" required>
-                                <option value="" disabled selected>Выберите ФГОС</option>
-                                {% for fgos in fgos_list %}
-                                    <option value="{{ fgos.id_fgos }}">{{ fgos.name }}</option>
-                                {% endfor %}
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_discipline" class="required">
+                                <i class="fas fa-book"></i> Дисциплина
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="id_discipline" name="id_discipline" required>
+                                    <option value="" disabled selected>Выберите дисциплину</option>
+                                    {% for discipline in disciplines %}
+                                        <option value="{{ discipline.id_discipline }}">{{ discipline.discipline_name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_fgos" class="required">
+                                <i class="fas fa-graduation-cap"></i> ФГОС
+                            </label>
+                            <div class="select-wrapper">
+                                <select id="id_fgos" name="id_fgos" required>
+                                    <option value="" disabled selected>Выберите ФГОС</option>
+                                    {% for fgos in fgos_list %}
+                                        <option value="{{ fgos.id_fgos }}">{{ fgos.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Скрытые поля для weeks_winter и weeks_summer -->
+            <!-- Скрытые поля для автоматической подстановки недель -->
             <input type="hidden" id="weeks_winter" name="weeks_winter" value="0">
             <input type="hidden" id="weeks_summer" name="weeks_summer" value="0">
 
-            <!-- Информация о неделях (только для отображения) -->
-            <div class="form-section">
-                <h3>Информация о семестрах</h3>
-                <div class="info-panel" id="weeksInfo">
-                    <p>Выберите год обучения, чтобы увидеть количество недель</p>
+            <!-- Информация о семестрах (по центру) -->
+            <div class="weeks-info" id="weeksInfoSection" style="display: none;">
+                <div class="weeks-info-item">
+                    <span class="weeks-label">Зимний семестр</span>
+                    <span class="weeks-value" id="winterWeeksDisplay">0</span>
+                </div>
+                <div class="weeks-info-divider"></div>
+                <div class="weeks-info-item">
+                    <span class="weeks-label">Летний семестр</span>
+                    <span class="weeks-value" id="summerWeeksDisplay">0</span>
                 </div>
             </div>
 
-            <!-- Зимний семестр -->
-            <div class="form-section">
-                <h3>Зимний семестр</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Самостоятельная работа</label>
-                        <input type="number" name="independent_winter" class="form-control" value="0" min="0">
+            <!-- Панель 2: Зимний семестр -->
+            <div class="form-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-snowflake"></i>
                     </div>
-                    <div class="form-group">
-                        <label>Консультации</label>
-                        <input type="number" name="consultations_winter" class="form-control" value="0" min="0">
-                    </div>
+                    <h3 class="card-title">Зимний семестр</h3>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Лекции</label>
-                        <input type="number" name="lectures_winter" class="form-control" value="0" min="0">
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="independent_winter">
+                                <i class="fas fa-user-graduate"></i> Самостоятельная работа
+                            </label>
+                            <input type="number" id="independent_winter" name="independent_winter" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="consultations_winter">
+                                <i class="fas fa-comments"></i> Консультации
+                            </label>
+                            <input type="number" id="consultations_winter" name="consultations_winter" value="0" min="0">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Практические занятия</label>
-                        <input type="number" name="practice_winter" class="form-control" value="0" min="0">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lectures_winter">
+                                <i class="fas fa-chalkboard"></i> Лекции
+                            </label>
+                            <input type="number" id="lectures_winter" name="lectures_winter" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="practice_winter">
+                                <i class="fas fa-tasks"></i> Практические занятия
+                            </label>
+                            <input type="number" id="practice_winter" name="practice_winter" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="labs_winter">
+                                <i class="fas fa-flask"></i> Лабораторные занятия
+                            </label>
+                            <input type="number" id="labs_winter" name="labs_winter" value="0" min="0">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Лабораторные занятия</label>
-                        <input type="number" name="labs_winter" class="form-control" value="0" min="0">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Семинарские занятия</label>
-                        <input type="number" name="seminars_winter" class="form-control" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Курсовой проект</label>
-                        <input type="number" name="course_project_winter" class="form-control" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Аттестация</label>
-                        <input type="number" name="attestation_winter" class="form-control" value="0" min="0">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Летний семестр -->
-            <div class="form-section">
-                <h3>Летний семестр</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Самостоятельная работа</label>
-                        <input type="number" name="independent_summer" class="form-control" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Консультации</label>
-                        <input type="number" name="consultations_summer" class="form-control" value="0" min="0">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Лекции</label>
-                        <input type="number" name="lectures_summer" class="form-control" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Практические занятия</label>
-                        <input type="number" name="practice_summer" class="form-control" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Лабораторные занятия</label>
-                        <input type="number" name="labs_summer" class="form-control" value="0" min="0">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Семинарские занятия</label>
-                        <input type="number" name="seminars_summer" class="form-control" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Курсовой проект</label>
-                        <input type="number" name="course_project_summer" class="form-control" value="0" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Аттестация</label>
-                        <input type="number" name="attestation_summer" class="form-control" value="0" min="0">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="seminars_winter">
+                                <i class="fas fa-users"></i> Семинарские занятия
+                            </label>
+                            <input type="number" id="seminars_winter" name="seminars_winter" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="course_project_winter">
+                                <i class="fas fa-project-diagram"></i> Курсовой проект
+                            </label>
+                            <input type="number" id="course_project_winter" name="course_project_winter" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="attestation_winter">
+                                <i class="fas fa-check-circle"></i> Аттестация
+                            </label>
+                            <input type="number" id="attestation_winter" name="attestation_winter" value="0" min="0">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn">Добавить нагрузку</button>
-            <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="cancel-btn">Отмена</a>
+            <!-- Панель 3: Летний семестр -->
+            <div class="form-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <h3 class="card-title">Летний семестр</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="independent_summer">
+                                <i class="fas fa-user-graduate"></i> Самостоятельная работа
+                            </label>
+                            <input type="number" id="independent_summer" name="independent_summer" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="consultations_summer">
+                                <i class="fas fa-comments"></i> Консультации
+                            </label>
+                            <input type="number" id="consultations_summer" name="consultations_summer" value="0" min="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lectures_summer">
+                                <i class="fas fa-chalkboard"></i> Лекции
+                            </label>
+                            <input type="number" id="lectures_summer" name="lectures_summer" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="practice_summer">
+                                <i class="fas fa-tasks"></i> Практические занятия
+                            </label>
+                            <input type="number" id="practice_summer" name="practice_summer" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="labs_summer">
+                                <i class="fas fa-flask"></i> Лабораторные занятия
+                            </label>
+                            <input type="number" id="labs_summer" name="labs_summer" value="0" min="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="seminars_summer">
+                                <i class="fas fa-users"></i> Семинарские занятия
+                            </label>
+                            <input type="number" id="seminars_summer" name="seminars_summer" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="course_project_summer">
+                                <i class="fas fa-project-diagram"></i> Курсовой проект
+                            </label>
+                            <input type="number" id="course_project_summer" name="course_project_summer" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="attestation_summer">
+                                <i class="fas fa-check-circle"></i> Аттестация
+                            </label>
+                            <input type="number" id="attestation_summer" name="attestation_summer" value="0" min="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Добавить запись
+                </button>
+            </div>
         </form>
     </div>
 </div>
 
 <style>
-.form-section {
-    background: #f8f9fa;
+/* Стили для карточек */
+.form-card {
+    background: white;
     border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 25px;
-    border: 1px solid #e0e0e0;
-}
-.form-section h3 {
-    margin-top: 0;
     margin-bottom: 20px;
-    color: #333;
-    font-size: 1.2rem;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 10px;
-    display: inline-block;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e8ecf0;
+    overflow: hidden;
 }
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 15px;
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    background: #fafbfc;
+    border-bottom: 1px solid #e8ecf0;
 }
+
+.card-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    font-size: 18px;
+}
+
+.card-title {
+    flex: 1;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Информация о неделях - по центру */
+.weeks-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e8ecf0;
+}
+
+.weeks-info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.weeks-label {
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.weeks-value {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 18px;
+}
+
+.weeks-value::after {
+    content: " нед.";
+    font-weight: normal;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.weeks-info-divider {
+    width: 1px;
+    height: 30px;
+    background: #dee2e6;
+}
+
+/* Форма */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn-primary {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: 'Montserrat', sans-serif;
+    background: var(--primary-color);
+    color: white;
+    min-width: 200px;
+}
+
+.btn-primary:hover {
+    background: #2a8eb5;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(77, 195, 240, 0.3);
+}
+
+/* Поля ввода */
+.form-group {
+    margin-bottom: 0;
+}
+
 .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 13px;
+    color: #2c3e50;
 }
-.form-group input[type="number"] {
+
+.form-group label i {
+    color: var(--primary-color);
+    width: 16px;
+    font-size: 14px;
+}
+
+.form-group input {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
     font-size: 14px;
-    box-sizing: border-box;
+    transition: all 0.2s;
 }
-.form-group input[type="number"]:focus {
+
+.form-group input:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(77, 195, 240, 0.1);
 }
+
 .select-wrapper {
     position: relative;
 }
+
 .select-wrapper select {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
     font-size: 14px;
     appearance: none;
     background: white;
+    cursor: pointer;
 }
-.select-arrow {
+
+.select-wrapper .select-arrow {
     position: absolute;
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 12px;
     pointer-events: none;
-    color: #666;
 }
-.required:after {
-    content: " *";
-    color: red;
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
 }
-.info-panel {
-    background: #e7f3ff;
-    border-left: 4px solid #007bff;
-    padding: 12px 15px;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #004085;
+
+.form-row:last-child {
+    margin-bottom: 0;
 }
-.info-panel strong {
-    color: #007bff;
-}
-button[type="submit"] {
-    background: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-right: 10px;
-}
-button[type="submit"]:hover {
-    background: #0056b3;
-}
-.cancel-btn {
-    background: #6c757d;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    text-decoration: none;
-    display: inline-block;
-}
-.cancel-btn:hover {
-    background: #545b62;
-    color: white;
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .card-header {
+        padding: 12px 16px;
+    }
+
+    .card-body {
+        padding: 16px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .weeks-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .weeks-info-divider {
+        width: 80%;
+        height: 1px;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 14px 20px;
+        min-width: auto;
+    }
 }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const submitBtn = document.getElementById('submitBtn');
+    // Функция обновления информации о неделях
+    function updateWeeksInfo() {
         const yearSelect = document.getElementById('id_year');
+        const selectedOption = yearSelect.options[yearSelect.selectedIndex];
         const weeksWinterInput = document.getElementById('weeks_winter');
         const weeksSummerInput = document.getElementById('weeks_summer');
-        const weeksInfoDiv = document.getElementById('weeksInfo');
+        const weeksInfoSection = document.getElementById('weeksInfoSection');
+        const winterWeeksDisplay = document.getElementById('winterWeeksDisplay');
+        const summerWeeksDisplay = document.getElementById('summerWeeksDisplay');
 
-        // Функция обновления информации о неделях
-        function updateWeeksInfo() {
-            const selectedOption = yearSelect.options[yearSelect.selectedIndex];
-            if (selectedOption && selectedOption.value) {
-                const winterWeek = selectedOption.getAttribute('data-winter-week') || 0;
-                const summerWeek = selectedOption.getAttribute('data-summer-week') || 0;
+        if (selectedOption && selectedOption.value) {
+            const winterWeek = selectedOption.getAttribute('data-winter-week') || 0;
+            const summerWeek = selectedOption.getAttribute('data-summer-week') || 0;
 
-                // Устанавливаем значения в скрытые поля
-                weeksWinterInput.value = winterWeek;
-                weeksSummerInput.value = summerWeek;
+            weeksWinterInput.value = winterWeek;
+            weeksSummerInput.value = summerWeek;
 
-                // Отображаем информацию для пользователя
-                weeksInfoDiv.innerHTML = `
-                    <strong>✓ Количество недель в семестрах:</strong><br>
-                    Зимний семестр: ${winterWeek} недель<br>
-                    Летний семестр: ${summerWeek} недель
-                `;
-            } else {
-                weeksWinterInput.value = '0';
-                weeksSummerInput.value = '0';
-                weeksInfoDiv.innerHTML = '<p>Выберите год обучения, чтобы увидеть количество недель</p>';
-            }
+            winterWeeksDisplay.textContent = winterWeek;
+            summerWeeksDisplay.textContent = summerWeek;
+
+            weeksInfoSection.style.display = 'flex';
+        } else {
+            weeksWinterInput.value = '0';
+            weeksSummerInput.value = '0';
+            weeksInfoSection.style.display = 'none';
+        }
+    }
+
+    function validateForm() {
+        const id_year = document.getElementById('id_year').value;
+        const id_teacher = document.getElementById('id_teacher').value;
+        const id_group = document.getElementById('id_group').value;
+        const id_discipline = document.getElementById('id_discipline').value;
+        const id_fgos = document.getElementById('id_fgos').value;
+
+        let errors = [];
+
+        if (!id_year) errors.push('Выберите год обучения');
+        if (!id_teacher) errors.push('Выберите преподавателя');
+        if (!id_group) errors.push('Выберите группу');
+        if (!id_discipline) errors.push('Выберите дисциплину');
+        if (!id_fgos) errors.push('Выберите ФГОС');
+
+        if (errors.length > 0) {
+            alert('Пожалуйста, исправьте следующие ошибки:\n' + errors.join('\n'));
+            return false;
         }
 
-        // Слушаем изменение выбора года
+        const weeksWinter = document.getElementById('weeks_winter').value;
+        const weeksSummer = document.getElementById('weeks_summer').value;
+
+        if (weeksWinter == '0' && weeksSummer == '0') {
+            alert('Пожалуйста, выберите год обучения');
+            return false;
+        }
+
+        return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const yearSelect = document.getElementById('id_year');
+
         if (yearSelect) {
             yearSelect.addEventListener('change', updateWeeksInfo);
-
-            // Если год уже выбран, обновляем информацию
             if (yearSelect.value) {
                 updateWeeksInfo();
             }
         }
 
-        // Валидация перед отправкой
-        if (submitBtn) {
-            submitBtn.addEventListener('click', function(e) {
-                const id_year = document.getElementById('id_year').value;
-                const id_teacher = document.getElementById('id_teacher').value;
-                const id_group = document.getElementById('id_group').value;
-                const id_discipline = document.getElementById('id_discipline').value;
-                const id_fgos = document.getElementById('id_fgos').value;
-
-                let errors = [];
-
-                if (!id_year) errors.push('Выберите год обучения');
-                if (!id_teacher) errors.push('Выберите преподавателя');
-                if (!id_group) errors.push('Выберите группу');
-                if (!id_discipline) errors.push('Выберите дисциплину');
-                if (!id_fgos) errors.push('Выберите ФГОС');
-
-                if (errors.length > 0) {
-                    e.preventDefault();
-                    alert(errors.join('\n'));
-                }
+        const numberInputs = document.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.value < 0) this.value = 0;
             });
-        }
+        });
     });
 </script>
 {% endif %}
@@ -1292,7 +1496,8 @@ button[type="submit"]:hover {
     </div>
 </div>
 
-<!-- <script>
+<!--- Убрала коммент потому что везде стрелочка появлялась на странице добавления (начало коммента тут было)--->
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         const submitBtn = document.getElementById('submitBtn');
 
@@ -1326,7 +1531,8 @@ button[type="submit"]:hover {
         }
     });
 </script>
-{% endif %} -->
+{% endif %}
+<!--- Убрала коммент потому что везде стрелочка появлялась на странице добавления (конец коммента тут было)--->
 
 {% endif %}
 {% endblock %}
