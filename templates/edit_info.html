@@ -412,6 +412,406 @@
 </script>
 {% endif %}
 
+{% if funck == 'edit_nagruzka' %}
+<div class="blocks">
+    <div class="edit-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-edit"></i> Редактирование нагрузки</h2>
+            <div class="header-actions">
+                <span class="record-id">ID: {{ load.id_load }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_nagruzka', id_load=load.id_load) }}" class="edit-form">
+            <!-- Основная информация -->
+            <div class="form-section">
+                <h3><i class="fas fa-info-circle"></i> Основная информация</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_year" class="required">
+                            <i class="fas fa-calendar-alt"></i> Год обучения
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="id_year" name="id_year" required onchange="updateWeeksInfo()">
+                                <option value="" disabled>Выберите год обучения</option>
+                                {% for year in academic_years %}
+                                    <option value="{{ year.id_year }}"
+                                        data-winter-week="{{ year.winter_week }}"
+                                        data-summer-week="{{ year.summer_week }}"
+                                        {% if form_data %}
+                                            {% if form_data.get('id_year')|int == year.id_year %}selected{% endif %}
+                                        {% else %}
+                                            {% if load.id_year == year.id_year %}selected{% endif %}
+                                        {% endif %}>
+                                        {{ year.year_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                        <div class="form-hint">Выберите год обучения</div>
+                    </div>
+
+                    <!-- Минималистичная информация о неделях -->
+                    <div class="form-group" id="weeks-info-container">
+                        <label><i class="fas fa-clock"></i> Учебные недели</label>
+                        <div class="weeks-mini-info" id="weeksInfo">
+                            <span class="week-item">
+                                <span class="week-label">Зимний</span>
+                                <span class="week-value" id="winterWeeksDisplay">—</span>
+                            </span>
+                            <span class="week-divider"></span>
+                            <span class="week-item">
+                                <span class="week-label">Летний</span>
+                                <span class="week-value" id="summerWeeksDisplay">—</span>
+                            </span>
+                        </div>
+                        <div class="form-hint">Количество недель в семестрах</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_teacher" class="required">
+                            <i class="fas fa-chalkboard-teacher"></i> Преподаватель
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="id_teacher" name="id_teacher" required>
+                                <option value="" disabled>Выберите преподавателя</option>
+                                {% for teacher in teachers %}
+                                    <option value="{{ teacher.id_user }}"
+                                        {% if form_data %}
+                                            {% if form_data.get('id_teacher')|int == teacher.id_user %}selected{% endif %}
+                                        {% else %}
+                                            {% if load.id_teacher == teacher.id_user %}selected{% endif %}
+                                        {% endif %}>
+                                        {{ teacher.full_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                        <div class="form-hint">Выберите преподавателя</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_group" class="required">
+                            <i class="fas fa-users"></i> Группа
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="id_group" name="id_group" required>
+                                <option value="" disabled>Выберите группу</option>
+                                {% for group in groups %}
+                                    <option value="{{ group.id_group }}"
+                                        {% if form_data %}
+                                            {% if form_data.get('id_group') == group.id_group %}selected{% endif %}
+                                        {% else %}
+                                            {% if load.id_group == group.id_group %}selected{% endif %}
+                                        {% endif %}>
+                                        {{ group.id_group }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                        <div class="form-hint">Выберите группу</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_discipline" class="required">
+                            <i class="fas fa-book"></i> Дисциплина
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="id_discipline" name="id_discipline" required>
+                                <option value="" disabled>Выберите дисциплину</option>
+                                {% for discipline in disciplines %}
+                                    <option value="{{ discipline.id_discipline }}"
+                                        {% if form_data %}
+                                            {% if form_data.get('id_discipline') == discipline.id_discipline %}selected{% endif %}
+                                        {% else %}
+                                            {% if load.id_discipline == discipline.id_discipline %}selected{% endif %}
+                                        {% endif %}>
+                                        {{ discipline.discipline_name }} ({{ discipline.id_discipline }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                        <div class="form-hint">Выберите дисциплину</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_fgos" class="required">
+                            <i class="fas fa-graduation-cap"></i> ФГОС
+                        </label>
+                        <div class="select-wrapper">
+                            <select id="id_fgos" name="id_fgos" required>
+                                <option value="" disabled>Выберите ФГОС</option>
+                                {% for fgos in fgos_list %}
+                                    <option value="{{ fgos.id_fgos }}"
+                                        {% if form_data %}
+                                            {% if form_data.get('id_fgos')|int == fgos.id_fgos %}selected{% endif %}
+                                        {% else %}
+                                            {% if load.id_fgos == fgos.id_fgos %}selected{% endif %}
+                                        {% endif %}>
+                                        {{ fgos.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="fas fa-chevron-down select-arrow"></i>
+                        </div>
+                        <div class="form-hint">Выберите ФГОС</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="exam">Экзамен</label>
+                        <input type="number" id="exam" name="exam"
+                               value="{{ form_data.get('exam', load.exam) if form_data else load.exam }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="credit">Зачёт</label>
+                        <input type="number" id="credit" name="credit"
+                               value="{{ form_data.get('credit', load.credit) if form_data else load.credit }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="diff_credit">Дифференцированный зачёт</label>
+                        <input type="number" id="diff_credit" name="diff_credit"
+                               value="{{ form_data.get('diff_credit', load.diff_credit) if form_data else load.diff_credit }}"
+                               min="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Зимний семестр -->
+            <div class="form-section">
+                <h3><i class="fas fa-snowflake"></i> Зимний семестр</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="independent_winter">Самостоятельная работа</label>
+                        <input type="number" id="independent_winter" name="independent_winter"
+                               value="{{ form_data.get('independent_winter', load.independent_winter) if form_data else load.independent_winter }}"
+                               min="0">
+
+                    </div>
+                    <div class="form-group">
+                        <label for="consultations_winter">Консультации</label>
+                        <input type="number" id="consultations_winter" name="consultations_winter"
+                               value="{{ form_data.get('consultations_winter', load.consultations_winter) if form_data else load.consultations_winter }}"
+                               min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lectures_winter">Лекции</label>
+                        <input type="number" id="lectures_winter" name="lectures_winter"
+                               value="{{ form_data.get('lectures_winter', load.lectures_winter) if form_data else load.lectures_winter }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="practice_winter">Практические занятия</label>
+                        <input type="number" id="practice_winter" name="practice_winter"
+                               value="{{ form_data.get('practice_winter', load.practice_winter) if form_data else load.practice_winter }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="labs_winter">Лабораторные занятия</label>
+                        <input type="number" id="labs_winter" name="labs_winter"
+                               value="{{ form_data.get('labs_winter', load.labs_winter) if form_data else load.labs_winter }}"
+                               min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="seminars_winter">Семинарские занятия</label>
+                        <input type="number" id="seminars_winter" name="seminars_winter"
+                               value="{{ form_data.get('seminars_winter', load.seminars_winter) if form_data else load.seminars_winter }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="course_project_winter">Курсовой проект</label>
+                        <input type="number" id="course_project_winter" name="course_project_winter"
+                               value="{{ form_data.get('course_project_winter', load.course_project_winter) if form_data else load.course_project_winter }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="attestation_winter">Аттестация</label>
+                        <input type="number" id="attestation_winter" name="attestation_winter"
+                               value="{{ form_data.get('attestation_winter', load.attestation_winter) if form_data else load.attestation_winter }}"
+                               min="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Летний семестр -->
+            <div class="form-section">
+                <h3><i class="fas fa-sun"></i> Летний семестр</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="independent_summer">Самостоятельная работа</label>
+                        <input type="number" id="independent_summer" name="independent_summer"
+                               value="{{ form_data.get('independent_summer', load.independent_summer) if form_data else load.independent_summer }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="consultations_summer">Консультации</label>
+                        <input type="number" id="consultations_summer" name="consultations_summer"
+                               value="{{ form_data.get('consultations_summer', load.consultations_summer) if form_data else load.consultations_summer }}"
+                               min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lectures_summer">Лекции</label>
+                        <input type="number" id="lectures_summer" name="lectures_summer"
+                               value="{{ form_data.get('lectures_summer', load.lectures_summer) if form_data else load.lectures_summer }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="practice_summer">Практические занятия</label>
+                        <input type="number" id="practice_summer" name="practice_summer"
+                               value="{{ form_data.get('practice_summer', load.practice_summer) if form_data else load.practice_summer }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="labs_summer">Лабораторные занятия</label>
+                        <input type="number" id="labs_summer" name="labs_summer"
+                               value="{{ form_data.get('labs_summer', load.labs_summer) if form_data else load.labs_summer }}"
+                               min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="seminars_summer">Семинарские занятия</label>
+                        <input type="number" id="seminars_summer" name="seminars_summer"
+                               value="{{ form_data.get('seminars_summer', load.seminars_summer) if form_data else load.seminars_summer }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="course_project_summer">Курсовой проект</label>
+                        <input type="number" id="course_project_summer" name="course_project_summer"
+                               value="{{ form_data.get('course_project_summer', load.course_project_summer) if form_data else load.course_project_summer }}"
+                               min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="attestation_summer">Аттестация</label>
+                        <input type="number" id="attestation_summer" name="attestation_summer"
+                               value="{{ form_data.get('attestation_summer', load.attestation_summer) if form_data else load.attestation_summer }}"
+                               min="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Минималистичный стиль для информации о неделях */
+.weeks-mini-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    font-size: 13px;
+    min-height: 36px;
+}
+
+.week-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.week-label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.week-value {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 14px;
+}
+
+.week-value:not(:empty)::after {
+    content: " нед.";
+    font-weight: normal;
+    font-size: 11px;
+    color: #6c757d;
+}
+
+.week-divider {
+    width: 1px;
+    height: 20px;
+    background: #dee2e6;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .weeks-mini-info {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    .week-divider {
+        display: none;
+    }
+}
+</style>
+
+<script>
+    function updateWeeksInfo() {
+        const yearSelect = document.getElementById('id_year');
+        const selectedOption = yearSelect.options[yearSelect.selectedIndex];
+        const winterDisplay = document.getElementById('winterWeeksDisplay');
+        const summerDisplay = document.getElementById('summerWeeksDisplay');
+
+        if (selectedOption && selectedOption.value) {
+            const winterWeek = selectedOption.getAttribute('data-winter-week') || 0;
+            const summerWeek = selectedOption.getAttribute('data-summer-week') || 0;
+
+            winterDisplay.textContent = winterWeek || '—';
+            summerDisplay.textContent = summerWeek || '—';
+        } else {
+            winterDisplay.textContent = '—';
+            summerDisplay.textContent = '—';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация информации о неделях при загрузке
+        updateWeeksInfo();
+
+        // Ограничение на отрицательные числа для всех числовых полей
+        const numberInputs = document.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.value < 0) this.value = 0;
+            });
+            input.addEventListener('input', function() {
+                if (this.value < 0) this.value = 0;
+            });
+        });
+
+        // Логирование для отладки
+        console.log('academic_years:', {{ academic_years|tojson|safe }});
+    });
+</script>
+{% endif %}
+
 {% if funck == 'edit_years' %}
 <div class="blocks">
     <div class="edit-form-container">
