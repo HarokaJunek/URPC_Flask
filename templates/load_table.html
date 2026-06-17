@@ -1331,6 +1331,7 @@ function exportToPDF() {
                         <thead>
                             <tr>
                                 <th>Действия</th>
+                                <th>№ Студента</th>
                                 <th>ФИО</th>
                                 <th>Номер группы</th>
                             </tr>
@@ -1349,6 +1350,7 @@ function exportToPDF() {
                                             <i class="fas fa-trash-alt"></i>
                                     </a>
                                 </td>
+                                <td>{{ student.id_student }}</td>
                                 <td>{{ student.full_name or 'Не назначена' }}</td>
                                 <td>{{ student.id_group or 'Не указана'}}</td>
                             </tr>

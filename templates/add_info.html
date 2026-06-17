@@ -1432,7 +1432,7 @@
                 </label>
                 <div class="select-wrapper">
                     <select id="id_load" name="id_load" required>
-                        <option value="" disabled {% if not form_data or not form_data.get('id_load') %}selected{% endif %}>Выберите нагрузка</option>
+                        <option value="" disabled {% if not form_data or not form_data.get('id_load') %}selected{% endif %}>Выберите нагрузку</option>
                         {% if workload_list %}
                             {% for load in workload_list %}
                                 <option value="{{ load.id }}"

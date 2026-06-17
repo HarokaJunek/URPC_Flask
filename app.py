@@ -9,9 +9,9 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
 import io
-import openpyxl
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
-from openpyxl.utils import get_column_letter
+# import openpyxl
+# from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+# from openpyxl.utils import get_column_letter
 from functools import wraps
 
 # ============================================================================
@@ -794,6 +794,7 @@ def load_table():
                 conn = get_db_connection()
                 query = '''
                     SELECT 
+                        students.id_student,
                         students.full_name,
                         groups.id_group
                     FROM students
