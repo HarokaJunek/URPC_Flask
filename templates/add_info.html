@@ -295,6 +295,28 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- НОВАЯ СЕКЦИЯ: Формы промежуточной аттестации -->
+                    <div class="form-row attestation-row">
+                        <div class="form-group">
+                            <label for="exam">
+                                 Экзамены
+                            </label>
+                            <input type="number" id="exam" name="exam" value="0" min="0" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="credit">
+                                 Зачеты
+                            </label>
+                            <input type="number" id="credit" name="credit" value="0" min="0" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="diff_credit">
+                                Дифференцированные зачеты
+                            </label>
+                            <input type="number" id="diff_credit" name="diff_credit" value="0" min="0" step="1">
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -305,23 +327,21 @@
             <!-- Информация о семестрах (по центру) -->
             <div class="weeks-info" id="weeksInfoSection" style="display: none;">
                 <div class="weeks-info-item">
-                    <span class="weeks-label">Зимний семестр</span>
+                    <span class="weeks-label">1 семестр</span>
                     <span class="weeks-value" id="winterWeeksDisplay">0</span>
                 </div>
                 <div class="weeks-info-divider"></div>
                 <div class="weeks-info-item">
-                    <span class="weeks-label">Летний семестр</span>
+                    <span class="weeks-label">2 семестр</span>
                     <span class="weeks-value" id="summerWeeksDisplay">0</span>
                 </div>
             </div>
 
-            <!-- Панель 2: Зимний семестр -->
+            <!-- Панель 2: 1 семестр -->
             <div class="form-card">
                 <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-snowflake"></i>
-                    </div>
-                    <h3 class="card-title">Зимний семестр</h3>
+                    <h3 class="card-title">1 семестр</h3>
+                    <div class="form-hint">Укажите нагрузку в часах</div>
                 </div>
                 <div class="card-body">
                     <div class="form-row">
@@ -381,13 +401,11 @@
                 </div>
             </div>
 
-            <!-- Панель 3: Летний семестр -->
+            <!-- Панель 3: 2 семестр -->
             <div class="form-card">
                 <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-sun"></i>
-                    </div>
-                    <h3 class="card-title">Летний семестр</h3>
+                    <h3 class="card-title">2 семестр</h3>
+                    <div class="form-hint">Укажите нагрузку в часах</div>
                 </div>
                 <div class="card-body">
                     <div class="form-row">
@@ -474,6 +492,13 @@
     padding: 15px 20px;
     background: #fafbfc;
     border-bottom: 1px solid #e8ecf0;
+}
+
+.card-header .form-hint {
+    margin-left: auto;
+    font-size: 13px;
+    color: #6c757d;
+    font-weight: normal;
 }
 
 .card-icon {
@@ -610,6 +635,12 @@
     box-shadow: 0 0 0 2px rgba(77, 195, 240, 0.1);
 }
 
+.form-hint {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
 .select-wrapper {
     position: relative;
 }
@@ -644,6 +675,12 @@
 
 .form-row:last-child {
     margin-bottom: 0;
+}
+
+.attestation-row {
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 1px dashed #dee2e6;
 }
 
 /* Адаптивность */

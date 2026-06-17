@@ -975,6 +975,18 @@ footer {
     white-space: nowrap;
 }
 
+.all-table1 th {
+    text-align: left;
+    padding: 15px 12px;
+    background: #f8f9fa;
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+}
+
 .all-table th:first-child {
     padding-left: 20px;
     border-radius: 8px 0 0 0;
