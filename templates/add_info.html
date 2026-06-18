@@ -193,6 +193,169 @@
 </script>
 {% endif %}
 
+    <!-- ДИСЦИПЛИНЫ -->
+    {% if funck == 'edit_disciplines' %}
+    <div class="blocks">
+        <div class="edit-form-container">
+            <div class="form-header">
+                {% if session.is_specialist %}
+                    <h2><i class="fas fa-edit"></i> Добавление дисциплины в систему</h2>
+                {% endif %}
+            </div>
+            <form method="POST" action="{{ url_for('add_info', funck='edit_disciplines') }}" class="edit-form">
+                <div class="form-group">
+                    <label for="discipline_name" class="required">
+                        <i class="fas fa-book"></i> Название дисциплины
+                    </label>
+                    <input type="text" id="discipline_name" name="discipline_name"
+                           placeholder="Например: Математика"
+                           value="{{ form_data.get('discipline_name', '') if form_data else '' }}">
+                    <div class="form-hint">Буквы (русские/латинские), цифры, пробелы (макс. 100 символов)</div>
+                </div>
+
+                <button type="submit" id="submitBtn">Создать дисциплину</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const disciplineNameInput = document.getElementById('discipline_name');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (disciplineNameInput) {
+                disciplineNameInput.addEventListener('input', function(e) {
+                    if (e.target.value.length > 100) {
+                        e.target.value = e.target.value.substring(0, 100);
+                    }
+                });
+            }
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    const disciplineName = disciplineNameInput ? disciplineNameInput.value.trim() : '';
+
+                    let errors = [];
+
+                    if (!disciplineName) {
+                        errors.push('Пожалуйста, укажите название дисциплины');
+                    } else if (disciplineName.length > 100) {
+                        errors.push('Название дисциплины не может быть длиннее 100 символов');
+                    }
+
+                    if (errors.length > 0) {
+                        e.preventDefault();
+                        alert(errors.join('\n'));
+                    }
+                });
+            }
+        });
+    </script>
+    {% endif %}
+
+    <!-- УЧЕБНЫЕ ГОДА -->
+    {% if funck == 'edit_years' %}
+    <div class="blocks">
+        <div class="edit-form-container">
+            <div class="form-header">
+                {% if session.is_specialist %}
+                    <h2><i class="fas fa-edit"></i> Добавление учебного года в систему</h2>
+                {% endif %}
+            </div>
+            <form method="POST" action="{{ url_for('add_info', funck='edit_years') }}" class="edit-form">
+                <div class="form-group">
+                    <label for="year_name" class="required">
+                        <i class="fas fa-calendar-alt"></i> Учебный год
+                    </label>
+                    <input type="text" id="year_name" name="year_name"
+                           placeholder="Например: 2024-2025"
+                           value="{{ form_data.get('year_name', '') if form_data else '' }}">
+                    <div class="form-hint">Формат: 2024-2025 (цифры и дефис)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="winter_week" class="required">
+                        <i class="fas fa-snowflake"></i> Недель в 1 семестре
+                    </label>
+                    <input type="number" id="winter_week" name="winter_week"
+                           placeholder="Например: 17"
+                           min="1" max="30"
+                           value="{{ form_data.get('winter_week', '') if form_data else '' }}">
+                    <div class="form-hint">Количество учебных недель в 1 семестре (от 1 до 30)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="summer_week" class="required">
+                        <i class="fas fa-sun"></i> Недель во 2 семестре
+                    </label>
+                    <input type="number" id="summer_week" name="summer_week"
+                           placeholder="Например: 17"
+                           min="1" max="30"
+                           value="{{ form_data.get('summer_week', '') if form_data else '' }}">
+                    <div class="form-hint">Количество учебных недель во 2 семестре (от 1 до 30)</div>
+                </div>
+
+                <button type="submit" id="submitBtn">Создать учебный год</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearNameInput = document.getElementById('year_name');
+            const winterWeekInput = document.getElementById('winter_week');
+            const summerWeekInput = document.getElementById('summer_week');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (yearNameInput) {
+                yearNameInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    let cleaned = value.replace(/[^0-9\-]/g, '');
+                    if (cleaned !== value) {
+                        e.target.value = cleaned;
+                    }
+                    if (cleaned.length > 9) {
+                        e.target.value = cleaned.substring(0, 9);
+                    }
+                });
+            }
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(e) {
+                    const yearName = yearNameInput ? yearNameInput.value.trim() : '';
+                    const winterWeek = winterWeekInput ? winterWeekInput.value : '';
+                    const summerWeek = summerWeekInput ? summerWeekInput.value : '';
+
+                    let errors = [];
+
+                    if (!yearName) {
+                        errors.push('Пожалуйста, укажите учебный год');
+                    } else if (!/^\d{4}-\d{4}$/.test(yearName)) {
+                        errors.push('Неверный формат учебного года. Пример: 2024-2025');
+                    }
+
+                    if (!winterWeek) {
+                        errors.push('Пожалуйста, укажите количество недель в 1 семестре');
+                    } else if (parseInt(winterWeek) < 1 || parseInt(winterWeek) > 30) {
+                        errors.push('Количество недель в 1 семестре должно быть от 1 до 30');
+                    }
+
+                    if (!summerWeek) {
+                        errors.push('Пожалуйста, укажите количество недель во 2 семестре');
+                    } else if (parseInt(summerWeek) < 1 || parseInt(summerWeek) > 30) {
+                        errors.push('Количество недель во 2 семестре должно быть от 1 до 30');
+                    }
+
+                    if (errors.length > 0) {
+                        e.preventDefault();
+                        alert(errors.join('\n'));
+                    }
+                });
+            }
+        });
+    </script>
+    {% endif %}
+
     {% if funck == 'edit_nagruzka' %}
 <div class="blocks">
     <div class="edit-form-container">
@@ -208,9 +371,8 @@
             <div class="form-card">
                 <div class="card-header">
                     <div class="card-icon">
-                        <i class="fas fa-info-circle"></i>
+                        <h3><i class="fas fa-info-circle"></i>    Основная информация</h3>
                     </div>
-                    <h3 class="card-title">Основная информация</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-row">
@@ -223,8 +385,8 @@
                                     <option value="" disabled selected>Выберите год обучения</option>
                                     {% for year in academic_years %}
                                         <option value="{{ year.id_year }}"
-                                                data-winter-week="{{ year.winter_week }}"
-                                                data-summer-week="{{ year.summer_week }}">
+                                                data-winter-week="{{ year.winter_week or 0 }}"
+                                                data-summer-week="{{ year.summer_week or 0 }}">
                                             {{ year.year_name }}
                                         </option>
                                     {% endfor %}
@@ -296,23 +458,23 @@
                         </div>
                     </div>
 
-                    <!-- НОВАЯ СЕКЦИЯ: Формы промежуточной аттестации -->
+                    <!-- Формы промежуточной аттестации -->
                     <div class="form-row attestation-row">
                         <div class="form-group">
                             <label for="exam">
-                                 Экзамены
+                                <i class="fas fa-check-circle"></i> Экзамены
                             </label>
                             <input type="number" id="exam" name="exam" value="0" min="0" step="1">
                         </div>
                         <div class="form-group">
                             <label for="credit">
-                                 Зачеты
+                                <i class="fas fa-check"></i> Зачеты
                             </label>
                             <input type="number" id="credit" name="credit" value="0" min="0" step="1">
                         </div>
                         <div class="form-group">
                             <label for="diff_credit">
-                                Дифференцированные зачеты
+                                <i class="fas fa-star"></i> Дифференцированные зачеты
                             </label>
                             <input type="number" id="diff_credit" name="diff_credit" value="0" min="0" step="1">
                         </div>
@@ -320,11 +482,7 @@
                 </div>
             </div>
 
-            <!-- Скрытые поля для автоматической подстановки недель -->
-            <input type="hidden" id="weeks_winter" name="weeks_winter" value="0">
-            <input type="hidden" id="weeks_summer" name="weeks_summer" value="0">
-
-            <!-- Информация о семестрах (по центру) -->
+            <!-- Информация о семестрах (только для отображения) -->
             <div class="weeks-info" id="weeksInfoSection" style="display: none;">
                 <div class="weeks-info-item">
                     <span class="weeks-label">1 семестр</span>
@@ -340,7 +498,7 @@
             <!-- Панель 2: 1 семестр -->
             <div class="form-card">
                 <div class="card-header">
-                    <h3 class="card-title">1 семестр</h3>
+                    <h3 class="card-title"> 1 семестр</h3>
                     <div class="form-hint">Укажите нагрузку в часах</div>
                 </div>
                 <div class="card-body">
@@ -404,7 +562,7 @@
             <!-- Панель 3: 2 семестр -->
             <div class="form-card">
                 <div class="card-header">
-                    <h3 class="card-title">2 семестр</h3>
+                    <h3 class="card-title"> 2 семестр</h3>
                     <div class="form-hint">Укажите нагрузку в часах</div>
                 </div>
                 <div class="card-body">
@@ -502,13 +660,17 @@
 }
 
 .card-icon {
-    width: 32px;
-    height: 32px;
     display: flex;
     align-items: center;
-    justify-content: center;
     color: var(--primary-color);
     font-size: 18px;
+}
+
+.card-icon h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
 }
 
 .card-title {
@@ -718,34 +880,28 @@
 </style>
 
 <script>
-    // Функция обновления информации о неделях
+    // Функция обновления информации о неделях (только для отображения)
     function updateWeeksInfo() {
         const yearSelect = document.getElementById('id_year');
         const selectedOption = yearSelect.options[yearSelect.selectedIndex];
-        const weeksWinterInput = document.getElementById('weeks_winter');
-        const weeksSummerInput = document.getElementById('weeks_summer');
         const weeksInfoSection = document.getElementById('weeksInfoSection');
         const winterWeeksDisplay = document.getElementById('winterWeeksDisplay');
         const summerWeeksDisplay = document.getElementById('summerWeeksDisplay');
 
         if (selectedOption && selectedOption.value) {
-            const winterWeek = selectedOption.getAttribute('data-winter-week') || 0;
-            const summerWeek = selectedOption.getAttribute('data-summer-week') || 0;
-
-            weeksWinterInput.value = winterWeek;
-            weeksSummerInput.value = summerWeek;
+            const winterWeek = parseInt(selectedOption.getAttribute('data-winter-week')) || 0;
+            const summerWeek = parseInt(selectedOption.getAttribute('data-summer-week')) || 0;
 
             winterWeeksDisplay.textContent = winterWeek;
             summerWeeksDisplay.textContent = summerWeek;
 
             weeksInfoSection.style.display = 'flex';
         } else {
-            weeksWinterInput.value = '0';
-            weeksSummerInput.value = '0';
             weeksInfoSection.style.display = 'none';
         }
     }
 
+    // Валидация формы
     function validateForm() {
         const id_year = document.getElementById('id_year').value;
         const id_teacher = document.getElementById('id_teacher').value;
@@ -766,17 +922,10 @@
             return false;
         }
 
-        const weeksWinter = document.getElementById('weeks_winter').value;
-        const weeksSummer = document.getElementById('weeks_summer').value;
-
-        if (weeksWinter == '0' && weeksSummer == '0') {
-            alert('Пожалуйста, выберите год обучения');
-            return false;
-        }
-
         return true;
     }
 
+    // Инициализация при загрузке страницы
     document.addEventListener('DOMContentLoaded', function() {
         const yearSelect = document.getElementById('id_year');
 
@@ -790,6 +939,9 @@
         const numberInputs = document.querySelectorAll('input[type="number"]');
         numberInputs.forEach(input => {
             input.addEventListener('change', function() {
+                if (this.value < 0) this.value = 0;
+            });
+            input.addEventListener('input', function() {
                 if (this.value < 0) this.value = 0;
             });
         });

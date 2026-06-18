@@ -386,8 +386,8 @@
         </div>
         {% endif %}
 
-        <!-- НАГРУЗКА -->
-        {% if funck == 'edit_nagruzka' %}
+         <!-- НАГРУЗКА -->
+{% if funck == 'edit_nagruzka' %}
 <style>
 /* Стили для кнопок фильтров */
 .filters-actions {
@@ -588,6 +588,13 @@
             <form method="get" action="{{ url_for('load_table') }}">
                 <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
                 <input type="hidden" name="funck" value="edit_nagruzka">
+                <!-- Сохраняем все активные фильтры -->
+                <input type="hidden" name="year" value="{{ request.args.get('year', '') }}">
+                <input type="hidden" name="teacher" value="{{ request.args.get('teacher', '') }}">
+                <input type="hidden" name="group" value="{{ request.args.get('group', '') }}">
+                <input type="hidden" name="discipline" value="{{ request.args.get('discipline', '') }}">
+                <input type="hidden" name="fgos" value="{{ request.args.get('fgos', '') }}">
+                <input type="hidden" name="semester" value="{{ request.args.get('semester', '') }}">
                 <i class="fas fa-search"></i>
             </form>
             {% if request.args.get('search') %}
@@ -599,7 +606,7 @@
     </div>
 </div>
 
-<!-- Фильтрыsss -->
+<!-- Фильтры -->
 <div class="filters-wrapper">
     <input type="checkbox" id="toggle-filters" hidden>
     <div class="filters-header">
@@ -702,7 +709,7 @@
             {% set course_project_summer = load.course_project_summer or 0 %}
             {% set attestation_summer = load.attestation_summer or 0 %}
 
-            {# Учебные недели из таблицы academic_year #}
+            {# Учебные недели из таблицы academic_year - данные приходят с JOIN #}
             {% set weeks_winter = load.winter_week or 0 %}
             {% set weeks_summer = load.summer_week or 0 %}
 
@@ -714,17 +721,19 @@
             {% set winter_with_teacher = lectures_winter + practice_winter + labs_winter + seminars_winter + course_project_winter %}
             {% set summer_with_teacher = lectures_summer + practice_summer + labs_summer + seminars_summer + course_project_summer %}
 
-            {# Новая формула: (Объём ОП - Самост.) / недели с округлением до целого #}
+            {# Формула: (Объём ОП - Самост.) / недели с округлением ВВЕРХ до целого #}
             {% if weeks_winter > 0 and winter_total_hours >= independent_winter %}
-                {% set winter_weekly = ((winter_total_hours - independent_winter) / weeks_winter) | round(0) | int %}
-            {% else %}
-                {% set winter_weekly = 0 %}
+            {% set winter_raw = (winter_total_hours - independent_winter) / weeks_winter %}
+            {% set winter_weekly = winter_raw | round(0, 'ceil') | int %}
+                {% else %}
+            {% set winter_weekly = 0 %}
             {% endif %}
 
             {% if weeks_summer > 0 and summer_total_hours >= independent_summer %}
-                {% set summer_weekly = ((summer_total_hours - independent_summer) / weeks_summer) | round(0) | int %}
-            {% else %}
-                {% set summer_weekly = 0 %}
+            {% set summer_raw = (summer_total_hours - independent_summer) / weeks_summer %}
+            {% set summer_weekly = summer_raw | round(0, 'ceil') | int %}
+                {% else %}
+            {% set summer_weekly = 0 %}
             {% endif %}
 
             {# Общая нагрузка преподавателя #}
@@ -833,6 +842,12 @@ function applyFilters() {
     if (disciplineFilter) params.set('discipline', disciplineFilter);
     if (groupFilter) params.set('group', groupFilter);
 
+    // Сохраняем поисковый запрос если он есть
+    const searchInput = document.querySelector('.search-box input[name="search"]');
+    if (searchInput && searchInput.value) {
+        params.set('search', searchInput.value);
+    }
+
     window.location.href = window.location.pathname + '?' + params.toString();
 }
 
@@ -841,7 +856,93 @@ function resetFilters() {
 }
 
 function exportToPDF() {
-    alert('Экспорт в PDF будет реализован');
+    // Проверяем, есть ли данные в таблице
+    const tableBody = document.querySelector('#readable-table tbody');
+    if (!tableBody) {
+        alert('Таблица не найдена!');
+        return;
+    }
+
+    const rows = tableBody.querySelectorAll('tr');
+    // Проверяем, есть ли данные (не считая строку "Нет данных")
+    let hasData = false;
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 0 && !row.querySelector('td[colspan]')) {
+            hasData = true;
+        }
+    });
+
+    if (!hasData) {
+        alert('В таблице нет данных для экспорта!\nПожалуйста, измените параметры фильтрации.');
+        return;
+    }
+
+    // Собираем все параметры фильтров
+    const params = new URLSearchParams();
+
+    // Поиск
+    const searchInput = document.querySelector('.search-box input[name="search"]');
+    if (searchInput && searchInput.value) {
+        params.set('search', searchInput.value);
+    }
+
+    // Фильтры из панели
+    const yearFilter = document.getElementById('filter-year');
+    if (yearFilter && yearFilter.value) {
+        params.set('year', yearFilter.value);
+    }
+
+    const teacherFilter = document.getElementById('filter-teacher');
+    if (teacherFilter && teacherFilter.value) {
+        params.set('teacher', teacherFilter.value);
+    }
+
+    const disciplineFilter = document.getElementById('filter-discipline');
+    if (disciplineFilter && disciplineFilter.value) {
+        params.set('discipline', disciplineFilter.value);
+    }
+
+    const groupFilter = document.getElementById('filter-group');
+    if (groupFilter && groupFilter.value) {
+        params.set('group', groupFilter.value);
+    }
+
+    // Параметры из URL (семестр, fgos)
+    const urlParams = new URLSearchParams(window.location.search);
+    const semesterFilter = urlParams.get('semester');
+    if (semesterFilter) {
+        params.set('semester', semesterFilter);
+    }
+
+    const fgosFilter = urlParams.get('fgos');
+    if (fgosFilter) {
+        params.set('fgos', fgosFilter);
+    }
+
+    // Формируем URL для экспорта
+    const currentPath = window.location.pathname;
+    const exportUrl = currentPath.replace('/load_table', '/export_pdf_nagruzka') + '?' + params.toString();
+
+    // Показываем индикатор загрузки
+    const exportBtn = document.querySelector('.export-btn');
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Генерация...';
+    exportBtn.disabled = true;
+
+    // Открываем PDF в новой вкладке
+    try {
+        window.open(exportUrl, '_blank');
+        // Возвращаем кнопку в исходное состояние через 2 секунды
+        setTimeout(() => {
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+        }, 2000);
+    } catch (e) {
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+        alert('Ошибка при экспорте: ' + e.message);
+    }
 }
 </script>
 {% endif %}

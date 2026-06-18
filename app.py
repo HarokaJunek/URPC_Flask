@@ -3,24 +3,30 @@ from unittest import case
 from xml.parsers.expat import errors
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
-import os
 import sqlite3
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
+import math  # Добавьте этот импорт в начало файла
 import io
 # import openpyxl
 # from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 # from openpyxl.utils import get_column_letter
-from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
-from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 pdfmetrics.registerFont(TTFont('Arial', 'arial.ttf'))
 from functools import wraps
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib import colors
+from reportlab.lib.units import mm, cm, inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, KeepTogether
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
+from reportlab.lib.fonts import addMapping
+import io
+import os
 
 # ============================================================================
 # 1. ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
@@ -132,6 +138,511 @@ def specialist_or_higher_required(f):
 
     return decorated_function
 
+def generate_load_pdf(load_data, teacher_filter=None, year_filter=None, semester_filter=None):
+    """
+    Генерация PDF с таблицей нагрузки в альбомной ориентации
+    с вертикальным текстом в заголовках и переносом в ячейках
+    """
+    buffer = io.BytesIO()
+
+    # Создаем документ в альбомной ориентации с минимальными полями
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        leftMargin=3 * mm,
+        rightMargin=3 * mm,
+        topMargin=8 * mm,
+        bottomMargin=8 * mm,
+        title="Нагрузка преподавателей"
+    )
+
+    # Регистрируем шрифт для кириллицы
+    try:
+        font_path = os.path.join(os.path.dirname(__file__), 'static', 'Fonts', 'DejaVuSans.ttf')
+        if os.path.exists(font_path):
+            pdfmetrics.registerFont(TTFont('DejaVu', font_path))
+            font_name = 'DejaVu'
+        else:
+            font_name = 'Helvetica'
+    except:
+        font_name = 'Helvetica'
+
+    styles = getSampleStyleSheet()
+
+    # Стили
+    title_style = ParagraphStyle(
+        'TitleStyle',
+        parent=styles['Heading1'],
+        fontName=font_name,
+        fontSize=12,
+        alignment=TA_CENTER,
+        spaceAfter=4,
+        textColor=colors.black,
+        bold=True
+    )
+
+    info_style = ParagraphStyle(
+        'InfoStyle',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=8,
+        alignment=TA_LEFT,
+        spaceAfter=2,
+        textColor=colors.black
+    )
+
+    # Стиль для ячеек с ПЕРЕНОСОМ текста (для ФИО, ПЦК и дисциплины)
+    wrap_style = ParagraphStyle(
+        'WrapStyle',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=5,
+        alignment=TA_CENTER,
+        leading=5.5,
+        wordWrap='CJK'
+    )
+
+    # Стиль для ЗАГОЛОВКОВ с уменьшенным межстрочным интервалом
+    header_style = ParagraphStyle(
+        'HeaderStyle',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=4.5,
+        alignment=TA_CENTER,
+        leading=4.8,
+        bold=True,
+        wordWrap='CJK'
+    )
+
+    signature_style = ParagraphStyle(
+        'SignatureStyle',
+        parent=styles['Normal'],
+        fontName=font_name,
+        fontSize=9,
+        alignment=TA_LEFT,
+        spaceAfter=2,
+        textColor=colors.black
+    )
+
+    elements = []
+
+    # Заголовок
+    elements.append(Paragraph("НАГРУЗКА ПРЕПОДАВАТЕЛЯ", title_style))
+    elements.append(Spacer(1, 1 * mm))
+
+    # ========== ФУНКЦИЯ ДЛЯ БЕЗОПАСНОГО ПОЛУЧЕНИЯ ЗНАЧЕНИЙ ==========
+    def safe_get(row, key, default=0):
+        if row is None:
+            return default
+        try:
+            if hasattr(row, 'keys'):
+                return row[key] if key in row.keys() else default
+            elif isinstance(row, dict):
+                return row.get(key, default)
+            else:
+                return getattr(row, key, default)
+        except:
+            return default
+
+    # ========== РАСЧЕТ ОБЩЕЙ НАГРУЗКИ ДЛЯ ФИЛЬТРАЦИИ ==========
+    def calculate_total_load(data, teacher_name=None):
+        """Расчет общей нагрузки преподавателя из данных"""
+        total = 0
+        for load in data:
+            if teacher_name:
+                load_teacher = safe_get(load, 'teacher_full_name', '')
+                if load_teacher != teacher_name:
+                    continue
+
+            lectures_winter = safe_get(load, 'lectures_winter', 0) or 0
+            practice_winter = safe_get(load, 'practice_winter', 0) or 0
+            labs_winter = safe_get(load, 'labs_winter', 0) or 0
+            seminars_winter = safe_get(load, 'seminars_winter', 0) or 0
+            course_project_winter = safe_get(load, 'course_project_winter', 0) or 0
+
+            lectures_summer = safe_get(load, 'lectures_summer', 0) or 0
+            practice_summer = safe_get(load, 'practice_summer', 0) or 0
+            labs_summer = safe_get(load, 'labs_summer', 0) or 0
+            seminars_summer = safe_get(load, 'seminars_summer', 0) or 0
+            course_project_summer = safe_get(load, 'course_project_summer', 0) or 0
+
+            winter_with_teacher = (lectures_winter + practice_winter + labs_winter +
+                                   seminars_winter + course_project_winter)
+            summer_with_teacher = (lectures_summer + practice_summer + labs_summer +
+                                   seminars_summer + course_project_summer)
+
+            total += winter_with_teacher + summer_with_teacher
+
+        return total
+
+    # Информация о фильтрах
+    info_lines = []
+
+    if teacher_filter:
+        conn = get_db_connection()
+        teacher = conn.execute(
+            'SELECT full_name FROM users WHERE full_name LIKE ? LIMIT 1',
+            (f'%{teacher_filter}%',)
+        ).fetchone()
+        conn.close()
+        teacher_display = teacher['full_name'] if teacher else teacher_filter
+
+        total_hours = calculate_total_load(load_data, teacher_display)
+        info_lines.append(f"Преподаватель: {teacher_display} (часов: {total_hours})")
+    else:
+        info_lines.append("Преподаватель: Все")
+        total_hours_all = calculate_total_load(load_data)
+        info_lines.append(f"Общая нагрузка всех преподавателей: {total_hours_all} часов")
+
+    if year_filter:
+        conn = get_db_connection()
+        year_name = conn.execute(
+            'SELECT year_name FROM academic_year WHERE id_year = ?',
+            (year_filter,)
+        ).fetchone()
+        conn.close()
+
+    if semester_filter:
+        semester_display = 'Зимний семестр' if semester_filter == 'winter' else 'Летний семестр'
+        info_lines.append(f"Семестр: {semester_display}")
+
+    info_text = " | ".join(info_lines)
+    elements.append(Paragraph(info_text, info_style))
+    elements.append(Spacer(1, 2 * mm))
+
+    # ========== ШАПКА ==========
+    header_row1 = [
+        '', '', '', '', '', '', '', '', '', '', '',
+        '', '', '', '', '', '1 СЕМЕСТР', '', '', '', '', '',
+        '', '', '', '', '', '2 СЕМЕСТР', '', '', '', '', '',
+        '', '', ''
+    ]
+
+    header_row2 = [
+        '№',
+        'Форма',
+        'Индекс',
+        'Дисциплина',
+        'Группа',
+        'Год',
+        Paragraph('Учеб.\nнед.\n(1 сем)', header_style),
+        Paragraph('Учеб.\nнед.\n(2 сем)', header_style),
+        'Экз',
+        'Зач',
+        Paragraph('Диф.\nзач', header_style),
+        Paragraph('Объем ОП', header_style),
+        Paragraph('Сам.', header_style),
+        Paragraph('Конс.', header_style),
+        Paragraph('С\nпреп.', header_style),
+        Paragraph('Нагр.\nв нед.', header_style),
+        Paragraph('Лекц.', header_style),
+        Paragraph('Прак.\nзан.', header_style),
+        Paragraph('Лаб.\nзан.', header_style),
+        Paragraph('Семин.', header_style),
+        Paragraph('Курс.\nпр.', header_style),
+        Paragraph('Аттест.', header_style),
+        Paragraph('Объем ОП', header_style),
+        Paragraph('Сам.', header_style),
+        Paragraph('Конс.', header_style),
+        Paragraph('С\nпреп.', header_style),
+        Paragraph('Нагр.\nв нед.', header_style),
+        Paragraph('Лекц.', header_style),
+        Paragraph('Прак.\nзан.', header_style),
+        Paragraph('Лаб.\nзан.', header_style),
+        Paragraph('Семин.', header_style),
+        Paragraph('Курс.\nпр.', header_style),
+        Paragraph('Аттест.', header_style),
+        Paragraph('Нагр.\nпреп.', header_style),
+        Paragraph('ФИО\nпреп.', header_style),
+        Paragraph('ПЦК', header_style)
+    ]
+
+    table_data = [header_row1, header_row2]
+
+    # Добавляем данные
+    for idx, load in enumerate(load_data, 1):
+        lectures_winter = safe_get(load, 'lectures_winter', 0) or 0
+        practice_winter = safe_get(load, 'practice_winter', 0) or 0
+        labs_winter = safe_get(load, 'labs_winter', 0) or 0
+        seminars_winter = safe_get(load, 'seminars_winter', 0) or 0
+        independent_winter = safe_get(load, 'independent_winter', 0) or 0
+        consultations_winter = safe_get(load, 'consultations_winter', 0) or 0
+        course_project_winter = safe_get(load, 'course_project_winter', 0) or 0
+        attestation_winter = safe_get(load, 'attestation_winter', 0) or 0
+
+        lectures_summer = safe_get(load, 'lectures_summer', 0) or 0
+        practice_summer = safe_get(load, 'practice_summer', 0) or 0
+        labs_summer = safe_get(load, 'labs_summer', 0) or 0
+        seminars_summer = safe_get(load, 'seminars_summer', 0) or 0
+        independent_summer = safe_get(load, 'independent_summer', 0) or 0
+        consultations_summer = safe_get(load, 'consultations_summer', 0) or 0
+        course_project_summer = safe_get(load, 'course_project_summer', 0) or 0
+        attestation_summer = safe_get(load, 'attestation_summer', 0) or 0
+
+        weeks_winter = safe_get(load, 'winter_week', 0) or 0
+        weeks_summer = safe_get(load, 'summer_week', 0) or 0
+
+        exam = safe_get(load, 'exam', 0) or 0
+        credit = safe_get(load, 'credit', 0) or 0
+        diff_credit = safe_get(load, 'diff_credit', 0) or 0
+
+        study_form_name = safe_get(load, 'study_form_name', '') or ''
+        id_discipline = safe_get(load, 'id_discipline', '') or ''
+        discipline_name = safe_get(load, 'discipline_name', '') or ''
+        id_group = safe_get(load, 'id_group', '') or ''
+        year_name = safe_get(load, 'year_name', '') or ''
+        teacher_full_name = safe_get(load, 'teacher_full_name', '') or ''
+        pck_name = safe_get(load, 'pck_name', '') or ''
+
+        # Расчеты
+        winter_total_hours = (independent_winter + consultations_winter + lectures_winter +
+                              practice_winter + labs_winter + seminars_winter +
+                              course_project_winter + attestation_winter)
+        summer_total_hours = (independent_summer + consultations_summer + lectures_summer +
+                              practice_summer + labs_summer + seminars_summer +
+                              course_project_summer + attestation_summer)
+
+        winter_with_teacher = (lectures_winter + practice_winter + labs_winter +
+                               seminars_winter + course_project_winter)
+        summer_with_teacher = (lectures_summer + practice_summer + labs_summer +
+                               seminars_summer + course_project_summer)
+
+        # ИСПРАВЛЕННЫЙ РАСЧЕТ НАГРУЗКИ НА НЕДЕЛЮ С ОКРУГЛЕНИЕМ ВВЕРХ (ceil)
+        if weeks_winter > 0 and winter_total_hours >= independent_winter:
+            winter_raw = (winter_total_hours - independent_winter) / weeks_winter
+            winter_weekly = math.ceil(winter_raw)  # Округление ВВЕРХ
+        else:
+            winter_weekly = 0
+
+        if weeks_summer > 0 and summer_total_hours >= independent_summer:
+            summer_raw = (summer_total_hours - independent_summer) / weeks_summer
+            summer_weekly = math.ceil(summer_raw)  # Округление ВВЕРХ
+        else:
+            summer_weekly = 0
+
+        total_teacher_load = winter_with_teacher + summer_with_teacher
+
+        def fmt(val):
+            return str(val) if val > 0 else ''
+
+        # ========== СОЗДАЕМ ЯЧЕЙКИ С ПЕРЕНОСОМ ДЛЯ ФИО, ПЦК И ДИСЦИПЛИНЫ ==========
+
+        # Для дисциплины - разбиваем на части, если строка длинная
+        discipline_name_display = discipline_name
+        if len(discipline_name_display) > 30:
+            parts = discipline_name_display.split(' ')
+            if len(parts) > 1:
+                lines = []
+                current_line = ''
+                for part in parts:
+                    if len(current_line) + len(part) + 1 <= 25:
+                        if current_line:
+                            current_line += ' ' + part
+                        else:
+                            current_line = part
+                    else:
+                        if current_line:
+                            lines.append(current_line)
+                        current_line = part
+                if current_line:
+                    lines.append(current_line)
+                discipline_name_display = '\n'.join(lines)
+            else:
+                discipline_name_display = '\n'.join(
+                    [discipline_name_display[i:i + 20] for i in range(0, len(discipline_name_display), 20)])
+
+        # Для ФИО - разбиваем на части, если строка длинная
+        teacher_name = teacher_full_name
+        if len(teacher_name) > 20:
+            parts = teacher_name.split(' ')
+            if len(parts) >= 3:
+                teacher_name = '\n'.join(parts)
+            elif len(parts) == 2:
+                teacher_name = '\n'.join(parts)
+            else:
+                teacher_name = '\n'.join([teacher_name[i:i + 10] for i in range(0, len(teacher_name), 10)])
+
+        # Для ПЦК - тоже разбиваем, если длинное
+        pck_name_display = pck_name
+        if len(pck_name_display) > 15:
+            parts = pck_name_display.split(' ')
+            if len(parts) > 1:
+                pck_name_display = '\n'.join(parts)
+            else:
+                pck_name_display = '\n'.join([pck_name_display[i:i + 10] for i in range(0, len(pck_name_display), 10)])
+
+        row = [
+            str(idx),
+            study_form_name,
+            str(id_discipline),
+            Paragraph(discipline_name_display, wrap_style),
+            id_group,
+            year_name,
+            fmt(weeks_winter),
+            fmt(weeks_summer),
+            fmt(exam),
+            fmt(credit),
+            fmt(diff_credit),
+            # 1 семестр
+            fmt(winter_total_hours),
+            fmt(independent_winter),
+            fmt(consultations_winter),
+            fmt(winter_with_teacher),
+            fmt(winter_weekly),  # <-- ЗДЕСЬ БУДЕТ НАГРУЗКА НА НЕДЕЛЮ 1 СЕМ
+            fmt(lectures_winter),
+            fmt(practice_winter),
+            fmt(labs_winter),
+            fmt(seminars_winter),
+            fmt(course_project_winter),
+            fmt(attestation_winter),
+            # 2 семестр
+            fmt(summer_total_hours),
+            fmt(independent_summer),
+            fmt(consultations_summer),
+            fmt(summer_with_teacher),
+            fmt(summer_weekly),  # <-- ЗДЕСЬ БУДЕТ НАГРУЗКА НА НЕДЕЛЮ 2 СЕМ
+            fmt(lectures_summer),
+            fmt(practice_summer),
+            fmt(labs_summer),
+            fmt(seminars_summer),
+            fmt(course_project_summer),
+            fmt(attestation_summer),
+            fmt(total_teacher_load),
+            Paragraph(teacher_name, wrap_style),
+            Paragraph(pck_name_display, wrap_style),
+        ]
+        table_data.append(row)
+
+    # ========== ШИРИНА КОЛОНОК ==========
+    col_widths = [
+        4.5 * mm,  # 0: №
+        9 * mm,  # 1: Форма
+        11 * mm,  # 2: Индекс
+        20 * mm,  # 3: Дисциплина
+        13 * mm,  # 4: Группа
+        10 * mm,  # 5: Год
+        10 * mm,  # 6: Нед.1
+        10 * mm,  # 7: Нед.2
+        4.5 * mm,  # 8: Экз
+        4.5 * mm,  # 9: Зач
+        5.5 * mm,  # 10: Д.Зач
+        # 1 семестр (11 колонок)
+        7 * mm,  # 11: ОП
+        5 * mm,  # 12: Сам.
+        5 * mm,  # 13: Конс.
+        7 * mm,  # 14: С преп.
+        7 * mm,  # 15: Нагр. в нед.
+        5 * mm,  # 16: Лекции
+        6 * mm,  # 17: Пр.зан.
+        6 * mm,  # 18: Лаб.зан.
+        7 * mm,  # 19: Семин.
+        6 * mm,  # 20: Курс.пр.
+        8 * mm,  # 21: Аттест.
+        # 2 семестр (11 колонок)
+        7 * mm,  # 22: ОП
+        5 * mm,  # 23: Сам.
+        5 * mm,  # 24: Конс.
+        7 * mm,  # 25: С преп.
+        7 * mm,  # 26: Нагр. в нед.
+        5.5 * mm,  # 27: Лекции
+        6 * mm,  # 28: Пр.зан.
+        6 * mm,  # 29: Лаб.зан.
+        7 * mm,  # 30: Семин.
+        6 * mm,  # 31: Курс.пр.
+        8 * mm,  # 32: Аттест.
+        8 * mm,  # 33: Нагр.
+        20 * mm,  # 34: ФИО
+        16 * mm,  # 35: ПЦК
+    ]
+
+    # Создаем таблицу
+    table = Table(table_data, colWidths=col_widths, repeatRows=2)
+
+    # ========== ОБЪЕДИНЕНИЕ ЯЧЕЕК ==========
+    table._span = [(11, 0, 21, 0)]  # 1 СЕМЕСТР
+    table._span.append((22, 0, 32, 0))  # 2 СЕМЕСТР
+
+    # ========== СТИЛИ ==========
+    style = TableStyle([
+        # Верхняя строка - черный фон
+        ('BACKGROUND', (0, 0), (-1, 0), colors.white),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('FONTNAME', (0, 0), (-1, 0), font_name),
+        ('FONTSIZE', (0, 0), (-1, 0), 6.5),
+        ('BOLD', (0, 0), (-1, 0), True),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+
+        # Нижняя строка - серый фон
+        ('BACKGROUND', (0, 1), (-1, 1), colors.lightgrey),
+        ('TEXTCOLOR', (0, 1), (-1, 1), colors.black),
+        ('FONTNAME', (0, 1), (-1, 1), font_name),
+        ('FONTSIZE', (0, 1), (-1, 1), 4.5),
+        ('BOLD', (0, 1), (-1, 1), True),
+        ('ALIGN', (0, 1), (-1, 1), 'CENTER'),
+        ('VALIGN', (0, 1), (-1, 1), 'MIDDLE'),
+
+        # Данные
+        ('FONTNAME', (0, 2), (-1, -1), font_name),
+        ('FONTSIZE', (0, 2), (-1, -1), 4.5),
+        ('ALIGN', (0, 2), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 2), (-1, -1), 'MIDDLE'),
+
+        # Сетка
+        ('GRID', (0, 0), (-1, -1), 0.2, colors.black),
+        ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+
+        # Отступы
+        ('TOPPADDING', (0, 0), (-1, -1), 0.5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0.5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0.5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0.5),
+
+        # Разделители семестров
+        ('LINEAFTER', (10, 0), (10, -1), 1.0, colors.black),
+        ('LINEAFTER', (21, 0), (21, -1), 1.0, colors.black),
+    ])
+
+    # ========== ВЕРТИКАЛЬНЫЙ ТЕКСТ ==========
+    for col in range(6, 36):
+        try:
+            style.add('ROTATION', (col, 1), (col, 1), 90)
+        except:
+            pass
+
+    table.setStyle(style)
+    elements.append(table)
+
+    # Подпись
+    elements.append(Spacer(1, 6 * mm))
+
+    if teacher_filter:
+        conn = get_db_connection()
+        teacher = conn.execute(
+            'SELECT full_name FROM users WHERE full_name LIKE ? LIMIT 1',
+            (f'%{teacher_filter}%',)
+        ).fetchone()
+        conn.close()
+        signature_name = teacher['full_name'] if teacher else teacher_filter
+    else:
+        signature_name = "_____________________"
+
+    elements.append(Paragraph(
+        f'<b>{signature_name}</b> ознакомлен(а) с нагрузкой _________________',
+        signature_style
+    ))
+    elements.append(Spacer(1, 1.5 * mm))
+
+    elements.append(Paragraph(
+        f'<b>Дата:</b> _______________',
+        signature_style
+    ))
+
+    # Строим PDF
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
+
 
 # ============================================================================
 # 3. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С БД
@@ -158,6 +669,135 @@ def get_db_connection():
 # ============================================================================
 # 4. МАРШРУТЫ
 # ============================================================================
+@app.route('/export_pdf_nagruzka', methods=['GET'])
+def export_pdf_nagruzka():
+    """Экспорт нагрузки в PDF с учетом фильтров"""
+    if not session.get('is_specialist', False):
+        flash('У вас нет прав доступа к этому разделу.', 'danger')
+        return redirect(url_for('index'))
+
+    try:
+        # Получаем параметры фильтров
+        search_query = request.args.get('search', '')
+        year_filter = request.args.get('year')
+        teacher_filter = request.args.get('teacher')
+        group_filter = request.args.get('group')
+        discipline_filter = request.args.get('discipline')
+        fgos_filter = request.args.get('fgos')
+        semester_filter = request.args.get('semester')
+
+        # Формируем запрос как в edit_nagruzka
+        conn = get_db_connection()
+
+        query = '''
+            SELECT 
+                w.*,
+                ay.winter_week,
+                ay.summer_week,
+                ay.year_name,
+                u.full_name as teacher_full_name,
+                d.discipline_name,
+                g.id_group,
+                f.name as fgos_name,
+                p.name_pck as pck_name,
+                sf.form_name as study_form_name
+            FROM workload w
+            LEFT JOIN academic_year ay ON w.id_year = ay.id_year
+            LEFT JOIN users u ON w.id_teacher = u.id_user
+            LEFT JOIN disciplines d ON w.id_discipline = d.id_discipline
+            LEFT JOIN groups g ON w.id_group = g.id_group
+            LEFT JOIN fgoss f ON w.id_fgos = f.id_fgos
+            LEFT JOIN pck p ON d.id_pck = p.id_pck
+            LEFT JOIN study_form sf ON g.id_study_form = sf.id_form
+            WHERE 1=1
+        '''
+        params = []
+
+        # Поиск
+        if search_query:
+            query += ''' AND (
+                ay.year_name LIKE ? OR 
+                u.full_name LIKE ? OR 
+                d.discipline_name LIKE ? OR 
+                g.id_group LIKE ? OR 
+                f.name LIKE ? OR
+                w.id_load LIKE ?
+            )'''
+            like_pattern = f'%{search_query}%'
+            params.extend([like_pattern] * 6)
+
+        # Фильтры
+        if year_filter and year_filter != '':
+            query += ' AND w.id_year = ?'
+            params.append(year_filter)
+
+        if teacher_filter and teacher_filter != '':
+            query += ' AND u.full_name LIKE ?'
+            params.append(f'%{teacher_filter}%')
+
+        if group_filter and group_filter != '':
+            query += ' AND w.id_group = ?'
+            params.append(group_filter)
+
+        if discipline_filter and discipline_filter != '':
+            query += ' AND d.discipline_name LIKE ?'
+            params.append(f'%{discipline_filter}%')
+
+        if fgos_filter and fgos_filter != '':
+            query += ' AND w.id_fgos = ?'
+            params.append(fgos_filter)
+
+        # Выполняем запрос
+        cursor = conn.execute(query, params)
+        table_info = cursor.fetchall()
+
+        # Фильтр по семестру
+        if semester_filter:
+            filtered_info = []
+            for load in table_info:
+                show = True
+                if semester_filter == 'winter' and (
+                        load['lectures_winter'] == 0 and load['practice_winter'] == 0 and
+                        load['labs_winter'] == 0 and load['seminars_winter'] == 0 and
+                        load['course_project_winter'] == 0):
+                    show = False
+                if semester_filter == 'summer' and (
+                        load['lectures_summer'] == 0 and load['practice_summer'] == 0 and
+                        load['labs_summer'] == 0 and load['seminars_summer'] == 0 and
+                        load['course_project_summer'] == 0):
+                    show = False
+                if show:
+                    filtered_info.append(load)
+            table_info = filtered_info
+
+        conn.close()
+
+        # Проверяем наличие данных
+        if not table_info:
+            flash('Нет данных для экспорта в PDF', 'warning')
+            return redirect(url_for('load_table', funck='edit_nagruzka', **request.args))
+
+        # Генерируем PDF
+        pdf_buffer = generate_load_pdf(
+            table_info,
+            teacher_filter,
+            year_filter,
+            semester_filter
+        )
+
+        # Формируем имя файла
+        filename = f'Нагрузка_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+
+        return send_file(
+            pdf_buffer,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/pdf'
+        )
+
+    except Exception as e:
+        flash(f'Ошибка при генерации PDF: {str(e)}', 'danger')
+        return redirect(url_for('load_table', funck='edit_nagruzka', **request.args))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -617,7 +1257,16 @@ def load_table():
                     'SELECT id_year, year_name, winter_week, summer_week FROM academic_year ORDER BY year_name').fetchall()
                 groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
 
-                # Базовый запрос с JOIN (правильные названия таблиц и полей)
+                # Получаем параметры из URL
+                search_query = request.args.get('search', '')
+                year_filter = request.args.get('year')
+                teacher_filter = request.args.get('teacher')
+                group_filter = request.args.get('group')
+                discipline_filter = request.args.get('discipline')
+                fgos_filter = request.args.get('fgos')
+                semester_filter = request.args.get('semester')
+
+                # Базовый запрос с JOIN
                 query = '''
                     SELECT 
                         w.*,
@@ -638,56 +1287,62 @@ def load_table():
                     LEFT JOIN fgoss f ON w.id_fgos = f.id_fgos
                     LEFT JOIN pck p ON d.id_pck = p.id_pck
                     LEFT JOIN study_form sf ON g.id_study_form = sf.id_form
+                    WHERE 1=1
                 '''
                 params = []
 
+                # Добавляем условия для ПОИСКА
                 if search_query:
-                    query += '''
-                        WHERE 
-                            ay.year_name LIKE ? OR 
-                            u.full_name LIKE ? OR 
-                            d.discipline_name LIKE ? OR 
-                            g.id_group LIKE ? OR 
-                            f.name LIKE ? OR
-                            w.id_load LIKE ?
-                    '''
+                    query += ''' AND (
+                        ay.year_name LIKE ? OR 
+                        u.full_name LIKE ? OR 
+                        d.discipline_name LIKE ? OR 
+                        g.id_group LIKE ? OR 
+                        f.name LIKE ? OR
+                        w.id_load LIKE ?
+                    )'''
                     like_pattern = f'%{search_query}%'
-                    params = [like_pattern, like_pattern, like_pattern, like_pattern, like_pattern, like_pattern]
+                    params.extend([like_pattern] * 6)
 
+                # Добавляем условия для ФИЛЬТРОВ (в SQL, а не в Python)
+                if year_filter and year_filter != '':
+                    query += ' AND w.id_year = ?'
+                    params.append(year_filter)
+
+                if teacher_filter and teacher_filter != '':
+                    query += ' AND u.full_name LIKE ?'
+                    params.append(f'%{teacher_filter}%')
+
+                if group_filter and group_filter != '':
+                    query += ' AND w.id_group = ?'
+                    params.append(group_filter)
+
+                if discipline_filter and discipline_filter != '':
+                    query += ' AND d.discipline_name LIKE ?'
+                    params.append(f'%{discipline_filter}%')
+
+                if fgos_filter and fgos_filter != '':
+                    query += ' AND w.id_fgos = ?'
+                    params.append(fgos_filter)
+
+                # Выполняем запрос
                 cursor = conn.execute(query, params)
                 table_info = cursor.fetchall()
 
-                # Применение фильтров из URL
-                year_filter = request.args.get('year')
-                teacher_filter = request.args.get('teacher')
-                group_filter = request.args.get('group')
-                discipline_filter = request.args.get('discipline')
-                fgos_filter = request.args.get('fgos')
-                semester_filter = request.args.get('semester')
-
-                if year_filter or teacher_filter or group_filter or discipline_filter or fgos_filter or semester_filter:
+                # Применяем фильтр по семестру (его сложнее сделать в SQL, оставляем в Python)
+                if semester_filter:
                     filtered_info = []
                     for load in table_info:
                         show = True
-                        if year_filter and str(load['id_year']) != year_filter:
-                            show = False
-                        if teacher_filter and str(load['id_teacher']) != teacher_filter:
-                            show = False
-                        if group_filter and str(load['id_group']) != group_filter:
-                            show = False
-                        if discipline_filter and str(load['id_discipline']) != discipline_filter:
-                            show = False
-                        if fgos_filter and str(load['id_fgos']) != fgos_filter:
-                            show = False
                         if semester_filter == 'winter' and (
-                                load['lectures_winter'] == 0 and load['practice_winter'] == 0 and load[
-                            'labs_winter'] == 0 and load['seminars_winter'] == 0 and load[
-                                    'course_project_winter'] == 0):
+                                load['lectures_winter'] == 0 and load['practice_winter'] == 0 and
+                                load['labs_winter'] == 0 and load['seminars_winter'] == 0 and
+                                load['course_project_winter'] == 0):
                             show = False
                         if semester_filter == 'summer' and (
-                                load['lectures_summer'] == 0 and load['practice_summer'] == 0 and load[
-                            'labs_summer'] == 0 and load['seminars_summer'] == 0 and load[
-                                    'course_project_summer'] == 0):
+                                load['lectures_summer'] == 0 and load['practice_summer'] == 0 and
+                                load['labs_summer'] == 0 and load['seminars_summer'] == 0 and
+                                load['course_project_summer'] == 0):
                             show = False
                         if show:
                             filtered_info.append(load)
@@ -699,7 +1354,14 @@ def load_table():
                                        funck=funck,
                                        table_info=table_info,
                                        academic_years=academic_years,
-                                       groups=groups)
+                                       groups=groups,
+                                       search_query=search_query,
+                                       year_filter=year_filter,
+                                       teacher_filter=teacher_filter,
+                                       group_filter=group_filter,
+                                       discipline_filter=discipline_filter,
+                                       fgos_filter=fgos_filter,
+                                       semester_filter=semester_filter)
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
@@ -1620,7 +2282,6 @@ def add_info():
             # Вспомогательные функции для загрузки данных из БД
             def get_academic_years():
                 conn = get_db_connection()
-                # Добавьте winter_week и summer_week в SELECT
                 rows = conn.execute(
                     'SELECT id_year, year_name, winter_week, summer_week FROM academic_year ORDER BY year_name').fetchall()
                 conn.close()
@@ -1680,9 +2341,9 @@ def add_info():
                     id_discipline = request.form.get('id_discipline')
                     id_fgos = request.form.get('id_fgos')
 
-                    # Получаем weeks_winter и weeks_summer из формы (теперь они скрытые поля)
-                    weeks_winter = int(request.form.get('weeks_winter', 0))
-                    weeks_summer = int(request.form.get('weeks_summer', 0))
+                    # ❌ УБИРАЕМ weeks_winter и weeks_summer - они НЕ ДОЛЖНЫ БЫТЬ в таблице workload
+                    # weeks_winter = int(request.form.get('weeks_winter', 0))
+                    # weeks_summer = int(request.form.get('weeks_summer', 0))
 
                     # Зимний семестр
                     independent_winter = int(request.form.get('independent_winter', 0))
@@ -1704,6 +2365,11 @@ def add_info():
                     course_project_summer = int(request.form.get('course_project_summer', 0))
                     attestation_summer = int(request.form.get('attestation_summer', 0))
 
+                    # ✅ ДОБАВЛЯЕМ экзамены, зачеты, дифф. зачеты
+                    exam = int(request.form.get('exam', 0))
+                    credit = int(request.form.get('credit', 0))
+                    diff_credit = int(request.form.get('diff_credit', 0))
+
                     # Валидация
                     if not all([id_year, id_teacher, id_group, id_discipline, id_fgos]):
                         flash('Заполните все обязательные поля', 'danger')
@@ -1723,25 +2389,27 @@ def add_info():
                         conn.close()
                         return redirect(url_for('add_info', funck='edit_nagruzka'))
 
-                    # Вставка новой записи (без weeks_winter и weeks_summer, они опциональны)
+                    # ✅ ПРАВИЛЬНЫЙ INSERT - БЕЗ weeks_winter и weeks_summer, С exam, credit, diff_credit
                     conn.execute('''
                         INSERT INTO workload (
                             id_year, id_teacher, id_group, id_discipline, id_fgos,
-                            weeks_winter, independent_winter, consultations_winter, 
+                            independent_winter, consultations_winter, 
                             lectures_winter, practice_winter, labs_winter, seminars_winter, 
                             course_project_winter, attestation_winter,
-                            weeks_summer, independent_summer, consultations_summer,
+                            independent_summer, consultations_summer,
                             lectures_summer, practice_summer, labs_summer, seminars_summer,
-                            course_project_summer, attestation_summer
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            course_project_summer, attestation_summer,
+                            exam, credit, diff_credit
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (
                         id_year, id_teacher, id_group, id_discipline, id_fgos,
-                        weeks_winter, independent_winter, consultations_winter,
+                        independent_winter, consultations_winter,
                         lectures_winter, practice_winter, labs_winter, seminars_winter,
                         course_project_winter, attestation_winter,
-                        weeks_summer, independent_summer, consultations_summer,
+                        independent_summer, consultations_summer,
                         lectures_summer, practice_summer, labs_summer, seminars_summer,
-                        course_project_summer, attestation_summer
+                        course_project_summer, attestation_summer,
+                        exam, credit, diff_credit
                     ))
                     conn.commit()
                     conn.close()
