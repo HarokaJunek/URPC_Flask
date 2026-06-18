@@ -1520,20 +1520,19 @@
                 </div>
 
                 <!-- флаг диплома -->
-                <div class="form-group">
+                <div>
                     <label for="is_diploma">
-                        <i class="fas fa-check-circle"></i> Оценка идёт в диплом
+                        <i class="fas fa-check-circle"></i> Оценка идёт в диплом    
+                        <input type="checkbox" id="is_diploma" name="is_diploma" value="1">
                     </label>
-                    <input type="checkbox" id="is_diploma" name="is_diploma" value="1">
-                    <div class="form-hint">Отметьте, если оценки из этой ведомости будут учитываться в приложении к диплому</div>
                 </div>
+                <div class="form-hint" style="margin-top: 5px;">Отметьте, если оценки из этой ведомости будут учитываться в приложении к диплому</div>
 
             <button type="submit" id="submitBtn">Создать ведомость</button>
         </form>
     </div>
 </div>
 
-<!--- Убрала коммент потому что везде стрелочка появлялась на странице добавления (начало коммента тут было)--->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const submitBtn = document.getElementById('submitBtn');
@@ -1569,7 +1568,6 @@
     });
 </script>
 {% endif %}
-<!--- Убрала коммент потому что везде стрелочка появлялась на странице добавления (конец коммента тут было)--->
 
 {% endif %}
 {% endblock %}

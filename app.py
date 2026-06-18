@@ -12,6 +12,14 @@ import io
 # import openpyxl
 # from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 # from openpyxl.utils import get_column_letter
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+pdfmetrics.registerFont(TTFont('Arial', 'arial.ttf'))
 from functools import wraps
 
 # ============================================================================
@@ -924,6 +932,7 @@ def load_table():
         # ВЕДОМОСТЬ
         case 'edit_statement':
             if (session.get('is_zav', False) or session.get('is_prepod', False)):
+                status = request.args.get('status', '')
                 conn = get_db_connection()
                 query = '''
                     SELECT 
@@ -960,6 +969,7 @@ def load_table():
                 table_info = conn.execute(query, params).fetchall()
                 conn.close()
                 return render_template('load_table.html',
+                                       status = status,
                                        table_info=table_info,
                                        funck=funck,
                                        groups=groups,
@@ -1066,6 +1076,7 @@ def load_table():
                         disc['avg_grade'] = round(sum(all_grades) / len(all_grades), 2) if all_grades else 0
                 # Передаём в шаблон
                 return render_template('load_table.html',
+                                       is_diploma = is_diploma,
                                        funck=funck,
                                        groups=groups,
                                        students=students,
@@ -4139,7 +4150,6 @@ def edit_info():
             # Обработка неизвестного параметра функции
             flash('Неверный параметр функции', 'danger')
             return redirect(url_for('index'))
-
 
 if __name__ == '__main__':
     if not os.path.exists(DATABASE):

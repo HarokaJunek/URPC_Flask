@@ -1201,9 +1201,11 @@ function exportToPDF() {
             <div class="table-header">
                 <h2><i class="fa-solid fa-gear"></i> Управление ведомостями</h2>
                 <div class="table-actions">
+                    {% if status == '0' %}
                         <a href="{{ url_for('add_info', funck='edit_statement') }}" class="action-btn add-btn">
                             <i class="fas fa-plus"></i> Добавить ведомость
                         </a>
+                    {% endif %}
                     <div class="search-box">
                         <form method="get" action="{{ url_for('load_table') }}" style="display: flex; align-items: center;">
                             <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
@@ -1359,20 +1361,17 @@ function exportToPDF() {
         {% if funck == 'edit_report' %}
         <div class="table-responsive">
             <div class="table-header">
-                <h2><i class="fa-solid fa-gear"></i> Итоговая успеваемость</h2>
-
+                {% if is_diploma == '1' %}
+                    <h2><i class="fa-solid fa-gear"></i> Приложение к диплому</h2>
+                {% else %}
+                    <h2><i class="fa-solid fa-gear"></i> Итоговая успеваемость</h2>
+                {% endif %}
                 <!-- Фильтры -->
                 <form method="get" action="{{ url_for('load_table', funck='edit_report') }}">
                     <input type="hidden" name="funck" value="edit_report">
                     <div class="filters-wrapper">
                         <input type="checkbox" id="toggle-filters" hidden>
-                        <div class="filters-header">
-                            <label for="toggle-filters" class="filters-toggle-btn">
-                                <i class="fas fa-filter"></i> Фильтры
-                                <i class="fas fa-chevron-down toggle-icon"></i>
-                            </label>
-                        </div>
-                        <div class="filters-panel">
+                        <div class="filters-panel" style="display: block;">
                             <div class="filters-grid">
                                 <div class="filter-item">
                                     <label><i class="fas fa-users"></i> Группа</label>
@@ -1395,7 +1394,7 @@ function exportToPDF() {
                             </div>
                             <div class="filters-actions">
                                 <button type="submit" class="apply-filters-btn">Сформировать</button>
-                                <a href="{{ url_for('load_table', funck='edit_report') }}" class="reset-filters-btn">Сбросить</a>
+                                <a href="{{ url_for('load_table', funck='edit_report') }}" type="submit" class="apply-filters-btn">Сбросить</a>
                             </div>
                         </div>
                     </div>
@@ -1403,12 +1402,6 @@ function exportToPDF() {
 
                 <table class="all-table">
                     <thead>
-                        <!-- Верхний уровень: семестр -->
-                        <tr>
-                            <th></th>
-                            <th></th>
-                            <th colspan="2">{{ semester_filter }} семестр</th>
-                        </tr>
                         <tr>
                             <th></th>
                             <th></th>
@@ -1458,7 +1451,6 @@ function exportToPDF() {
                         {% endfor %}
                     </tbody>
                 </table>
-                <!-- Только PDF (Excel удален) -->
                 <div class="export-buttons">
                     <button class="export-btn" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
                 </div>
