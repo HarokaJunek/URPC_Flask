@@ -1860,7 +1860,9 @@
                             </div>
                         {% else %}
                             <div class="export-buttons">
-                                <button class="export-btn" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                                <a href="{{ url_for('edit_info', funck='edit_statement', id_statement=statement.id_statement, export='pdf') }}" class="export-btn">
+                                    <i class="fas fa-file-pdf"> PDF </i>
+                                </a>
                             </div>
                         {% endif %}
                     </form>
@@ -1920,10 +1922,6 @@
                                 this.setCustomValidity('');
                             }
                         });
-                        
-                        function exportToPDF() {
-                            alert('Экспорт в PDF будет реализован');
-                        }
                     }
                 });
             </script>

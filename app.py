@@ -643,6 +643,182 @@ def generate_load_pdf(load_data, teacher_filter=None, year_filter=None, semester
     buffer.seek(0)
     return buffer
 
+def export_statement_pdf(id_statement):
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    pdfmetrics.registerFont(TTFont('Arial', 'arial.ttf'))
+    pdfmetrics.registerFont(TTFont('Arial-Bold', 'arialbd.ttf'))
+    conn = get_db_connection()
+    
+    # Данные ведомости (шапка)
+    statement = conn.execute('''
+        SELECT 
+            statements.id_statement,
+            specialties.specialty_name,
+            academic_year.year_name,
+            groups.course_number,
+            workload.id_group,
+            statements.semester,
+            disciplines.discipline_name,
+            users.full_name,
+            statements.excused,
+            statements.unexcused,
+            departments.department_name
+        FROM statements
+        LEFT JOIN workload ON statements.id_discipline = workload.id_load
+        LEFT JOIN academic_year ON workload.id_year = academic_year.id_year
+        LEFT JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+        LEFT JOIN groups ON workload.id_group = groups.id_group 
+        LEFT JOIN users ON workload.id_teacher = users.id_user
+        LEFT JOIN specialties ON groups.id_specialty = specialties.id_specialty
+        LEFT JOIN departments ON specialties.id_department = departments.id_department
+        WHERE statements.id_statement = ?
+    ''', (id_statement,)).fetchone()
+    
+    # Список студентов с оценками
+    students = conn.execute('''
+        SELECT 
+            students.full_name,
+            students.id_student,
+            grades.grade
+        FROM students
+        LEFT JOIN grades ON students.id_student = grades.id_student 
+            AND grades.id_statement = ?
+        WHERE students.id_group = ?
+    ''', (id_statement, statement['id_group'])).fetchall()
+    
+    conn.close()
+    
+    # Считаем статистику
+    grade_A = grade_B = grade_C = grade_D = not_been = 0
+    for s in students:
+        g = s['grade']
+        if g == 5: grade_A += 1
+        elif g == 4: grade_B += 1
+        elif g == 3: grade_C += 1
+        elif g == 2: grade_D += 1
+        elif g == 0: not_been += 1
+    grades_all = grade_A + grade_B + grade_C + grade_D
+    
+    # Создаём PDF
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    c.setFont("Arial", 14)
+    
+    # ЗАГОЛОВОК 
+    c.setFont("Arial", 10)
+    y = height - 30
+    c.drawCentredString(width/2, y, "Государственное автономное профессиональное образовательное учреждение Свердловской области")
+    y -= 15
+    c.drawCentredString(width/2, y, "«Уральский политехнический колледж - Межрегиональный центр компетенций»")
+    y -= 25
+    c.setFont("Arial", 16)
+    c.drawCentredString(width/2, y, f"{statement['department_name']} отделение")
+    y -= 20
+    c.drawCentredString(width/2, y, "Оценочная ведомость")
+    
+    # ШАПКА 
+    c.setFont("Arial", 12)
+    y -= 20
+    left_margin = 40
+    right_margin = width - 40
+    
+    c.setFont("Arial-Bold", 12)
+    c.drawString(left_margin, y, "Специальность: ")
+    c.setFont("Arial", 12)
+    c.drawString(left_margin + 100, y, statement['specialty_name'] or '')
+    y -= 20
+
+    c.setFont("Arial-Bold", 12)
+    c.drawString(left_margin, y, "Учебный год: ")
+    c.setFont("Arial", 12)
+    c.drawString(left_margin + 100, y, statement['year_name'] or '')
+    c.setFont("Arial-Bold", 12)
+    c.drawString(width/2, y, "Курс: ")  # начинается с середины
+    c.setFont("Arial", 12)
+    c.drawString(width/2 + 40, y, str(statement['course_number'] or ''))
+    y -= 20
+
+    c.setFont("Arial-Bold", 12)
+    c.drawString(left_margin, y, "Группа: ")
+    c.setFont("Arial", 12)
+    c.drawString(left_margin + 100, y, statement['id_group'] or '')
+    c.setFont("Arial-Bold", 12)
+    c.drawString(width/2, y, "Семестр: ")  # начинается с середины
+    c.setFont("Arial", 12)
+    c.drawString(width/2 + 70, y, str(statement['semester'] or ''))
+    y -= 20
+
+    c.setFont("Arial-Bold", 12)
+    c.drawString(left_margin, y, "Дисциплина: ")
+    c.setFont("Arial", 12)
+    c.drawString(left_margin + 100, y, statement['discipline_name'] or '')
+    y -= 20
+
+    c.setFont("Arial-Bold", 12)
+    c.drawString(left_margin, y, "Преподаватель: ")
+    c.setFont("Arial", 12)
+    c.drawString(left_margin + 100, y, statement['full_name'] or '')
+    
+    # ТАБЛИЦА
+    y -= 25
+    table_data = [["№", "ФИО студента", "Оценка"]]  # заголовки
+    for idx, student in enumerate(students, 1):
+        grade = student['grade']
+        grade_display = 'Н/Я' if grade == 0 else (str(grade) if grade else '')
+        table_data.append([str(idx), student['full_name'], grade_display])
+
+    main_table = Table(table_data, colWidths=[100, 270, 130])
+
+    main_table.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (-1, -1), 'Arial'),
+        ('FONTSIZE', (0, 0), (-1, -1), 12),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+    ]))
+
+    main_table.wrapOn(c, width - 2 * left_margin, height - y)
+    main_table.drawOn(c, left_margin, y - len(table_data) * 16)
+    
+    # СВОДНАЯ СТАТИСТИКА
+    y -= len(table_data) * 16 + 10   # сдвигаем ниже таблицы
+    stats_data = [
+        ["Не явилось", str(not_been), "Получено оценок", str(grades_all)],
+        ["По уважительной причине", str(statement['excused'] or 0),"Неудовлетворительно", str(grade_D) ],
+        ["По неуважительной причине", str(statement['unexcused'] or 0), "Удовлетворительно", str(grade_C)],
+        ["", "", "Хорошо", str(grade_B)],
+        ["", "", "Отлично", str(grade_A)],
+    ]
+
+    stats_table = Table(stats_data, colWidths=[200, 60, 220, 30])
+
+    stats_table.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (-1, -1), 'Arial'),
+        ('FONTSIZE', (0, 0), (-1, -1), 12),
+        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+    ]))
+
+    stats_table.wrapOn(c, width - 2 * left_margin, height - y)
+    stats_table.drawOn(c, left_margin, y - len(stats_data) * 18)
+    
+    y -= len(stats_data) * 18 + 20  # сдвигаем ниже таблицы
+    c.drawString(left_margin,y, " «___» _____________ 20__г.")
+    c.drawString(width/2 + 8,  y, "Преподаватель: ______________________")    
+    c.save()
+    buffer.seek(0)
+    print("PDF сгенерирован, размер:", len(buffer.getvalue()), "байт")
+    return send_file(buffer, mimetype='application/pdf',
+                     as_attachment=True,
+                     download_name=f'statement_{id_statement}.pdf')
 
 # ============================================================================
 # 3. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С БД
@@ -4638,6 +4814,8 @@ def edit_info():
             if session.get('is_zav', False) or session.get('is_prepod', False):
                 # Получаем ID из разных источников
                 id_statement = request.args.get('id_statement')
+                if request.args.get('export') == 'pdf':
+                    return export_statement_pdf(id_statement)
                 if not id_statement:
                     flash('Не указан ID ведомости', 'danger')
                     return redirect(url_for('load_table', funck='edit_statement'))
