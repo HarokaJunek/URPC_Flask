@@ -186,6 +186,24 @@ main {
     transform: translateX(3px);
 }
 
+.expandable {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 30px; 
+    transition: max-width 0.3s ease;
+}
+
+.expandable:hover {
+    max-width: 300px; 
+}
+
+.link-text {
+    margin-left: 8px;
+    display: inline-block;
+}
+
 /* ============================================================================
    ОСНОВНОЙ КОНТЕНТ
    ============================================================================ */

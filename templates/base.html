@@ -69,74 +69,94 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="fa fa-home"></i>
             </a>
             {% if session.is_admin %}
-                <a href="{{ url_for('load_table', funck='edit_users') }}" class="nav-link">
-                    <i class="fas fa-users-cog"></i> Управление пользователями
+                <a href="{{ url_for('load_table', funck='edit_users') }}" class="nav-link expandable">
+                    <i class="fas fa-users-cog"></i> 
+                    <span class="link-text">Пользователи</span>
+                </a>
+                <a href="{{ url_for('load_table', funck='edit_otdel') }}" class="nav-link expandable">
+                    <i class="fa-solid fa-school"></i>
+                    <span class="link-text">Отделения</span>                
                 </a>
             {% endif %}
 
             {% if session.is_specialist %}
-                <a href="{{ url_for('load_table', funck='edit_users') }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_users') }}" class="nav-link expandable">
                     <i class="fa fa-user-circle" aria-hidden="true"></i>
+                    <span class="link-text">Преподаватели</span>
                 </a>
 
-                <a href="{{ url_for('load_table', funck='edit_disciplines') }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_disciplines') }}" class="nav-link expandable">
                     <i class="fa fa-book" aria-hidden="true"></i>
+                    <span class="link-text">Дисциплины</span>                    
                 </a>
 
-                <a href="{{ url_for('load_table', funck='edit_years') }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_years') }}" class="nav-link expandable">
                     <i class="fa fa-calendar" aria-hidden="true"></i>
+                    <span class="link-text">Учебные годы</span>
                 </a>
 
-                <a href="{{ url_for('load_table', funck='edit_fgoss') }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_fgoss') }}" class="nav-link expandable">
                     <i class="fas fa-graduation-cap"></i>
+                    <span class="link-text">ФГОС</span>
                 </a>
 
-                <a href="{{ url_for('load_table', funck='edit_pck') }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_pck') }}" class="nav-link expandable">
                      <i class="fa fa-bookmark" aria-hidden="true"></i>
+                    <span class="link-text">ПЦК</span>
                 </a>
 
-                <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="nav-link">
-                        <i class="fa fa-table" aria-hidden="true"></i>
+                <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="nav-link expandable">
+                    <i class="fa fa-table" aria-hidden="true"></i>
+                    <span class="link-text">Нагрузка</span>
                 </a>
                 <!-- Здесь можно добавить другие ссылки для админа -->
             {% endif %}
 
              {% if session.is_zav %}
                 <!-- СТУДЕНТЫ -->
-                <a href="{{ url_for('load_table', funck='edit_students') }}" class="nav-link">
-                        <i class="fas fa-users" aria-hidden="true"></i>
-                </a> 
+                <a href="{{ url_for('load_table', funck='edit_students') }}" class="nav-link expandable">
+                    <i class="fas fa-users" aria-hidden="true"></i>
+                    <span class="link-text">Студенты</span>
+                </a>
                 <!-- ТИП ВЕДОМОСТИ -->
-                <a href="{{ url_for('load_table', funck='edit_typesved') }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_typesved') }}" class="nav-link expandable">
                     <i class="fas fa-list-alt"></i>
+                    <span class="link-text">Типы ведомости</span>
                 </a> 
                 <!-- ГРУППЫ -->
-                <a href="{{ url_for('load_table', funck='edit_groups') }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_groups') }}" class="nav-link expandable">
                     <i class="fas fa-layer-group" aria-hidden="true"></i>
+                    <span class="link-text">Группы</span>
                 </a> 
                 <!-- ФОРМА ОБУЧЕНИЯ -->
-                <a href="{{ url_for('load_table', funck='edit_formobuch') }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_formobuch') }}" class="nav-link expandable">
                     <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                    <span class="link-text">Формы обучения</span>
                 </a>
                 <!-- СПЕЦИАЛЬНОСТИ -->
-                <a href="{{ url_for('load_table', funck='edit_spec') }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_spec') }}" class="nav-link expandable">
                     <i class="fas fa-certificate" aria-hidden="true"></i>
+                    <span class="link-text">Специальности</span>
                 </a>
                 <!-- ВЕДОМОСТЬ -->
-                <a href="{{ url_for('load_table', funck='edit_statement', status=0)}}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_statement', status=0)}}" class="nav-link expandable">
                     <i class="fas fa-file-alt" aria-hidden="true"></i>
+                    <span class="link-text">Ведомости</span>
                 </a>
                 <!-- ИТОГОВАЯ ВЕДОМОСТЬ -->
-                <a href="{{ url_for('load_table', funck='edit_statement', status=1) }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_statement', status=1) }}" class="nav-link expandable">
                         <i class="fas fa-file" aria-hidden="true"></i>
+                        <span class="link-text">Оценочные ведомости</span>
                 </a> 
                 <!-- УСПЕВАЕМОСТЬ -->
-                <a href="{{ url_for('load_table', funck='edit_report', is_diploma=0) }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_report', is_diploma=0) }}" class="nav-link expandable">
                     <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                    <span class="link-text">Итоговая успеваемость</span>
                 </a> 
                 <!-- ПРИЛОЖЕНИЕ К ДИПЛОМУ -->
-                <a href="{{ url_for('load_table', funck='edit_report', is_diploma=1) }}" class="nav-link">
+                <a href="{{ url_for('load_table', funck='edit_report', is_diploma=1) }}" class="nav-link expandable">
                     <i class="fas fa-scroll" aria-hidden="true"></i>
+                    <span class="link-text">Приложение к диплому</span>
                 </a> 
                 <!-- Здесь можно добавить другие ссылки для админа -->
             {% endif %}
