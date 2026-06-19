@@ -48,846 +48,42 @@
 {% else %}
     {% if session.is_guest %}
         <div class="blocks">
-        <h2>👋 Добро пожаловать, {{ session.full_name }}! Ваша учетная запись еще не подтверждена. Дождитесь подтверждения от администратора.</h2>
+        <h2> Добро пожаловать, {{ session.full_name }}! Ваша учетная запись еще не подтверждена. Дождитесь подтверждения от администратора.</h2>
         </div>
     {% endif %}
+
     {% if session.is_admin %}
         <div class="blocks">
-        <h2>👋 Добро пожаловать, {{ session.full_name }}! Администратор</h2>
-
-<div class="banner-grid">
-    <a href="{{ url_for('load_table', funck='edit_users') }}" class="banner-card">
-        <div class="banner-icon">
-            <i class="fas fa-users"></i>
-        </div>
-        <div class="banner-content">
-            <h3>Пользователи</h3>
-            <p>Редактирование пользователей в системе</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-</div>
-
+            <h2> Добро пожаловать, администратор: {{ session.full_name }}! </h2>
             <div class="banner-grid">
-    <a href="{{ url_for('load_table', funck='edit_otdel') }}" class="banner-card">
-        <div class="banner-icon">
-            <i class="fa-solid fa-school"></i>
-        </div>
-        <div class="banner-content">
-            <h3>Отделения</h3>
-            <p>Редактирование отделений в системе</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-</div>
-
-
-
-
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-
-
-
-            <!-- Вставьте этот код после приветственного сообщения, но до закрывающего div class="blocks" -->
-<div class="banner-grid">
-    <a href="" class="banner-card">
-        <div class="banner-icon">
-            <i class="fas fa-calendar-alt"></i>
-        </div>
-        <div class="banner-content">
-            <h3>Расписание</h3>
-            <p>Просмотр актуального расписания занятий</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-
-    <a href="" class="banner-card">
-        <div class="banner-icon">
-            <i class="fas fa-user-graduate"></i>
-        </div>
-        <div class="banner-content">
-            <h3>Студенты</h3>
-            <p>Список студентов и успеваемость</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-
-    <a href="" class="banner-card">
-        <div class="banner-icon">
-            <i class="fas fa-users"></i>
-        </div>
-        <div class="banner-content">
-            <h3>Группы</h3>
-            <p>Управление учебными группами</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-
-    <a href="" class="banner-card">
-        <div class="banner-icon">
-            <i class="fas fa-chart-bar"></i>
-        </div>
-        <div class="banner-content">
-            <h3>Отчеты</h3>
-            <p>Формирование отчетов и статистика</p>
-            <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
-        </div>
-    </a>
-</div>
-
-<!-- Вставьте этот код после приветственного сообщения, но до закрывающего div class="blocks" -->
-<div class="banner-squares">
-    <a href="" class="square-card">
-        <div class="square-icon">
-            <i class="fas fa-calendar-alt"></i>
-        </div>
-        <h3>Расписание</h3>
-        <p>Занятия и замены</p>
-        <div class="square-arrow">
-            <i class="fas fa-arrow-right"></i>
-        </div>
-    </a>
-
-    <a href="" class="square-card">
-        <div class="square-icon">
-            <i class="fas fa-user-graduate"></i>
-        </div>
-        <h3>Студенты</h3>
-        <p>Личные дела и успеваемость</p>
-        <div class="square-arrow">
-            <i class="fas fa-arrow-right"></i>
-        </div>
-    </a>
-
-    <a href="" class="square-card">
-        <div class="square-icon">
-            <i class="fas fa-chalkboard-teacher"></i>
-        </div>
-        <h3>Преподаватели</h3>
-        <p>Нагрузка и кафедры</p>
-        <div class="square-arrow">
-            <i class="fas fa-arrow-right"></i>
-        </div>
-    </a>
-
-    <a href="" class="square-card">
-        <div class="square-icon">
-            <i class="fas fa-book-open"></i>
-        </div>
-        <h3>Методичка</h3>
-        <p>УМК и литература</p>
-        <div class="square-arrow">
-            <i class="fas fa-arrow-right"></i>
-        </div>
-    </a>
-</div>
-
-            <!-- Вставьте этот код после приветственного сообщения, но до закрывающего div class="blocks" -->
-<div class="banner-minimal">
-    <a href="" class="minimal-card">
-        <i class="fas fa-tachometer-alt"></i>
-        <span>Рабочий стол</span>
-    </a>
-
-    <a href="" class="minimal-card">
-        <i class="fas fa-calendar-alt"></i>
-        <span>Расписание</span>
-    </a>
-
-    <a href="" class="minimal-card">
-        <i class="fas fa-user-graduate"></i>
-        <span>Студенты</span>
-    </a>
-
-    <a href="" class="minimal-card">
-        <i class="fas fa-users"></i>
-        <span>Группы</span>
-    </a>
-
-    <a href="" class="minimal-card">
-        <i class="fas fa-book"></i>
-        <span>Дисциплины</span>
-    </a>
-
-    <a href="" class="minimal-card">
-        <i class="fas fa-chart-bar"></i>
-        <span>Отчеты</span>
-    </a>
-</div>
-
-
-
-
-
-
-
-
-
-
-<!-- Вставьте этот код в нужное место страницы, например в блок для администратора -->
-<div class="all-table-container">
-    <div class="table-header">
-        <h2><i class="fas fa-database"></i> Управление записями</h2>
-        <div class="table-actions">
-            <button class="action-btn add-btn">
-                <i class="fas fa-plus"></i> Добавить запись
-            </button>
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Поиск...">
-            </div>
-        </div>
-    </div>
-
-    <div class="table-responsive">
-        <table class="all-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ФИО</th>
-                    <th>Email</th>
-                    <th>Телефон</th>
-                    <th>Роль</th>
-                    <th>Статус</th>
-                    <th>Дата рег.</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Строка 1: Активный пользователь -->
-                <tr>
-                    <td class="id-cell">1</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <span class="user-name">Иванов И.И.</span>
-                            <span class="user-fullname">Иванов Иван Иванович</span>
-                        </div>
-                    </td>
-                    <td class="email-cell">ivanov@mail.ru</td>
-                    <td class="phone-cell">+7 (999) 123-45-67</td>
-                    <td><span class="role-badge admin">Админ</span></td>
-                    <td><span class="status-badge active">Активен</span></td>
-                    <td class="date-cell">12.01.25</td>
-                    <td class="actions-cell">
-                        <button class="icon-btn edit" title="Редактировать">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="icon-btn delete" title="Удалить">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <!-- Строка 2: Заведующий отделением -->
-                <tr>
-                    <td class="id-cell">2</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <span class="user-name">Петрова А.С.</span>
-                            <span class="user-fullname">Петрова Анна Сергеевна</span>
-                        </div>
-                    </td>
-                    <td class="email-cell">petrova@mail.ru</td>
-                    <td class="phone-cell">+7 (999) 234-56-78</td>
-                    <td><span class="role-badge zav">Зав.отд.</span></td>
-                    <td><span class="status-badge active">Активен</span></td>
-                    <td class="date-cell">15.01.25</td>
-                    <td class="actions-cell">
-                        <button class="icon-btn edit" title="Редактировать">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="icon-btn delete" title="Удалить">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <!-- Строка 3: Преподаватель -->
-                <tr>
-                    <td class="id-cell">3</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <span class="user-name">Сидоров П.П.</span>
-                            <span class="user-fullname">Сидоров Петр Петрович</span>
-                        </div>
-                    </td>
-                    <td class="email-cell">sidorov@mail.ru</td>
-                    <td class="phone-cell">+7 (999) 345-67-89</td>
-                    <td><span class="role-badge prepod">Препод.</span></td>
-                    <td><span class="status-badge active">Активен</span></td>
-                    <td class="date-cell">20.01.25</td>
-                    <td class="actions-cell">
-                        <button class="icon-btn edit" title="Редактировать">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="icon-btn delete" title="Удалить">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <!-- Строка 4: Специалист учебной части (неактивный) -->
-                <tr>
-                    <td class="id-cell">4</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <span class="user-name">Смирнова Е.В.</span>
-                            <span class="user-fullname">Смирнова Елена Владимировна</span>
-                        </div>
-                    </td>
-                    <td class="email-cell">smirnova@mail.ru</td>
-                    <td class="phone-cell">+7 (999) 456-78-90</td>
-                    <td><span class="role-badge specialist">Спец.УЧ</span></td>
-                    <td><span class="status-badge inactive">Неактивен</span></td>
-                    <td class="date-cell">25.01.25</td>
-                    <td class="actions-cell">
-                        <button class="icon-btn edit" title="Редактировать">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="icon-btn delete" title="Удалить">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <!-- Строка 5: Гость (ожидает подтверждения) -->
-                <tr>
-                    <td class="id-cell">5</td>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <span class="user-name">Козлов Д.А.</span>
-                            <span class="user-fullname">Козлов Дмитрий Алексеевич</span>
-                        </div>
-                    </td>
-                    <td class="email-cell">kozlov@mail.ru</td>
-                    <td class="phone-cell">+7 (999) 567-89-01</td>
-                    <td><span class="role-badge guest">Гость</span></td>
-                    <td><span class="status-badge pending">Ожидает</span></td>
-                    <td class="date-cell">28.01.25</td>
-                    <td class="actions-cell">
-                        <button class="icon-btn edit" title="Редактировать">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="icon-btn delete" title="Удалить">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Нижняя панель с информацией о количестве записей -->
-    <div class="table-footer">
-        <div class="table-info">
-            Всего записей: <span class="total-count">5</span>
-        </div>
-        <div class="mobile-actions">
-            <select class="mobile-select" onchange="location = this.value;">
-                <option value="">Быстрые действия</option>
-                <option value="#">Добавить запись</option>
-                <option value="#">Экспорт в Excel</option>
-                <option value="#">Экспорт в PDF</option>
-                <option value="#">Печать</option>
-            </select>
-        </div>
-        <div class="export-buttons">
-            <button class="export-btn" title="Экспорт в Excel">
-                <i class="fas fa-file-excel"></i> Excel
-            </button>
-            <button class="export-btn" title="Экспорт в PDF">
-                <i class="fas fa-file-pdf"></i> PDF
-            </button>
-            <button class="export-btn" title="Печать">
-                <i class="fas fa-print"></i>
-            </button>
-        </div>
-    </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- Форма редактирования записи (встроенная) -->
-<div class="edit-form-container">
-    <div class="form-header">
-        <h2><i class="fas fa-edit"></i> Редактирование записи</h2>
-        <div class="header-actions">
-            <span class="record-id">ID: 1</span>
-        </div>
-    </div>
-
-    <form class="edit-form">
-        <!-- Основная информация -->
-        <div class="form-section">
-            <h3 class="section-title">
-                <i class="fas fa-user"></i> Основная информация
-            </h3>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="edit-fullname" class="required">
-                        <i class="fas fa-user"></i> ФИО
-                    </label>
-                    <input type="text" id="edit-fullname" value="Иванов Иван Иванович" placeholder="Введите ФИО полностью" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="edit-email" class="required">
-                        <i class="fas fa-envelope"></i> Email
-                    </label>
-                    <input type="email" id="edit-email" value="ivanov@mail.ru" placeholder="example@mail.ru" required>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="edit-phone">
-                        <i class="fas fa-phone"></i> Телефон
-                    </label>
-                    <input type="tel" id="edit-phone" value="+7 (999) 123-45-67" placeholder="+7 (___) ___-__-__">
-                </div>
-
-                <div class="form-group">
-                    <label for="edit-birthdate">
-                        <i class="fas fa-birthday-cake"></i> Дата рождения
-                    </label>
-                    <input type="date" id="edit-birthdate" value="1990-05-15">
-                </div>
-            </div>
-        </div>
-
-        <!-- Роль и статус -->
-        <div class="form-section">
-            <h3 class="section-title">
-                <i class="fas fa-shield-alt"></i> Права доступа
-            </h3>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="edit-role" class="required">
-                        <i class="fas fa-user-tag"></i> Роль
-                    </label>
-                    <div class="select-wrapper">
-                        <select id="edit-role" required>
-                            <option value="" disabled>Выберите роль</option>
-                            <option value="admin" selected>Администратор</option>
-                            <option value="zav">Заведующий отделением</option>
-                            <option value="prepod">Преподаватель</option>
-                            <option value="specialist">Специалист учебной части</option>
-                            <option value="guest">Гость</option>
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
+                <a href="{{ url_for('load_table', funck='edit_users') }}" class="banner-card">
+                    <div class="banner-icon">
+                        <i class="fas fa-users"></i>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="edit-status" class="required">
-                        <i class="fas fa-circle"></i> Статус
-                    </label>
-                    <div class="select-wrapper">
-                        <select id="edit-status" required>
-                            <option value="" disabled>Выберите статус</option>
-                            <option value="active" selected>Активен</option>
-                            <option value="inactive">Неактивен</option>
-                            <option value="pending">Ожидает подтверждения</option>
-                            <option value="blocked">Заблокирован</option>
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
+                    <div class="banner-content">
+                        <h3>Пользователи</h3>
+                        <p>Редактирование пользователей в системе</p>
+                        <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Системная информация (только чтение) -->
-        <div class="form-section">
-            <h3 class="section-title">
-                <i class="fas fa-cog"></i> Системная информация
-            </h3>
-
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">Дата регистрации:</span>
-                    <span class="info-value">12.01.2025</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Последний вход:</span>
-                    <span class="info-value">13.02.2025 09:42</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Количество входов:</span>
-                    <span class="info-value">156</span>
-                </div>
-            </div>
-        </div>
-
-
-
-        <!-- Кнопки действий -->
-        <div class="form-actions">
-            <button type="button" class="btn-danger" id="deleteRecord">
-                <i class="fas fa-trash-alt"></i> Удалить
-            </button>
-            <button type="submit" class="btn-primary">
-                <i class="fas fa-save"></i> Сохранить изменения
-            </button>
-        </div>
-    </form>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class="all-table-container">
-        <div class="table-header">
-            <h2><i class="fas fa-database"></i> Перечень дисциплин</h2>
-        </div>
-
-        <!-- Фильтры (свёрнуты по умолчанию) -->
-        <div class="filters-wrapper">
-            <input type="checkbox" id="toggle-filters" hidden>
-            <div class="filters-header">
-                <label for="toggle-filters" class="filters-toggle-btn">
-                    <i class="fas fa-filter"></i> Фильтры
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </label>
-            </div>
-            <div class="filters-panel">
-                <div class="filters-grid">
-                    <div class="filter-item">
-                        <label><i class="fas fa-calendar-alt"></i> Год обучения</label>
-                        <select class="filter-select">
-                            <option>Все</option>
-                            <option>2023-2024</option>
-                            <option>2024-2025</option>
-                        </select>
+                </a>
+                <a href="{{ url_for('load_table', funck='edit_otdel') }}" class="banner-card">
+                    <div class="banner-icon">
+                        <i class="fa-solid fa-school"></i>
                     </div>
-                    <div class="filter-item">
-                        <label><i class="fas fa-chalkboard-teacher"></i> Преподаватель</label>
-                        <input type="text" class="filter-input" placeholder="ФИО">
+                    <div class="banner-content">
+                        <h3>Отделения</h3>
+                        <p>Редактирование отделений в системе</p>
+                        <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
-                    <div class="filter-item">
-                        <label><i class="fas fa-book"></i> Дисциплина</label>
-                        <input type="text" class="filter-input" placeholder="Название">
-                    </div>
-                    <div class="filter-item">
-                        <label><i class="fas fa-users"></i> Группа</label>
-                        <select class="filter-select">
-                            <option>Все</option>
-                            <option>ИС-21</option>
-                            <option>ИС-22</option>
-                        </select>
-                    </div>
-                    <div class="filter-item">
-                        <label><i class="fas fa-layer-group"></i> Семестр</label>
-                        <select class="filter-select">
-                            <option>Любой</option>
-                            <option>1</option>
-                            <option>2</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="filters-actions">
-                    <button class="btn-primary apply-filters-btn">Применить</button>
-                </div>
+                </a>
             </div>
-        </div>
-
-        <!-- Таблица с горизонтальным скроллом -->
-        <div class="table-responsive">
-            <table class="all-table big-schedule-table" id="readable-table">
-                <thead>
-                    <!-- Строка 1: основные группировки -->
-                    <tr class="main-name-table">
-                        <th rowspan="3">Действия</th>
-                        <th rowspan="3">Форма</th>
-                        <th rowspan="3">Индекс</th>
-                        <th rowspan="3">Наименование циклов</th>
-                        <th rowspan="3" style="min-width: 150px;">Группы</th>
-                        <th rowspan="3">Год обучения</th>
-                        <th colspan="22">Распределение по семестрам</th>
-                        <th rowspan="3">Нагр. препод.</th>
-                        <th rowspan="3">ФИО препод.</th>
-                        <th rowspan="3">ПЦК</th>
-                    </tr>
-                    <!-- Строка 2: Семестр 1 и Семестр 2 -->
-                    <tr>
-                        <th colspan="11">Семестр 1</th>
-                        <th colspan="11">Семестр 2</th>
-                    </tr>
-                    <!-- Строка 3: детальные колонки для каждого семестра -->
-                    <tr class="double-name-table">
-                        <!-- Семестр 1: 11 колонок -->
-                        <th>Объём ОП</th><th>Самост.</th><th>Консульт.</th><th>С препод.</th><th>Нагр. в нед.</th>
-                        <th>Лекции</th><th>Пр. занятия</th><th>Лаб. занятия</th><th>Семинар. занятия</th><th>Курс. проектир.</th><th>Промежут. аттестация</th>
-                        <!-- Семестр 2: 11 колонок -->
-                        <th>Объём ОП</th><th>Самост.</th><th>Консульт.</th><th>С препод.</th><th>Нагр. в нед.</th>
-                        <th>Лекции</th><th>Пр. занятия</th><th>Лаб. занятия</th><th>Семинар. занятия</th><th>Курс. проектир.</th><th>Промежут. аттестация</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Строка 1: Иностранный язык -->
-                    <tr>
-                        <td class="actions-cell">
-                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
-                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                        <td>очная</td>
-                        <td class="id-cell">ОГС.04</td>
-                        <td>Иностранный язык в проф. деятельности</td>
-                        <td>23/ИС-391</td>
-                        <td>2024-2025</td>
-                        <!-- Семестр 1 -->
-                        <td>34</td><td>0</td><td>0</td><td>34</td><td>2</td><td>34</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <!-- Семестр 2 -->
-                        <td>50</td><td>0</td><td>4</td><td>46</td><td>2</td><td>46</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <td>120</td>
-                        <td>Шаталова Екатерина Анатольевна</td>
-                        <td>иностранных языков</td>
-                    </tr>
-                    <!-- Строка 2: Математика -->
-                    <tr>
-                        <td class="actions-cell">
-                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
-                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                        <td>очная</td>
-                        <td class="id-cell">ЕН.01</td>
-                        <td>Математика</td>
-                        <td>23/ИС-391, 23/ИС-392</td>
-                        <td>2024-2025</td>
-                        <!-- Семестр 1 -->
-                        <td>72</td><td>0</td><td>4</td><td>68</td><td>4</td><td>34</td><td>34</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <!-- Семестр 2 -->
-                        <td>80</td><td>0</td><td>6</td><td>74</td><td>4</td><td>34</td><td>40</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <td>140</td>
-                        <td>Петров Иван Сергеевич</td>
-                        <td>естественнонаучных дисциплин</td>
-                    </tr>
-                    <!-- Строка 3: Основы алгоритмизации -->
-                    <tr>
-                        <td class="actions-cell">
-                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
-                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                        <td>очная</td>
-                        <td class="id-cell">ОП.05</td>
-                        <td>Основы алгоритмизации и программирования</td>
-                        <td>23/ИС-391</td>
-                        <td>2024-2025</td>
-                        <!-- Семестр 1 -->
-                        <td>90</td><td>0</td><td>6</td><td>84</td><td>5</td><td>34</td><td>50</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <!-- Семестр 2 -->
-                        <td>108</td><td>0</td><td>8</td><td>100</td><td>6</td><td>34</td><td>66</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <td>156</td>
-                        <td>Сидоров Алексей Викторович</td>
-                        <td>информационных технологий</td>
-                    </tr>
-                    <!-- Строка 4: Веб-приложения (заочная) -->
-                    <tr>
-                        <td class="actions-cell">
-                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
-                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                        <td>заочная</td>
-                        <td class="id-cell">ПМ.02</td>
-                        <td>Разработка веб-приложений</td>
-                        <td>23/ЗИС-301</td>
-                        <td>2023-2024</td>
-                        <!-- Семестр 1 -->
-                        <td>40</td><td>0</td><td>2</td><td>38</td><td>2</td><td>20</td><td>18</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <!-- Семестр 2 -->
-                        <td>60</td><td>0</td><td>4</td><td>56</td><td>3</td><td>20</td><td>36</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <td>84</td>
-                        <td>Николаева Мария Игоревна</td>
-                        <td>информационных технологий</td>
-                    </tr>
-                    <!-- Строка 5: Физкультура -->
-                    <tr>
-                        <td class="actions-cell">
-                            <button class="icon-btn edit"><i class="fas fa-edit"></i></button>
-                            <button class="icon-btn delete"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                        <td>очная</td>
-                        <td class="id-cell">ФК.00</td>
-                        <td>Физическая культура</td>
-                        <td>23/ИС-391, 23/ИС-392</td>
-                        <td>2024-2025</td>
-                        <!-- Семестр 1 -->
-                        <td>36</td><td>0</td><td>0</td><td>36</td><td>2</td><td>0</td><td>36</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <!-- Семестр 2 -->
-                        <td>36</td><td>0</td><td>0</td><td>36</td><td>2</td><td>0</td><td>36</td><td>0</td><td>0</td><td>0</td><td>0</td>
-                        <td>72</td>
-                        <td>Смирнов Павел Андреевич</td>
-                        <td>физического воспитания</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Подвал таблицы с экспортом -->
-        <div class="table-footer">
-            <div class="table-info">
-                Всего записей: <span class="total-count">5</span>
-            </div>
-            <div class="export-buttons">
-                <button class="export-btn"><i class="fas fa-file-excel"></i> Excel</button>
-                <button class="export-btn"><i class="fas fa-file-pdf"></i> PDF</button>
-            </div>
-        </div>
-    </div>
-
-<script>
-    (function() {
-        const table = document.getElementById('readable-table');
-        if (!table) return;
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        function clearHighlights() {
-            const highlighted = table.querySelectorAll('.highlight-row, .highlight-col, .highlight-cell');
-            highlighted.forEach(el => el.classList.remove('highlight-row', 'highlight-col', 'highlight-cell'));
-        }
-        rows.forEach(row => {
-            const cells = Array.from(row.children);
-            cells.forEach((cell, idx) => {
-                if (cell.classList && cell.classList.contains('actions-cell')) return;
-                cell.addEventListener('mouseenter', function() {
-                    clearHighlights();
-                    cells.forEach(c => {
-                        if (!c.classList || !c.classList.contains('actions-cell')) c.classList.add('highlight-row');
-                    });
-                    rows.forEach(r => {
-                        const targetCell = r.children[idx];
-                        if (targetCell && (!targetCell.classList || !targetCell.classList.contains('actions-cell'))) {
-                            targetCell.classList.add('highlight-col');
-                        }
-                    });
-                    this.classList.add('highlight-cell');
-                });
-                cell.addEventListener('mouseleave', clearHighlights);
-            });
-        });
-        table.addEventListener('mouseleave', clearHighlights);
-    })();
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </div>
     {% endif %}
-
-
-
 
     <!-- ЗАВЕДУЮЩИЙ -->
     {% if session.is_zav %}
     <div class="blocks">
-            <h2>👋 Добро пожаловать, {{ session.full_name }}!</h2>
+            <h2>Добро пожаловать, заведующий: {{ session.full_name }}!</h2>
             <h3 style="margin-top: 40px;">Учебный процесс</h3>
             <div class="banner-grid">
                 <!-- СТУДЕНТЫ -->
@@ -907,7 +103,7 @@
                 <!-- ТИП ВЕДОМОСТИ -->
                 <a href="{{ url_for('load_table', funck='edit_typesved') }}" class="banner-card">
                     <div class="banner-icon">
-                        <i class="fas fa-users"></i>
+                        <i class="fas fa-list-alt"></i>
                     </div>
                     <div class="banner-content">
                         <h3>Типы ведомости</h3>
@@ -921,7 +117,7 @@
                 <!-- ГРУППЫ -->
                 <a href="{{ url_for('load_table', funck='edit_groups') }}" class="banner-card">
                     <div class="banner-icon">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <i class="fas fa-layer-group" aria-hidden="true"></i>
                     </div>
                     <div class="banner-content">
                         <h3>Группы</h3>
@@ -934,7 +130,7 @@
                 <!-- ФОРМА ОБУЧЕНИЯ -->
                 <a href="{{ url_for('load_table', funck='edit_formobuch') }}" class="banner-card">
                     <div class="banner-icon">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
                     </div>
                     <div class="banner-content">
                         <h3>Формы обучения</h3>
@@ -945,7 +141,7 @@
                 <!-- СПЕЦИАЛЬНОСТИ -->
                 <a href="{{ url_for('load_table', funck='edit_spec') }}" class="banner-card">
                     <div class="banner-icon">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <i class="fas fa-certificate" aria-hidden="true"></i>
                     </div>
                     <div class="banner-content">
                         <h3>Специальности</h3>
@@ -956,7 +152,7 @@
                 <!-- ВЕДОМОСТЬ -->
                 <a href="{{ url_for('load_table', funck='edit_statement', status=0)}}" class="banner-card">
                     <div class="banner-icon">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <i class="fas fa-file-alt" aria-hidden="true"></i>
                     </div>
                     <div class="banner-content">
                         <h3>Ведомости</h3>
@@ -970,10 +166,10 @@
                 <!-- ИТОГОВАЯ ВЕДОМОСТЬ -->
                 <a href="{{ url_for('load_table', funck='edit_statement', status=1) }}" class="banner-card">
                     <div class="banner-icon">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <i class="fas fa-file" aria-hidden="true"></i>
                     </div>
                     <div class="banner-content">
-                        <h3>Ведомости</h3>
+                        <h3>Оценочные ведомости</h3>
                         <p>Просмотр ведомостей в системе</p>
                         <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
@@ -982,7 +178,7 @@
                 <!-- УСПЕВАЕМОСТЬ -->
                 <a href="{{ url_for('load_table', funck='edit_report', is_diploma=0) }}" class="banner-card">
                     <div class="banner-icon">
-                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
                     </div>
                     <div class="banner-content">
                         <h3>Итоговая успеваемость</h3>
@@ -993,7 +189,7 @@
                 <!-- ПРИЛОЖЕНИЕ К ДИПЛОМУ -->
                 <a href="{{ url_for('load_table', funck='edit_report', is_diploma=1) }}" class="banner-card">
                     <div class="banner-icon">
-                        <i class="fas fa-users"></i>
+                        <i class="fas fa-scroll"></i>
                     </div>
                     <div class="banner-content">
                         <h3>Приложение к диплому</h3>
@@ -1012,7 +208,7 @@
     <!-- ПРЕПОДАВАТЕЛЬ -->
     {% if session.is_prepod %}
         <div class="blocks">
-        <h2>👋 Добро пожаловать, {{ session.full_name }}! Преподаватель</h2>
+        <h2> Добро пожаловать, преподаватель: {{ session.full_name }}!</h2>
             <div class="banner-grid">
                 <!-- ВЕДОМОСТЬ -->
                 <a href="{{ url_for('load_table', funck='edit_statement') }}" class="banner-card">
@@ -1030,13 +226,9 @@
     {% endif %}
 
 
-
-
-
-
     {% if session.is_specialist %}
 <div class="blocks">
-    <h2>👋 Добро пожаловать, cпециалист учебной части: {{ session.full_name }}</h2>
+    <h2> Добро пожаловать, cпециалист учебной части: {{ session.full_name }}</h2>
 
     <div class="banner-grid">
         <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="banner-card">
@@ -1049,9 +241,7 @@
                 <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
             </div>
         </a>
-    </div>
 
-    <div class="banner-grid">
         <a href="{{ url_for('load_table', funck='edit_users') }}" class="banner-card">
             <div class="banner-icon">
 <i class="fa fa-user-circle" aria-hidden="true"></i>
@@ -1062,9 +252,7 @@
                 <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
             </div>
         </a>
-    </div>
 
-    <div class="banner-grid">
         <a href="{{ url_for('load_table', funck='edit_disciplines') }}" class="banner-card">
             <div class="banner-icon">
                 <i class="fa fa-book" aria-hidden="true"></i>
@@ -1088,9 +276,8 @@
                 <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
             </div>
         </a>
-    </div>
 
-    <div class="banner-grid">
+
         <a href="{{ url_for('load_table', funck='edit_fgoss') }}" class="banner-card">
             <div class="banner-icon">
                 <i class="fas fa-graduation-cap"></i>
@@ -1101,9 +288,7 @@
                 <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
             </div>
         </a>
-    </div>
 
-    <div class="banner-grid">
         <a href="{{ url_for('load_table', funck='edit_pck') }}" class="banner-card">
             <div class="banner-icon">
                 <i class="fa fa-bookmark" aria-hidden="true"></i>

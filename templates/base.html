@@ -101,6 +101,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- Здесь можно добавить другие ссылки для админа -->
             {% endif %}
 
+             {% if session.is_zav %}
+                <!-- СТУДЕНТЫ -->
+                <a href="{{ url_for('load_table', funck='edit_students') }}" class="nav-link">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                </a> 
+                <!-- ТИП ВЕДОМОСТИ -->
+                <a href="{{ url_for('load_table', funck='edit_typesved') }}" class="nav-link">
+                    <i class="fas fa-list-alt"></i>
+                </a> 
+                <!-- ГРУППЫ -->
+                <a href="{{ url_for('load_table', funck='edit_groups') }}" class="nav-link">
+                    <i class="fas fa-layer-group" aria-hidden="true"></i>
+                </a> 
+                <!-- ФОРМА ОБУЧЕНИЯ -->
+                <a href="{{ url_for('load_table', funck='edit_formobuch') }}" class="nav-link">
+                    <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                </a>
+                <!-- СПЕЦИАЛЬНОСТИ -->
+                <a href="{{ url_for('load_table', funck='edit_spec') }}" class="nav-link">
+                    <i class="fas fa-certificate" aria-hidden="true"></i>
+                </a>
+                <!-- ВЕДОМОСТЬ -->
+                <a href="{{ url_for('load_table', funck='edit_statement', status=0)}}" class="nav-link">
+                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                </a>
+                <!-- ИТОГОВАЯ ВЕДОМОСТЬ -->
+                <a href="{{ url_for('load_table', funck='edit_statement', status=1) }}" class="nav-link">
+                        <i class="fas fa-file" aria-hidden="true"></i>
+                </a> 
+                <!-- УСПЕВАЕМОСТЬ -->
+                <a href="{{ url_for('load_table', funck='edit_report', is_diploma=0) }}" class="nav-link">
+                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                </a> 
+                <!-- ПРИЛОЖЕНИЕ К ДИПЛОМУ -->
+                <a href="{{ url_for('load_table', funck='edit_report', is_diploma=1) }}" class="nav-link">
+                    <i class="fas fa-scroll" aria-hidden="true"></i>
+                </a> 
+                <!-- Здесь можно добавить другие ссылки для админа -->
+            {% endif %}
+
             <a href="{{ url_for('logout') }}" class="nav-link">
                 <i class="fas fa-sign-out-alt"></i>
             </a>
