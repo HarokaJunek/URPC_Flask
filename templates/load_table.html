@@ -1553,13 +1553,15 @@ function exportToPDF() {
                     </tbody>
                 </table>
                 <div class="export-buttons">
-                    <button class="export-btn" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                <a href="{{  url_for('load_table', funck='edit_report', group=group_filter, semester=semester_filter, is_diploma=is_diploma, export='pdf') }}" class="export-btn">
+                    <i class="fas fa-file-pdf"> PDF </i>
+                </a>
                 </div>
             </div>
         </div>
         <script>
             function exportToPDF() {
-                alert('Экспорт в PDF будет реализован');
+                window.location.href = "{{ url_for('load_table', funck='edit_report', group=group_filter, semester=semester_filter, is_diploma=is_diploma, export='pdf') }}";
             }
         </script>
         {% endif %}

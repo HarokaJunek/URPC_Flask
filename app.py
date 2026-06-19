@@ -643,6 +643,7 @@ def generate_load_pdf(load_data, teacher_filter=None, year_filter=None, semester
     buffer.seek(0)
     return buffer
 
+# Ведомости (экспорт в pdf)
 def export_statement_pdf(id_statement):
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
@@ -819,6 +820,168 @@ def export_statement_pdf(id_statement):
     return send_file(buffer, mimetype='application/pdf',
                      as_attachment=True,
                      download_name=f'statement_{id_statement}.pdf')
+
+# Успеваемость (экспорт в pdf)
+def export_report_pdf(group_filter, semester_filter, is_diploma=''):
+    conn = get_db_connection()
+    
+    query = '''
+        SELECT 
+            students.id_student,
+            students.full_name, 
+            grades.grade,
+            disciplines.discipline_name, 
+            workload.id_group, 
+            statements.semester,
+            statement_types.type_name
+        FROM students
+        INNER JOIN grades ON students.id_student = grades.id_student
+        INNER JOIN statements ON grades.id_statement = statements.id_statement
+        INNER JOIN statement_types ON statements.id_type = statement_types.id_type
+        INNER JOIN workload ON statements.id_discipline = workload.id_load
+        INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+        WHERE workload.id_group = ?
+        AND statements.semester = ?
+    '''
+    params = [group_filter, semester_filter]
+    if is_diploma:
+        query += ' AND statements.is_diploma = 1'
+    
+    table_info = conn.execute(query, params).fetchall()
+    conn.close()
+    
+    # Подготавливаем control_types для сложной шапки
+    control_types_dict = {}
+    for row in table_info:
+        type_name = row['type_name'] or 'Без типа'
+        disc_name = row['discipline_name']
+        if type_name not in control_types_dict:
+            control_types_dict[type_name] = []
+        # Проверяем, нет ли уже такой дисциплины в этом типе
+        if disc_name not in [d['name'] for d in control_types_dict[type_name]]:
+            control_types_dict[type_name].append({
+                'id': disc_name,
+                'name': disc_name,
+                'avg_grade': 0
+            })
+
+    # Преобразуем в список для шаблона
+    control_types = []
+    total_cols = 0
+    for type_name, discs in control_types_dict.items():
+        control_types.append({
+            'name': type_name,
+            'disciplines': discs
+        })
+        total_cols += len(discs)
+
+    # Группируем оценки по студентам
+    students_dict = {}
+    for row in table_info:
+        sid = row['id_student']
+        if sid not in students_dict:
+            students_dict[sid] = {
+                'full_name': row['full_name'],
+                'grades': {}
+            }
+        students_dict[sid]['grades'][row['discipline_name']] = row['grade']
+
+    # Считаем средний балл для каждого студента
+    students = []
+    for sid, s_data in students_dict.items():
+        grades_list = [g if g != 0 else 1 for g in s_data['grades'].values() if g is not None]
+        avg = round(sum(grades_list) / len(grades_list), 2) if grades_list else 0
+        s_data['avg_grade'] = avg
+        students.append(s_data)
+
+    # Считаем средний балл по каждой дисциплине
+    for type_item in control_types:
+        for disc in type_item['disciplines']:
+            all_grades = []
+            for student in students:
+                grade = student['grades'].get(disc['id'], None)
+                if grade is not None:
+                    if grade == 0:
+                        all_grades.append(1)
+                    elif grade > 0:
+                        all_grades.append(grade)
+            disc['avg_grade'] = round(sum(all_grades) / len(all_grades), 2) if all_grades else 0
+                
+    # Создаём PDF
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    
+    # Заголовок
+    title = "Приложение к диплому" if is_diploma else "Итоговая успеваемость"
+    c.setFont("Arial", 16)
+    c.drawCentredString(width/2, height - 30, title)
+    c.drawCentredString(width/2, height - 50, f"Группа: {group_filter}, Семестр: {semester_filter}")
+
+    table_data = []
+
+    # Первая строка шапки: пустые ячейки + типы контроля
+    header1 = ["", ""]
+    for type_item in control_types:
+        header1.append(type_item['name'] or '—')
+        # Добавляем пустые ячейки для остальных колонок этого типа
+        for _ in range(len(type_item['disciplines']) - 1):
+            header1.append("")
+    header1.append("")
+    table_data.append(header1)
+
+    # Вторая строка: №, ФИО, названия дисциплин
+    header2 = ["№", "ФИО студента"]
+    for type_item in control_types:
+        for disc in type_item['disciplines']:
+            header2.append(disc['name'] or '—')
+    header2.append("")
+    table_data.append(header2)
+
+    # Третья строка: средний балл по дисциплине
+    header3 = ["Ср. балл", "по дисциплине"]
+    for type_item in control_types:
+        for disc in type_item['disciplines']:
+            header3.append(str(disc['avg_grade']))
+    header3.append("Ср. балл студента")
+    table_data.append(header3)
+
+    # Данные студентов
+    for idx, student in enumerate(students, 1):
+        row = [str(idx), student['full_name']]
+        for type_item in control_types:
+            for disc in type_item['disciplines']:
+                grade = student['grades'].get(disc['id'], '—')
+                row.append(str(grade) if grade is not None else '—')
+        row.append(str(student['avg_grade']))
+        table_data.append(row)
+
+    # Создаём таблицу
+    total_cols = len(header2)
+    col_widths = [30, 120] + [50] * (total_cols - 2)
+    table = Table(table_data, colWidths=col_widths)
+
+    # Стиль
+    table.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (-1, -1), 'Arial'),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('BACKGROUND', (0, 1), (-1, 1), colors.lightgrey),
+        ('BACKGROUND', (0, 2), (-1, 2), colors.lightgrey),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('SPAN', (0, 0), (1, 0)),  # объединяем "Ср. балл" и "по дисциплине"
+    ]))
+
+    table.wrapOn(c, width - 40, height - 80)
+    table.drawOn(c, 20, height - 80 - len(table_data) * 16)
+    
+    c.save()
+    buffer.seek(0)
+    return send_file(buffer, mimetype='application/pdf',
+                     as_attachment=True,
+                     download_name=f'report_{group_filter}_{semester_filter}.pdf')
 
 # ============================================================================
 # 3. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С БД
@@ -1822,6 +1985,8 @@ def load_table():
                 group_filter = request.args.get('group', '')
                 semester_filter = request.args.get('semester', '')
                 is_diploma = request.args.get('is_diploma', '')
+                if request.args.get('export') == 'pdf':
+                     return export_report_pdf(group_filter, semester_filter, is_diploma)
                 table_info = []
 
                 conn = get_db_connection()
@@ -4814,12 +4979,11 @@ def edit_info():
             if session.get('is_zav', False) or session.get('is_prepod', False):
                 # Получаем ID из разных источников
                 id_statement = request.args.get('id_statement')
-                if request.args.get('export') == 'pdf':
-                    return export_statement_pdf(id_statement)
                 if not id_statement:
                     flash('Не указан ID ведомости', 'danger')
                     return redirect(url_for('load_table', funck='edit_statement'))
-
+                if request.args.get('export') == 'pdf':
+                    return export_statement_pdf(id_statement)
                 conn = get_db_connection()
 
                 # GET — показываем форму
@@ -4985,13 +5149,13 @@ def edit_info():
                         conn.commit()
                         conn.close()
                         flash('Ведомость успешно сохранена!', 'success')
-                        return redirect(url_for('load_table', funck='edit_statement'))
+                return redirect(url_for('load_table', funck='edit_statement'))
 
             else:
                 flash('У вас нет прав доступа.', 'danger')
                 return redirect(url_for('index'))
 
-                # Обработка других значений funck (если есть)
+        # Обработка других значений funck (если есть)
         case _:
             # Обработка неизвестного параметра функции
             flash('Неверный параметр функции', 'danger')
