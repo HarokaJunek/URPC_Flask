@@ -581,9 +581,11 @@
 <div class="table-header">
     <h2><i class="fa-solid fa-gear"></i> Управление нагрузкой</h2>
     <div class="table-actions">
+        {%if session.is_specialist%}
         <a href="{{ url_for('add_info', funck='edit_nagruzka') }}" class="action-btn add-btn">
             <i class="fas fa-plus"></i> Добавить запись
         </a>
+        {% endif %}
         <div class="search-box">
             <form method="get" action="{{ url_for('load_table') }}">
                 <input type="text" name="search" placeholder="Поиск..." value="{{ request.args.get('search', '') }}">
@@ -660,7 +662,9 @@
     <table class="all-table1" id="readable-table">
         <thead>
             <tr class="main-name-table">
+        {%if session.is_specialist%}
                 <th rowspan="3">Действия</th>
+        {% endif %}
                 <th rowspan="3">Форма</th>
                 <th rowspan="3">Индекс</th>
                 <th rowspan="3">Наименование дисциплин</th>
@@ -750,6 +754,7 @@
             {% set diff_credit = load.diff_credit or 0 %}
 
             <tr data-id="{{ load.id_load }}" data-group="{{ load.id_group }}" data-year="{{ load.id_year }}" data-teacher="{{ load.teacher_full_name or '' }}" data-discipline="{{ load.discipline_name or '' }}">
+                {%if session.is_specialist%}
                 <td class="actions-cell">
                     <a href="{{ url_for('edit_info', funck='edit_nagruzka', id_load=load.id_load) }}" class="icon-btn edit" title="Редактировать">
                         <i class="fas fa-edit"></i>
@@ -758,6 +763,7 @@
                         <i class="fas fa-trash-alt"></i>
                     </a>
                 </td>
+                {% endif %}
                 <td>{{ load.study_form_name or 'очная' }}</td>
                 <td class="id-cell">{{ load.id_discipline or '' }}</td>
                 <td>{{ load.discipline_name or '' }}</td>
@@ -1335,10 +1341,12 @@ function exportToPDF() {
                 </div>
                 <div class="filters-panel">
                     <div class="filters-grid">
+                        {% if session.is_zav %}
                         <div class="filter-item">
                             <label><i class="fas fa-chalkboard-teacher"></i> Преподаватель</label>
                             <input type="text" class="filter-input" id="filter-teacher" placeholder="ФИО">
                         </div>
+                        {% endif %}
                         <div class="filter-item">
                             <label><i class="fas fa-book"></i> Дисциплина</label>
                             <input type="text" class="filter-input" id="filter-discipline" placeholder="Название">
@@ -1385,6 +1393,11 @@ function exportToPDF() {
                                     <a href="{{ url_for('edit_info', funck='edit_statement', id_statement=statement.id_statement, status=1) }}"
                                         class="icon-btn view" title="Просмотреть">
                                         <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('load_table', funck='edit_statement', id_statement=statement.id_statement, action='unsubmit') }}" 
+                                        class="icon-btn undo" title="Отменить сдачу"
+                                        onclick="return confirm('Вы уверены, что хотите отменить сдачу ведомости?');">
+                                        <i class="fas fa-undo"></i>
                                     </a>
                                 {% endif %}
                                 {% if statement.status == 0 %}

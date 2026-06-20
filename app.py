@@ -1601,7 +1601,7 @@ def load_table():
                 return redirect(url_for('index'))
 
         case 'edit_nagruzka':
-            if session.get('is_specialist', False):
+            if session.get('is_specialist', False) or session.get('is_prepod', False):
                 conn = get_db_connection()
 
                 # Получение списков для фильтров
@@ -1642,6 +1642,10 @@ def load_table():
                     WHERE 1=1
                 '''
                 params = []
+
+                if session.get('is_prepod', False) and not session.get('is_specialist', False):
+                    query += ' AND w.id_teacher = ?'
+                    params.append(session['user_id'])
 
                 # Добавляем условия для ПОИСКА
                 if search_query:
@@ -1946,6 +1950,17 @@ def load_table():
         # ВЕДОМОСТЬ
         case 'edit_statement':
             if (session.get('is_zav', False) or session.get('is_prepod', False)):
+
+                id_statement = request.args.get('id_statement')
+                if request.args.get('action') == 'unsubmit':
+                    conn = get_db_connection()
+                    print("DEBUG: unsubmit triggered, id_statement =", request.args.get('id_statement'))
+                    conn.execute('UPDATE statements SET status = 0 WHERE id_statement = ?', (id_statement,))
+                    conn.commit()
+                    flash('Сдача ведомости отменена!', 'success')
+                    conn.close()
+                    return redirect(url_for('load_table', funck='edit_statement',))
+                
                 status = request.args.get('status', '')
                 conn = get_db_connection()
                 query = '''
@@ -1964,6 +1979,11 @@ def load_table():
                     '''
                 params = []
 
+                if session.get('is_prepod', False) and not session.get('is_zav', False):
+                    query += ' WHERE workload.id_teacher = ?'
+
+                    params.append(session['user_id'])
+                
                 # Фильтрация по статусу
                 status_filter = request.args.get('status', '')
                 if status_filter:
@@ -1979,7 +1999,7 @@ def load_table():
 
                 # Получаем данные для фильтров
                 groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
-
+                    
                 table_info = conn.execute(query, params).fetchall()
                 conn.close()
                 return render_template('load_table.html',
@@ -5061,6 +5081,7 @@ def edit_info():
                     if not statement:
                         flash('Ведомость не найдена.', 'danger')
                         return redirect(url_for('load_table', funck='edit_statement'))
+                    
 
                     return render_template('edit_info.html',
                                            funck=funck,
@@ -5075,7 +5096,7 @@ def edit_info():
                                            session=session)
 
                 conn = get_db_connection()
-                print("FORM DATA:", request.form)
+                
                 # POST — сохраняем изменения
                 if request.method == 'POST':
                     if request.args.get('action') == 'submit':
@@ -5084,13 +5105,12 @@ def edit_info():
                         conn.commit()
                         flash('Ведомость сдана!', 'success')
                         conn.close()
-                        return redirect(url_for('edit_info', funck='edit_statement', id_statement=id_statement))
+                        return redirect(url_for('load_table', funck='edit_statement', id_statement=id_statement))
+
                     excused = request.form.get('excused', '')
                     unexcused = request.form.get('unexcused', '')
                     id_grade = request.form.get('id_grade', '')
                     errors = []
-
-
 
                     if not excused:
                         errors.append('Количество н/я по уважительной причине обязательно')

@@ -48,7 +48,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Навигационное меню -->
     <nav class="navbar">
         <div class="nav-brand">
-            <img style="width: 185px; height: 69px;" src="{{ url_for ('static', filename='img/logo.png')}}">
+            <a href="{{ url_for('index') }}">
+                <img style="width: 185px; height: 69px;" src="{{ url_for ('static', filename='img/logo.png')}}">
+             </a>
         </div>
 
 
@@ -65,8 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- Меню -->
     <div class="nav-menu">
         {% if session.user_id %}
-            <a href="{{ url_for('index') }}" class="nav-link">
+            <a href="{{ url_for('index') }}" class="nav-link expandable">
                 <i class="fa fa-home"></i>
+                <span class="link-text">Главная страница</span>
             </a>
             {% if session.is_admin %}
                 <a href="{{ url_for('load_table', funck='edit_users') }}" class="nav-link expandable">
@@ -80,6 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
             {% endif %}
 
             {% if session.is_specialist %}
+                <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="nav-link expandable">
+                    <i class="fa fa-table" aria-hidden="true"></i>
+                    <span class="link-text">Нагрузка</span>
+                </a>
                 <a href="{{ url_for('load_table', funck='edit_users') }}" class="nav-link expandable">
                     <i class="fa fa-user-circle" aria-hidden="true"></i>
                     <span class="link-text">Преподаватели</span>
@@ -103,11 +110,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <a href="{{ url_for('load_table', funck='edit_pck') }}" class="nav-link expandable">
                      <i class="fa fa-bookmark" aria-hidden="true"></i>
                     <span class="link-text">ПЦК</span>
-                </a>
-
-                <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="nav-link expandable">
-                    <i class="fa fa-table" aria-hidden="true"></i>
-                    <span class="link-text">Нагрузка</span>
                 </a>
                 <!-- Здесь можно добавить другие ссылки для админа -->
             {% endif %}
@@ -160,7 +162,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 </a> 
                 <!-- Здесь можно добавить другие ссылки для админа -->
             {% endif %}
-
+             {% if session.is_prepod %}
+                <a href="{{ url_for('load_table', funck='edit_statement') }}" class="nav-link expandable">
+                    <i class="fa fa-file-alt" aria-hidden="true"></i>
+                    <span class="link-text">Ведомости</i></span>
+                </a>
+                <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="nav-link expandable">
+                    <i class="fa fa-table" aria-hidden="true"></i>
+                    <span class="link-text">Нагрузка</i></span>
+                </a>
+            {% endif %}
             <a href="{{ url_for('logout') }}" class="nav-link">
                 <i class="fas fa-sign-out-alt"></i>
             </a>
