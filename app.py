@@ -655,6 +655,7 @@ def export_statement_pdf(id_statement):
     statement = conn.execute('''
         SELECT 
             statements.id_statement,
+            specialties.id_specialty,
             specialties.specialty_name,
             academic_year.year_name,
             groups.course_number,
@@ -664,6 +665,7 @@ def export_statement_pdf(id_statement):
             users.full_name,
             statements.excused,
             statements.unexcused,
+            statements.filled_at,
             departments.department_name
         FROM statements
         LEFT JOIN workload ON statements.id_discipline = workload.id_load
@@ -701,6 +703,17 @@ def export_statement_pdf(id_statement):
         elif g == 0: not_been += 1
     grades_all = grade_A + grade_B + grade_C + grade_D
     
+    def format_date(date_str):
+        if not date_str:
+            return 'Не указана'
+        try:
+            y, m, d = date_str.split('-')
+            months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+                    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+            return f"«{int(d):02d}» {months[int(m)-1]} {y}г."
+        except:
+            return date_str
+
     # Создаём PDF
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -729,7 +742,7 @@ def export_statement_pdf(id_statement):
     c.setFont("Arial-Bold", 12)
     c.drawString(left_margin, y, "Специальность: ")
     c.setFont("Arial", 12)
-    c.drawString(left_margin + 100, y, statement['specialty_name'] or '')
+    c.drawString(left_margin + 100, y, statement['id_specialty'] + " " +statement['specialty_name'] or '')
     y -= 20
 
     c.setFont("Arial-Bold", 12)
@@ -759,7 +772,7 @@ def export_statement_pdf(id_statement):
     y -= 20
 
     c.setFont("Arial-Bold", 12)
-    c.drawString(left_margin, y, "Преподаватель: ")
+    c.drawString(left_margin, y, "Зачет принял: ")
     c.setFont("Arial", 12)
     c.drawString(left_margin + 100, y, statement['full_name'] or '')
     
@@ -812,8 +825,8 @@ def export_statement_pdf(id_statement):
     stats_table.drawOn(c, left_margin, y - len(stats_data) * 18)
     
     y -= len(stats_data) * 18 + 20  # сдвигаем ниже таблицы
-    c.drawString(left_margin,y, " «___» _____________ 20__г.")
-    c.drawString(width/2 + 8,  y, "Преподаватель: ______________________")    
+    c.drawString(left_margin,y, f"Дата сдачи: {format_date(statement['filled_at'])}")
+    c.drawString(width/2 + 8,  y, "Преподаватель: ____________________")    
     c.save()
     buffer.seek(0)
     print("PDF сгенерирован, размер:", len(buffer.getvalue()), "байт")
@@ -4998,17 +5011,18 @@ def edit_info():
                             statements.semester,
                             disciplines.discipline_name,
                             users.full_name,
-                            statements.status,   
+                            statements.status,
+                            statements.filled_at,
                             statements.excused,
                             statements.unexcused   
-                            FROM statements
-                            LEFT JOIN workload ON statements.id_discipline = workload.id_load
-                            LEFT JOIN academic_year ON workload.id_year = academic_year.id_year
-                            LEFT JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
-                            LEFT JOIN groups ON workload.id_group = groups.id_group 
-                            LEFT JOIN users ON workload.id_teacher = users.id_user
-                            LEFT JOIN specialties ON groups.id_specialty = specialties.id_specialty
-                            WHERE statements.id_statement = ?
+                        FROM statements
+                        LEFT JOIN workload ON statements.id_discipline = workload.id_load
+                        LEFT JOIN academic_year ON workload.id_year = academic_year.id_year
+                        LEFT JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+                        LEFT JOIN groups ON workload.id_group = groups.id_group 
+                        LEFT JOIN users ON workload.id_teacher = users.id_user
+                        LEFT JOIN specialties ON groups.id_specialty = specialties.id_specialty
+                        WHERE statements.id_statement = ?
                     ''', (id_statement,)).fetchone()
 
                     student = conn.execute('''
@@ -5060,23 +5074,35 @@ def edit_info():
                                            not_been=not_been,
                                            session=session)
 
+                conn = get_db_connection()
+                print("FORM DATA:", request.form)
                 # POST — сохраняем изменения
                 if request.method == 'POST':
-                    not_been_excused = request.form.get('not_been_excused', '')
-                    not_been_unexcused = request.form.get('not_been_unexcused', '')
+                    if request.args.get('action') == 'submit':
+                        filled_at = request.form.get('filled_at', '')
+                        conn.execute('UPDATE statements SET status = 1, filled_at = ? WHERE id_statement = ?', (filled_at, id_statement,))
+                        conn.commit()
+                        flash('Ведомость сдана!', 'success')
+                        conn.close()
+                        return redirect(url_for('edit_info', funck='edit_statement', id_statement=id_statement))
+                    excused = request.form.get('excused', '')
+                    unexcused = request.form.get('unexcused', '')
                     id_grade = request.form.get('id_grade', '')
-
                     errors = []
-                    if not not_been_excused:
+
+
+
+                    if not excused:
                         errors.append('Количество н/я по уважительной причине обязательно')
-                    elif not re.match(r'^[\d]+$', not_been_excused):
+                    elif not re.match(r'^[\d]+$', excused):
                         errors.append('Количество н/я по уважительной причине может содержать только цифры и числа')
 
-                    if not not_been_unexcused:
+                    if not unexcused:
                         errors.append('Количество н/я по неуважительной причине обязательно')
-                    elif not re.match(r'^[\d]+$', not_been_unexcused):
+                    elif not re.match(r'^[\d]+$', unexcused):
                         errors.append('Количество н/я по неуважительной причине может содержать только цифры и числа')
-
+                    
+                    print("DEBUG: errors =", errors)
                     if errors:
                         statement = conn.execute('''
                             SELECT 
@@ -5088,17 +5114,18 @@ def edit_info():
                                 statements.semester,
                                 disciplines.discipline_name,
                                 users.full_name,
-                                statements.status,   
+                                statements.status,
+                                statements.filled_at,
                                 statements.excused,
                                 statements.unexcused   
-                                FROM statements
-                                INNER JOIN workload ON statements.id_discipline = workload.id_load
-                                INNER JOIN academic_year ON workload.id_year = academic_year.id_year
-                                INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
-                                INNER JOIN groups ON workload.id_group = groups.id_group 
-                                INNER JOIN users ON workload.id_teacher = users.id_user
-                                INNER JOIN specialties ON groups.id_specialty = specialties.id_specialty
-                                WHERE statements.id_statement = ?
+                            FROM statements
+                            LEFT JOIN workload ON statements.id_discipline = workload.id_load
+                            LEFT JOIN academic_year ON workload.id_year = academic_year.id_year
+                            LEFT JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
+                            LEFT JOIN groups ON workload.id_group = groups.id_group 
+                            LEFT JOIN users ON workload.id_teacher = users.id_user
+                            LEFT JOIN specialties ON groups.id_specialty = specialties.id_specialty
+                            WHERE statements.id_statement = ?
                         ''', (id_statement,)).fetchone()
 
                         student = conn.execute('''
@@ -5110,8 +5137,15 @@ def edit_info():
                             LEFT JOIN grades ON students.id_student = grades.id_student 
                                 AND grades.id_statement = ?
                             WHERE students.id_group = ?''', (id_statement, statement['id_group'])).fetchall()
-
+                        for error in errors:
+                                flash(error, 'danger')
+                        return render_template('edit_info.html', 
+                                        funck=funck, 
+                                        statement=statement, 
+                                        students=student,
+                                        session=session)
                     else:
+                        filled_at = request.form.get('filled_at', '')
                         statement = conn.execute('''
                             SELECT 
                                 statements.id_statement,
@@ -5121,7 +5155,11 @@ def edit_info():
                                 workload.id_group,
                                 statements.semester,
                                 disciplines.discipline_name,
-                                users.full_name
+                                users.full_name,
+                                statements.status,
+                                statements.filled_at,
+                                statements.excused,
+                                statements.unexcused   
                                 FROM statements
                                 INNER JOIN workload ON statements.id_discipline = workload.id_load
                                 INNER JOIN academic_year ON workload.id_year = academic_year.id_year
@@ -5131,24 +5169,24 @@ def edit_info():
                                 INNER JOIN specialties ON groups.id_specialty = specialties.id_specialty
                                 WHERE statements.id_statement = ?
                         ''', (id_statement,)).fetchone()
-
                         student = conn.execute('''
                             SELECT students.id_student FROM students WHERE students.id_group = ?''',
-                                               (statement['id_group'],)).fetchall()
+                                            (statement['id_group'],)).fetchall()
 
-                        for stud in student:
-                            id_stud = stud['id_student']
-                            key = f"grade_{id_stud}"
-                            grade_value = request.form.get(key, '')
-                            if grade_value != "":
-                                conn.execute('''
-                                    INSERT OR REPLACE INTO grades (id_student, id_statement, grade) VALUES (?, ?, ?)
-                                    ''', (id_stud, id_statement, grade_value,))
-                        conn.execute(''' UPDATE statements SET excused = ?, unexcused = ? WHERE id_statement = ?''',
-                                     (not_been_excused, not_been_unexcused, id_statement,))
-                        conn.commit()
-                        conn.close()
-                        flash('Ведомость успешно сохранена!', 'success')
+                    for stud in student:
+                        id_stud = stud['id_student']
+                        key = f"grade_{id_stud}"
+                        grade_value = request.form.get(key, '')
+                        if grade_value != "":
+                            conn.execute('''
+                                INSERT OR REPLACE INTO grades (id_student, id_statement, grade) VALUES (?, ?, ?)
+                                ''', (id_stud, id_statement, grade_value,))
+
+                    conn.execute(''' UPDATE statements SET excused = ?,  unexcused = ?, filled_at = ? WHERE id_statement = ?''',
+                                 (excused, unexcused, filled_at, id_statement,))
+                    conn.commit()
+                    conn.close()
+                    flash('Ведомость успешно сохранена!', 'success')
                 return redirect(url_for('load_table', funck='edit_statement'))
 
             else:

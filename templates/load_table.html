@@ -1355,7 +1355,9 @@ function exportToPDF() {
                     </div>
                     <div class="filters-actions">
                         <a href="javascript:void(0);" class="apply-filters-btn" onclick="applyFilters()">Применить</a>
-                        <a href="javascript:void(0);" class="reset-filters-btn" onclick="resetFilters()">Сбросить</a>
+                        <a href="javascript:void(0);" class="reset-filters-btn" onclick="resetFilters()">
+                            <i class="fas fa-undo-alt"></i>Сбросить
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1472,7 +1474,14 @@ function exportToPDF() {
                     <input type="hidden" name="funck" value="edit_report">
                     <div class="filters-wrapper">
                         <input type="checkbox" id="toggle-filters" hidden>
-                        <div class="filters-panel" style="display: block;">
+                        <div class="filters-header">
+                            <label for="toggle-filters" class="filters-toggle-btn">
+                                <i class="fas fa-filter"></i> Фильтры
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </label>
+                        </div>
+                        <input type="checkbox" id="toggle-filters" hidden>
+                        <div class="filters-panel">
                             <div class="filters-grid">
                                 <div class="filter-item">
                                     <label><i class="fas fa-users"></i> Группа</label>
@@ -1494,8 +1503,10 @@ function exportToPDF() {
                                 </div>
                             </div>
                             <div class="filters-actions">
-                                <button type="submit" class="apply-filters-btn">Сформировать</button>
-                                <a href="{{ url_for('load_table', funck='edit_report') }}" type="submit" class="apply-filters-btn">Сбросить</a>
+                                <a href="javascript:void(0);" class="apply-filters-btn">Сформировать</a>
+                                <a href="javascript:void(0);" class="reset-filters-btn" onclick="resetFilters()">
+                                    <i class="fas fa-undo-alt"></i>Сбросить
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -1552,16 +1563,41 @@ function exportToPDF() {
                         {% endfor %}
                     </tbody>
                 </table>
-                <div class="export-buttons">
-                <a href="{{  url_for('load_table', funck='edit_report', group=group_filter, semester=semester_filter, is_diploma=is_diploma, export='pdf') }}" class="export-btn">
-                    <i class="fas fa-file-pdf"> PDF </i>
-                </a>
+                <div class="export-buttons" style="float: right;">
+                    <a href="..." class="export-btn">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
                 </div>
             </div>
         </div>
         <script>
-            function exportToPDF() {
-                window.location.href = "{{ url_for('load_table', funck='edit_report', group=group_filter, semester=semester_filter, is_diploma=is_diploma, export='pdf') }}";
+            function applyFilters() {
+                const groupFilter = document.getElementById('filter-group').value.toLowerCase();
+                const semesterFilter = document.getElementById('filter-semester').value.toLowerCase();
+
+                const rows = document.querySelectorAll('#readable-table tbody tr');
+                let visibleCount = 0;
+                rows.forEach(row => {
+                    if (row.cells.length === 1) return;
+
+                    let show = true;
+                    if (groupFilter && !row.dataset.group.toLowerCase().includes(groupFilter)) show = false;
+                    if (semesterFilter && !row.dataset.semester.toLowerCase().includes(semesterFilter)) show = false;
+
+                    row.style.display = show ? '' : 'none';
+                    if (show) visibleCount++;
+                });
+
+                document.querySelector('.total-count').textContent = visibleCount;
+            }
+            function resetFilters() {
+                document.getElementById('filter-group').value = '';
+                document.getElementById('filter-semester').value = '';
+                const rows = document.querySelectorAll('#readable-table tbody tr');
+                rows.forEach(row => {
+                    row.style.display = '';
+                });
+                document.querySelector('.total-count').textContent = rows.length;
             }
         </script>
         {% endif %}

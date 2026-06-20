@@ -2358,6 +2358,24 @@ width: auto;
         transform: translateY(-1px);
         box-shadow: 0 4px 10px rgba(77, 195, 240, 0.4);
     }
+
+    .reset-filters-btn {
+        background: #dc3545; /* красный */
+        border: none;
+        padding: 10px 28px;
+        border-radius: 30px;
+        font-weight: 500;
+        font-size: 14px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+    }
+    .reset-filters-btn:hover {
+        background: #c82333; /* темно-красный при наведении */
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+    }
 @media (max-width: 768px) {
         #readable-table th, #readable-table td {
             padding: 8px 6px;
