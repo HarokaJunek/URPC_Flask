@@ -579,7 +579,12 @@
 </style>
 
 <div class="table-header">
+    {% if session.is_specialist %}
     <h2><i class="fa-solid fa-gear"></i> Управление нагрузкой</h2>
+    {% endif %}
+    {% if session.is_prepod %}
+    <h2><i class="fa-solid fa-gear"></i> Просмотр нагрузки</h2>
+    {% endif %}
     <div class="table-actions">
         {%if session.is_specialist%}
         <a href="{{ url_for('add_info', funck='edit_nagruzka') }}" class="action-btn add-btn">
@@ -607,7 +612,7 @@
         </div>
     </div>
 </div>
-
+{% if session.is_specialist %}
 <!-- Фильтры -->
 <div class="filters-wrapper">
     <input type="checkbox" id="toggle-filters" hidden>
@@ -656,6 +661,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <!-- Таблица -->
 <div class="table-responsive">
@@ -754,7 +760,7 @@
             {% set diff_credit = load.diff_credit or 0 %}
 
             <tr data-id="{{ load.id_load }}" data-group="{{ load.id_group }}" data-year="{{ load.id_year }}" data-teacher="{{ load.teacher_full_name or '' }}" data-discipline="{{ load.discipline_name or '' }}">
-                {%if session.is_specialist%}
+                {%if session.is_specialist %}
                 <td class="actions-cell">
                     <a href="{{ url_for('edit_info', funck='edit_nagruzka', id_load=load.id_load) }}" class="icon-btn edit" title="Редактировать">
                         <i class="fas fa-edit"></i>
@@ -826,12 +832,15 @@
 
 <!-- Подвал таблицы -->
 <div class="table-footer">
+    {% if session.is_specialist %}
     <div class="table-info">
         Всего записей: <span class="total-count">{{ table_info|length }}</span>
     </div>
+
     <div class="export-buttons">
         <button class="export-btn" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
     </div>
+    {% endif %}
 </div>
 
 <script>

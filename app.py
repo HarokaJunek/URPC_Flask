@@ -1024,7 +1024,7 @@ def get_db_connection():
 @app.route('/export_pdf_nagruzka', methods=['GET'])
 def export_pdf_nagruzka():
     """Экспорт нагрузки в PDF с учетом фильтров"""
-    if not session.get('is_specialist', False):
+    if not session.get('is_specialist', False) or session.get('is_prepod', False):
         flash('У вас нет прав доступа к этому разделу.', 'danger')
         return redirect(url_for('index'))
 
