@@ -1461,8 +1461,8 @@ function exportToPDF() {
                 <!-- Фильтры -->
                 <form method="get" action="{{ url_for('load_table', funck='edit_report') }}">
                     <input type="hidden" name="funck" value="edit_report">
+                    <input type="hidden" name="is_diploma" value="{{ is_diploma }}">
                     <div class="filters-wrapper">
-                        <input type="checkbox" id="toggle-filters" hidden>
                         <div class="filters-header">
                             <label for="toggle-filters" class="filters-toggle-btn">
                                 <i class="fas fa-filter"></i> Фильтры
@@ -1481,15 +1481,17 @@ function exportToPDF() {
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="filter-item">
-                                    <label><i class="fas fa-users"></i> Семестр</label>
-                                    <select class="filter-select" id="filter-semester" name="semester">
-                                        <option value="">Все</option>
-                                        {% for i in range(1, 9) %}
-                                        <option value="{{ i }}">{{ i }} семестр</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+                                {% if is_diploma == '0' %}
+                                    <div class="filter-item">
+                                        <label><i class="fas fa-users"></i> Семестр</label>
+                                        <select class="filter-select" id="filter-semester" name="semester">
+                                            <option value="">Все</option>
+                                            {% for i in range(1, 9) %}
+                                            <option value="{{ i }}">{{ i }} семестр</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="filters-actions">
                                 <a href="javascript:void(0);" class="apply-filters-btn" onclick="this.closest('form').submit()">
@@ -1506,8 +1508,12 @@ function exportToPDF() {
                 <table class="all-table" id="readable-table">
                     <thead>
                         <tr>
+                            <th>{{ group_filter  }}</th>
+                            {% if semester_filter == "" %}
                             <th></th>
-                            <th></th>
+                            {% else %}
+                            <th>{{ semester_filter }} семестр</th>
+                            {% endif %}
                             {% for type in control_types %}
                             <th colspan="{{ type.disciplines|length }}">{{ type.name or '—' }}</th>
                             {% endfor %}
@@ -1556,7 +1562,7 @@ function exportToPDF() {
                 </table>
                 <div class="table-footer"></div>
                     <div class="export-buttons" style="float: right;">
-                        <a href="..." class="export-btn">
+                        <a href="{{ url_for('load_table', funck='edit_report', group=group_filter, semester=semester_filter, is_diploma=is_diploma, export='pdf') }}" class="export-btn">
                             <i class="fas fa-file-pdf"></i> PDF
                         </a>
                     </div>

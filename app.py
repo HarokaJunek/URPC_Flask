@@ -857,9 +857,12 @@ def export_report_pdf(group_filter, semester_filter, is_diploma=''):
         INNER JOIN workload ON statements.id_discipline = workload.id_load
         INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
         WHERE workload.id_group = ?
-        AND statements.semester = ?
     '''
-    params = [group_filter, semester_filter]
+    params = [group_filter]
+
+    if semester_filter:
+        query += ' AND statements.semester = ?'
+        params.append(semester_filter)
     if is_diploma:
         query += ' AND statements.is_diploma = 1'
     
@@ -925,18 +928,40 @@ def export_report_pdf(group_filter, semester_filter, is_diploma=''):
                 
     # Создаём PDF
     buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
+    c = canvas.Canvas(buffer, pagesize=landscape(A4))
+    left_margin = 40
+    width, height = landscape(A4)
     
     # Заголовок
-    title = "Приложение к диплому" if is_diploma else "Итоговая успеваемость"
-    c.setFont("Arial", 16)
-    c.drawCentredString(width/2, height - 30, title)
-    c.drawCentredString(width/2, height - 50, f"Группа: {group_filter}, Семестр: {semester_filter}")
+    c.setFont("Arial", 10)
+    y = height - 30
+    c.drawCentredString(width/2, y, "Государственное автономное профессиональное образовательное учреждение Свердловской области")
+    y -= 15
+    c.drawCentredString(width/2, y, "«Уральский политехнический колледж - Межрегиональный центр компетенций»")
+    y -= 30
+    c.setFont("Arial", 14)
+    if is_diploma:
+        title = "Приложение к диплому" 
+    else: 
+        "Итоговая успеваемость"
+    c.drawCentredString(width/2, y, title)
+    c.setFont("Arial", 12)
+    c.drawCentredString(width/2, y - 20, f"Группа: {group_filter}")
+    if is_diploma == 0:
+        c.drawCentredString(width/2, y - 40, f"Семестр: {semester_filter}")
+    y -= 5
 
+    wrap_style = ParagraphStyle(
+        'WrapStyle',
+        fontName='Arial',
+        fontSize=9,
+        leading=10,  # межстрочный интервал
+        alignment=TA_CENTER,
+        wordWrap='CJK'  # перенос по словам
+    )
     table_data = []
 
-    # Первая строка шапки: пустые ячейки + типы контроля
+    # пустые ячейки + типы контроля
     header1 = ["", ""]
     for type_item in control_types:
         header1.append(type_item['name'] or '—')
@@ -946,20 +971,20 @@ def export_report_pdf(group_filter, semester_filter, is_diploma=''):
     header1.append("")
     table_data.append(header1)
 
-    # Вторая строка: №, ФИО, названия дисциплин
-    header2 = ["№", "ФИО студента"]
+    #  №, ФИО, названия дисциплин
+    header2 = [Paragraph("", wrap_style), Paragraph("ФИО студента", wrap_style)]
     for type_item in control_types:
         for disc in type_item['disciplines']:
-            header2.append(disc['name'] or '—')
-    header2.append("")
+            header2.append(Paragraph(disc['name'] or '—', wrap_style))
+    header2.append(Paragraph("", wrap_style))
     table_data.append(header2)
 
-    # Третья строка: средний балл по дисциплине
-    header3 = ["Ср. балл", "по дисциплине"]
+    # средний балл по дисциплине
+    header3 = ["№ п/п", " Ср. балл по дисциплине"]
     for type_item in control_types:
         for disc in type_item['disciplines']:
             header3.append(str(disc['avg_grade']))
-    header3.append("Ср. балл студента")
+    header3.append("Ср. балл \nстудента")
     table_data.append(header3)
 
     # Данные студентов
@@ -974,30 +999,42 @@ def export_report_pdf(group_filter, semester_filter, is_diploma=''):
 
     # Создаём таблицу
     total_cols = len(header2)
-    col_widths = [30, 120] + [50] * (total_cols - 2)
+    available_width = width - 40
+    fixed_cols = [30, 120]
+    remaining_width = available_width - sum(fixed_cols)
+    disc_cols = total_cols - 2
+    disc_width = remaining_width / disc_cols
+    col_widths = fixed_cols + [disc_width] * disc_cols
     table = Table(table_data, colWidths=col_widths)
 
     # Стиль
     table.setStyle(TableStyle([
         ('FONTNAME', (0, 0), (-1, -1), 'Arial'),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-        ('BACKGROUND', (0, 1), (-1, 1), colors.lightgrey),
-        ('BACKGROUND', (0, 2), (-1, 2), colors.lightgrey),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('SPAN', (0, 0), (1, 0)),  # объединяем "Ср. балл" и "по дисциплине"
+
     ]))
 
-    table.wrapOn(c, width - 40, height - 80)
-    table.drawOn(c, 20, height - 80 - len(table_data) * 16)
+    table.wrapOn(c, width - 40, y - 80)
+    table.drawOn(c, 20, y - 80 - len(table_data) * 16)
     
+    # Обновляем y после таблицы
+    table_y = y - 80 - len(table_data) * 16
+    y = table_y - 40  # отступ от нижнего края таблицы
+
+    # Подписи
+    c.setFont("Arial", 12)
+    c.drawString(width - 240, y, "Заведующий: ____________________") 
+    c.drawString(left_margin - 20, y, "Дата: «___» _____________ 20___г.")
     c.save()
     buffer.seek(0)
+
     return send_file(buffer, mimetype='application/pdf',
                      as_attachment=True,
-                     download_name=f'report_{group_filter}_{semester_filter}.pdf')
+                     download_name=f'{title}_{group_filter}_{semester_filter}.pdf')
+
 
 # ============================================================================
 # 3. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С БД
@@ -2021,13 +2058,11 @@ def load_table():
                 group_filter = request.args.get('group', '')
                 semester_filter = request.args.get('semester', '')
                 is_diploma = request.args.get('is_diploma', '')
-                if request.args.get('export') == 'pdf':
-                     return export_report_pdf(group_filter, semester_filter, is_diploma)
                 table_info = []
 
                 conn = get_db_connection()
                 groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
-                if group_filter and semester_filter:
+                if group_filter:
                     query = '''
                         SELECT 
                             students.id_student,
@@ -2044,12 +2079,15 @@ def load_table():
                         INNER JOIN workload ON statements.id_discipline = workload.id_load
                         INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
                         WHERE workload.id_group = ?
-                        AND statements.semester = ?
                     '''
-                    params = [group_filter, semester_filter]
+                    params = [group_filter]
 
                     if is_diploma:
                         query += ' AND statements.is_diploma = 1'
+
+                    if semester_filter:
+                        query += ' AND statements.semester = ?'
+                        params.append(semester_filter)
 
                     table_info = conn.execute(query, params).fetchall()
                 else:
@@ -2113,11 +2151,15 @@ def load_table():
                                 elif grade > 0:
                                     all_grades.append(grade)
                         disc['avg_grade'] = round(sum(all_grades) / len(all_grades), 2) if all_grades else 0
+                
                 # Передаём в шаблон
+                if request.args.get('export') == 'pdf':
+                    return export_report_pdf(group_filter, semester_filter, is_diploma)
                 return render_template('load_table.html',
                                        is_diploma = is_diploma,
                                        funck=funck,
                                        groups=groups,
+                                       group_filter=group_filter,
                                        students=students,
                                        control_types=control_types,
                                        total_cols=total_cols,
