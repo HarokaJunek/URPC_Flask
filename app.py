@@ -1976,21 +1976,21 @@ def load_table():
                     INNER JOIN workload ON statements.id_discipline = workload.id_load
                     INNER JOIN disciplines ON workload.id_discipline = disciplines.id_discipline
                     INNER JOIN users ON workload.id_teacher = users.id_user
+                    where 1=1
                     '''
                 params = []
 
                 if session.get('is_prepod', False) and not session.get('is_zav', False):
-                    query += ' WHERE workload.id_teacher = ?'
-
-                    params.append(session['user_id'])
+                    query += ' and workload.id_teacher = ?'
+                    params.append(session['user_id']) 
                 
                 # Фильтрация по статусу
                 status_filter = request.args.get('status', '')
                 if status_filter:
-                    query += ' WHERE statements.status = ?'
+                    query += ' and statements.status = ?'
                     params.append(status_filter)
                 elif search_query:
-                    query += ' WHERE (users.full_name LIKE ? OR disciplines.discipline_name LIKE ? OR workload.id_group LIKE ?)'
+                    query += ' and (users.full_name LIKE ? OR disciplines.discipline_name LIKE ? OR workload.id_group LIKE ?)'
                     like_pattern = '%' + search_query + '%'
                     params.extend([like_pattern, like_pattern, like_pattern])
 

@@ -1873,11 +1873,13 @@
                                 </button>
                             </div>
                         {% else %}
-                            <div class="export-buttons">
-                                <a href="{{ url_for('edit_info', funck='edit_statement', id_statement=statement.id_statement, export='pdf') }}" 
-                                class="export-btn" style="float: right; position: relative; top: -35px;">
-                                    <i class="fas fa-file-pdf"></i>PDF
-                                </a>
+                            <div class="table-footer"></div>
+                                <div class="export-buttons">
+                                    <a href="{{ url_for('edit_info', funck='edit_statement', id_statement=statement.id_statement, export='pdf') }}" 
+                                    class="export-btn" style="float: right; position: relative; top: -35px;">
+                                        <i class="fas fa-file-pdf"></i>PDF
+                                    </a>
+                                </div>
                             </div>
                         {% endif %}
                     </form>
