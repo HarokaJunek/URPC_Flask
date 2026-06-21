@@ -1594,21 +1594,31 @@ def load_table():
                 return redirect(url_for('index'))
 
         case 'edit_disciplines':
-            if session.get('is_specialist', False):
+            if session.get('is_specialist', False) or session.get('is_admin', False):
                 conn = get_db_connection()
 
-                # Базовый запрос
-                query = 'SELECT * FROM disciplines'
+                # Базовый запрос с JOIN для получения названия ПЦК
+                query = '''
+                    SELECT 
+                        d.id_discipline, 
+                        d.discipline_name, 
+                        d.id_pck, 
+                        p.name_pck as pck_name
+                    FROM disciplines d
+                    LEFT JOIN pck p ON d.id_pck = p.id_pck
+                '''
                 params = []
 
                 # Если передан поисковый запрос, добавляем WHERE с условиями
                 if search_query:
-                    query += ' WHERE disciplines.id_discipline LIKE ? OR disciplines.discipline_name LIKE ?'
+                    query += ' WHERE d.id_discipline LIKE ? OR d.discipline_name LIKE ? OR p.name_pck LIKE ?'
                     like_pattern = f'%{search_query}%'
-                    params = [like_pattern, like_pattern]
+                    params = [like_pattern, like_pattern, like_pattern]
+
+                query += ' ORDER BY d.discipline_name'
 
                 cursor = conn.execute(query, params)
-                table_info = cursor.fetchall()  # Используем fetchall() вместо execute_query()
+                table_info = cursor.fetchall()
                 conn.close()
 
                 return render_template('load_table.html', table_info=table_info, funck=funck)
@@ -1640,6 +1650,7 @@ def load_table():
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
 
+
         case 'edit_nagruzka':
             if session.get('is_specialist', False) or session.get('is_prepod', False):
                 conn = get_db_connection()
@@ -1649,14 +1660,27 @@ def load_table():
                     'SELECT id_year, year_name, winter_week, summer_week FROM academic_year ORDER BY year_name').fetchall()
                 groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
 
+                # Получение списков для поиска с автодополнением
+                teachers = conn.execute(
+                    'SELECT id_user, full_name FROM users WHERE id_role = 4 ORDER BY full_name'
+                ).fetchall()
+
+                disciplines = conn.execute(
+                    'SELECT id_discipline, discipline_name FROM disciplines ORDER BY discipline_name'
+                ).fetchall()
+
+                fgos_list = conn.execute(
+                    'SELECT id_fgos, name FROM fgoss ORDER BY name'
+                ).fetchall()
+
                 # Получаем параметры из URL
                 search_query = request.args.get('search', '')
-                year_filter = request.args.get('year')
-                teacher_filter = request.args.get('teacher')
-                group_filter = request.args.get('group')
-                discipline_filter = request.args.get('discipline')
-                fgos_filter = request.args.get('fgos')
-                semester_filter = request.args.get('semester')
+                year_filter = request.args.get('year', '')
+                teacher_filter = request.args.get('teacher', '')
+                group_filter = request.args.get('group', '')
+                discipline_filter = request.args.get('discipline', '')
+                fgos_filter = request.args.get('fgos', '')
+                semester_filter = request.args.get('semester', '')
 
                 # Базовый запрос с JOIN
                 query = '''
@@ -1700,14 +1724,13 @@ def load_table():
                     like_pattern = f'%{search_query}%'
                     params.extend([like_pattern] * 6)
 
-                # Добавляем условия для ФИЛЬТРОВ (в SQL, а не в Python)
-                if year_filter and year_filter != '':
-                    query += ' AND w.id_year = ?'
-                    params.append(year_filter)
-
+                # ✅ ИСПРАВЛЕННЫЙ ФИЛЬТР ПО ПРЕПОДАВАТЕЛЮ
                 if teacher_filter and teacher_filter != '':
+                    # Ищем по полному имени (как есть)
                     query += ' AND u.full_name LIKE ?'
                     params.append(f'%{teacher_filter}%')
+                    # Для отладки:
+                    print(f"Teacher filter: {teacher_filter}")
 
                 if group_filter and group_filter != '':
                     query += ' AND w.id_group = ?'
@@ -1721,11 +1744,15 @@ def load_table():
                     query += ' AND w.id_fgos = ?'
                     params.append(fgos_filter)
 
+                if year_filter and year_filter != '':
+                    query += ' AND w.id_year = ?'
+                    params.append(year_filter)
+
                 # Выполняем запрос
                 cursor = conn.execute(query, params)
                 table_info = cursor.fetchall()
 
-                # Применяем фильтр по семестру (его сложнее сделать в SQL, оставляем в Python)
+                # Применяем фильтр по семестру
                 if semester_filter:
                     filtered_info = []
                     for load in table_info:
@@ -1746,11 +1773,21 @@ def load_table():
 
                 conn.close()
 
+                # Преобразуем данные для JS
+                teachers_list = [{'id_user': row['id_user'], 'full_name': row['full_name']} for row in teachers]
+                groups_list = [{'id_group': row['id_group']} for row in groups]
+                disciplines_list = [{'id_discipline': row['id_discipline'], 'discipline_name': row['discipline_name']}
+                                    for row in disciplines]
+                fgos_list_data = [{'id_fgos': row['id_fgos'], 'name': row['name']} for row in fgos_list]
+
                 return render_template('load_table.html',
                                        funck=funck,
                                        table_info=table_info,
                                        academic_years=academic_years,
                                        groups=groups,
+                                       teachers=teachers_list,
+                                       disciplines=disciplines_list,
+                                       fgos_list=fgos_list_data,
                                        search_query=search_query,
                                        year_filter=year_filter,
                                        teacher_filter=teacher_filter,
@@ -2577,7 +2614,7 @@ def add_info():
             return redirect(url_for('index'))
 
     if funck == 'edit_disciplines':
-        if session.get('is_specialist', False):
+        if session.get('is_specialist', False) or session.get('is_admin', False):
             # Вспомогательная функция для загрузки PCK из БД
             def get_pck():
                 conn = get_db_connection()
@@ -2594,7 +2631,7 @@ def add_info():
             # 1. Получаем данные
             discipline_id = request.form.get('discipline_id', '').strip()
             discipline_name = request.form.get('discipline_name', '').strip()
-            id_pck = request.form.get('id_pck')
+            id_pck = request.form.get('pck')
 
             # 2. Валидация
             errors = []
@@ -2665,10 +2702,10 @@ def add_info():
                 try:
                     cursor = conn.cursor()
                     cursor.execute('''
-                        INSERT INTO disciplines 
-                        (id_discipline, discipline_name, id_pck)
-                        VALUES (?, ?, ?)
-                    ''', (discipline_id, discipline_name, int(id_pck)))
+                                INSERT INTO disciplines 
+                                (id_discipline, discipline_name, id_pck)
+                                VALUES (?, ?, ?)
+                            ''', (discipline_id, discipline_name, int(id_pck)))
                     conn.commit()
                     flash(f'Дисциплина {discipline_name} успешно создана!', 'success')
                     return redirect(url_for('load_table', funck='edit_disciplines'))
@@ -3579,6 +3616,8 @@ def add_info():
         else:
             flash('У вас нет прав для добавления ведомости', 'danger')
             return redirect(url_for('index'))
+    flash('Неизвестный тип операции', 'danger')
+    return redirect(url_for('index'))
 
 
 @app.route('/edit_info', methods=['GET', 'POST'])
@@ -4052,7 +4091,20 @@ def edit_info():
                     return redirect(url_for('load_table', funck='edit_nagruzka'))
 
                 conn = get_db_connection()
-                load = conn.execute('SELECT * FROM workload WHERE id_load = ?', (id_load,)).fetchone()
+
+                # ✅ ДОБАВЛЯЕМ JOIN для получения имен
+                load = conn.execute('''
+                    SELECT 
+                        w.*,
+                        u.full_name as teacher_full_name,
+                        d.discipline_name,
+                        g.id_group as group_id
+                    FROM workload w
+                    LEFT JOIN users u ON w.id_teacher = u.id_user
+                    LEFT JOIN disciplines d ON w.id_discipline = d.id_discipline
+                    LEFT JOIN groups g ON w.id_group = g.id_group
+                    WHERE w.id_load = ?
+                ''', (id_load,)).fetchone()
                 conn.close()
 
                 if not load:
@@ -4068,9 +4120,41 @@ def edit_info():
 
                 # GET – показываем форму
                 if request.method == 'GET':
+                    # ✅ СОЗДАЕМ form_data для отображения в полях поиска
+                    form_data = {
+                        'id_year': load['id_year'],
+                        'id_teacher': load['id_teacher'],
+                        'teacher_name': load['teacher_full_name'] or '',
+                        'id_group': load['id_group'],
+                        'group_name': load['group_id'] or '',
+                        'id_discipline': load['id_discipline'],
+                        'discipline_name': load['discipline_name'] or '',
+                        'id_fgos': load['id_fgos'],
+                        'exam': load['exam'] or 0,
+                        'credit': load['credit'] or 0,
+                        'diff_credit': load['diff_credit'] or 0,
+                        'independent_winter': load['independent_winter'] or 0,
+                        'consultations_winter': load['consultations_winter'] or 0,
+                        'lectures_winter': load['lectures_winter'] or 0,
+                        'practice_winter': load['practice_winter'] or 0,
+                        'labs_winter': load['labs_winter'] or 0,
+                        'seminars_winter': load['seminars_winter'] or 0,
+                        'course_project_winter': load['course_project_winter'] or 0,
+                        'attestation_winter': load['attestation_winter'] or 0,
+                        'independent_summer': load['independent_summer'] or 0,
+                        'consultations_summer': load['consultations_summer'] or 0,
+                        'lectures_summer': load['lectures_summer'] or 0,
+                        'practice_summer': load['practice_summer'] or 0,
+                        'labs_summer': load['labs_summer'] or 0,
+                        'seminars_summer': load['seminars_summer'] or 0,
+                        'course_project_summer': load['course_project_summer'] or 0,
+                        'attestation_summer': load['attestation_summer'] or 0,
+                    }
+
                     return render_template('edit_info.html',
                                            funck=funck,
                                            load=load,
+                                           form_data=form_data,  # ✅ ПЕРЕДАЕМ form_data
                                            academic_years=academic_years,
                                            teachers=teachers,
                                            groups=groups,
@@ -4114,6 +4198,29 @@ def edit_info():
                 credit = get_int_value('credit')
                 diff_credit = get_int_value('diff_credit')
 
+                # ✅ Получаем имена для отображения в случае ошибки
+                teacher_name = ''
+                group_name = ''
+                discipline_name = ''
+
+                # Находим имя преподавателя
+                for teacher in teachers:
+                    if teacher['id_user'] == id_teacher:
+                        teacher_name = teacher['full_name']
+                        break
+
+                # Находим группу
+                for group in groups:
+                    if group['id_group'] == id_group:
+                        group_name = group['id_group']
+                        break
+
+                # Находим дисциплину
+                for discipline in disciplines:
+                    if discipline['id_discipline'] == id_discipline:
+                        discipline_name = discipline['discipline_name']
+                        break
+
                 # Валидация
                 errors = []
 
@@ -4131,16 +4238,48 @@ def edit_info():
                 if errors:
                     for error in errors:
                         flash(error, 'danger')
+
+                    # ✅ Создаем form_data с именами для отображения
+                    form_data = {
+                        'id_year': id_year,
+                        'id_teacher': id_teacher,
+                        'teacher_name': teacher_name,
+                        'id_group': id_group,
+                        'group_name': group_name,
+                        'id_discipline': id_discipline,
+                        'discipline_name': discipline_name,
+                        'id_fgos': id_fgos,
+                        'exam': exam,
+                        'credit': credit,
+                        'diff_credit': diff_credit,
+                        'independent_winter': independent_winter,
+                        'consultations_winter': consultations_winter,
+                        'lectures_winter': lectures_winter,
+                        'practice_winter': practice_winter,
+                        'labs_winter': labs_winter,
+                        'seminars_winter': seminars_winter,
+                        'course_project_winter': course_project_winter,
+                        'attestation_winter': attestation_winter,
+                        'independent_summer': independent_summer,
+                        'consultations_summer': consultations_summer,
+                        'lectures_summer': lectures_summer,
+                        'practice_summer': practice_summer,
+                        'labs_summer': labs_summer,
+                        'seminars_summer': seminars_summer,
+                        'course_project_summer': course_project_summer,
+                        'attestation_summer': attestation_summer,
+                    }
+
                     return render_template('edit_info.html',
                                            funck=funck,
                                            load=load,
+                                           form_data=form_data,  # ✅ ПЕРЕДАЕМ form_data
                                            academic_years=academic_years,
                                            teachers=teachers,
                                            groups=groups,
                                            disciplines=disciplines,
                                            fgos_list=fgos_list,
-                                           is_specialist=session.get('is_specialist', False),
-                                           form_data=request.form)
+                                           is_specialist=session.get('is_specialist', False))
 
                 conn = get_db_connection()
                 try:
@@ -4155,16 +4294,48 @@ def edit_info():
                         flash('Такая запись нагрузки уже существует для данной дисциплины, группы и преподавателя',
                               'danger')
                         conn.close()
+
+                        # ✅ Создаем form_data с именами для отображения
+                        form_data = {
+                            'id_year': id_year,
+                            'id_teacher': id_teacher,
+                            'teacher_name': teacher_name,
+                            'id_group': id_group,
+                            'group_name': group_name,
+                            'id_discipline': id_discipline,
+                            'discipline_name': discipline_name,
+                            'id_fgos': id_fgos,
+                            'exam': exam,
+                            'credit': credit,
+                            'diff_credit': diff_credit,
+                            'independent_winter': independent_winter,
+                            'consultations_winter': consultations_winter,
+                            'lectures_winter': lectures_winter,
+                            'practice_winter': practice_winter,
+                            'labs_winter': labs_winter,
+                            'seminars_winter': seminars_winter,
+                            'course_project_winter': course_project_winter,
+                            'attestation_winter': attestation_winter,
+                            'independent_summer': independent_summer,
+                            'consultations_summer': consultations_summer,
+                            'lectures_summer': lectures_summer,
+                            'practice_summer': practice_summer,
+                            'labs_summer': labs_summer,
+                            'seminars_summer': seminars_summer,
+                            'course_project_summer': course_project_summer,
+                            'attestation_summer': attestation_summer,
+                        }
+
                         return render_template('edit_info.html',
                                                funck=funck,
                                                load=load,
+                                               form_data=form_data,  # ✅ ПЕРЕДАЕМ form_data
                                                academic_years=academic_years,
                                                teachers=teachers,
                                                groups=groups,
                                                disciplines=disciplines,
                                                fgos_list=fgos_list,
-                                               is_specialist=session.get('is_specialist', False),
-                                               form_data=request.form)
+                                               is_specialist=session.get('is_specialist', False))
 
                     # Обновление записи
                     conn.execute('''
@@ -4215,16 +4386,48 @@ def edit_info():
                     conn.rollback()
                     flash(f'Ошибка базы данных: {str(e)}', 'danger')
                     conn.close()
+
+                    # ✅ Создаем form_data с именами для отображения
+                    form_data = {
+                        'id_year': id_year,
+                        'id_teacher': id_teacher,
+                        'teacher_name': teacher_name,
+                        'id_group': id_group,
+                        'group_name': group_name,
+                        'id_discipline': id_discipline,
+                        'discipline_name': discipline_name,
+                        'id_fgos': id_fgos,
+                        'exam': exam,
+                        'credit': credit,
+                        'diff_credit': diff_credit,
+                        'independent_winter': independent_winter,
+                        'consultations_winter': consultations_winter,
+                        'lectures_winter': lectures_winter,
+                        'practice_winter': practice_winter,
+                        'labs_winter': labs_winter,
+                        'seminars_winter': seminars_winter,
+                        'course_project_winter': course_project_winter,
+                        'attestation_winter': attestation_winter,
+                        'independent_summer': independent_summer,
+                        'consultations_summer': consultations_summer,
+                        'lectures_summer': lectures_summer,
+                        'practice_summer': practice_summer,
+                        'labs_summer': labs_summer,
+                        'seminars_summer': seminars_summer,
+                        'course_project_summer': course_project_summer,
+                        'attestation_summer': attestation_summer,
+                    }
+
                     return render_template('edit_info.html',
                                            funck=funck,
                                            load=load,
+                                           form_data=form_data,  # ✅ ПЕРЕДАЕМ form_data
                                            academic_years=academic_years,
                                            teachers=teachers,
                                            groups=groups,
                                            disciplines=disciplines,
                                            fgos_list=fgos_list,
-                                           is_specialist=session.get('is_specialist', False),
-                                           form_data=request.form)
+                                           is_specialist=session.get('is_specialist', False))
 
             else:
                 flash('У вас нет прав доступа.', 'danger')

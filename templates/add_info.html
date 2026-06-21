@@ -198,60 +198,53 @@
     <div class="blocks">
         <div class="edit-form-container">
             <div class="form-header">
-                {% if session.is_specialist %}
-                    <h2><i class="fas fa-edit"></i> Добавление дисциплины в систему</h2>
-                {% endif %}
+                <h2><i class="fas fa-book"></i> Добавление дисциплины</h2>
             </div>
             <form method="POST" action="{{ url_for('add_info', funck='edit_disciplines') }}" class="edit-form">
                 <div class="form-group">
-                    <label for="discipline_name" class="required">
-                        <i class="fas fa-book"></i> Название дисциплины
+                    <label for="discipline_id" class="required">
+                        <i class="fas fa-hashtag"></i> ID дисциплины
                     </label>
-                    <input type="text" id="discipline_name" name="discipline_name"
-                           placeholder="Например: Математика"
-                           value="{{ form_data.get('discipline_name', '') if form_data else '' }}">
-                    <div class="form-hint">Буквы (русские/латинские), цифры, пробелы (макс. 100 символов)</div>
+                    <input type="text" id="discipline_id" name="discipline_id"
+                           placeholder="Например: DISC001"
+                           value="{{ form_data.get('discipline_id', '') if form_data else '' }}">
+                    <div class="form-hint">Уникальный идентификатор дисциплины</div>
                 </div>
 
-                <button type="submit" id="submitBtn">Создать дисциплину</button>
+                <div class="form-group">
+                    <label for="discipline_name" class="required">
+                        <i class="fas fa-graduation-cap"></i> Название дисциплины
+                    </label>
+                    <input type="text" id="discipline_name" name="discipline_name"
+                           placeholder="Введите название дисциплины"
+                           value="{{ form_data.get('discipline_name', '') if form_data else '' }}">
+                    <div class="form-hint">Полное название дисциплины</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pck" class="required">
+                        <i class="fas fa-folder"></i> ПЦК
+                    </label>
+                    <div class="select-wrapper">
+                        <select id="pck" name="pck" required>
+                            <option value="" disabled {% if not form_data or not form_data.get('pck') %}selected{% endif %}>Выберите ПЦК</option>
+                            {% for pck in pck_list %}
+                                <option value="{{ pck.id }}"
+                                    {% if form_data and form_data.get('pck')|int == pck.id %}selected{% endif %}>
+                                    {{ pck.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                    <div class="form-hint">Выберите предметно-цикловую комиссию</div>
+                </div>
+
+                <button type="submit" id="submitBtn">Добавить дисциплину</button>
             </form>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const disciplineNameInput = document.getElementById('discipline_name');
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (disciplineNameInput) {
-                disciplineNameInput.addEventListener('input', function(e) {
-                    if (e.target.value.length > 100) {
-                        e.target.value = e.target.value.substring(0, 100);
-                    }
-                });
-            }
-
-            if (submitBtn) {
-                submitBtn.addEventListener('click', function(e) {
-                    const disciplineName = disciplineNameInput ? disciplineNameInput.value.trim() : '';
-
-                    let errors = [];
-
-                    if (!disciplineName) {
-                        errors.push('Пожалуйста, укажите название дисциплины');
-                    } else if (disciplineName.length > 100) {
-                        errors.push('Название дисциплины не может быть длиннее 100 символов');
-                    }
-
-                    if (errors.length > 0) {
-                        e.preventDefault();
-                        alert(errors.join('\n'));
-                    }
-                });
-            }
-        });
-    </script>
-    {% endif %}
+{% endif %}
 
     <!-- УЧЕБНЫЕ ГОДА -->
     {% if funck == 'edit_years' %}
@@ -395,50 +388,38 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="id_teacher" class="required">
+                        <div class="form-group search-group">
+                            <label for="teacher_search" class="required">
                                 <i class="fas fa-chalkboard-teacher"></i> Преподаватель
                             </label>
-                            <div class="select-wrapper">
-                                <select id="id_teacher" name="id_teacher" required>
-                                    <option value="" disabled selected>Выберите преподавателя</option>
-                                    {% for teacher in teachers %}
-                                        <option value="{{ teacher.id_user }}">{{ teacher.full_name }}</option>
-                                    {% endfor %}
-                                </select>
-                                <i class="fas fa-chevron-down select-arrow"></i>
+                            <div class="search-wrapper">
+                                <input type="text" id="teacher_search" placeholder="Введите имя преподавателя..." autocomplete="off">
+                                <input type="hidden" id="id_teacher" name="id_teacher" required>
+                                <div class="search-results" id="teacher_results"></div>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="id_group" class="required">
+                        <div class="form-group search-group">
+                            <label for="group_search" class="required">
                                 <i class="fas fa-users"></i> Группа
                             </label>
-                            <div class="select-wrapper">
-                                <select id="id_group" name="id_group" required>
-                                    <option value="" disabled selected>Выберите группу</option>
-                                    {% for group in groups %}
-                                        <option value="{{ group.id_group }}">{{ group.id_group }}</option>
-                                    {% endfor %}
-                                </select>
-                                <i class="fas fa-chevron-down select-arrow"></i>
+                            <div class="search-wrapper">
+                                <input type="text" id="group_search" placeholder="Введите номер группы..." autocomplete="off">
+                                <input type="hidden" id="id_group" name="id_group" required>
+                                <div class="search-results" id="group_results"></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="id_discipline" class="required">
+                        <div class="form-group search-group">
+                            <label for="discipline_search" class="required">
                                 <i class="fas fa-book"></i> Дисциплина
                             </label>
-                            <div class="select-wrapper">
-                                <select id="id_discipline" name="id_discipline" required>
-                                    <option value="" disabled selected>Выберите дисциплину</option>
-                                    {% for discipline in disciplines %}
-                                        <option value="{{ discipline.id_discipline }}">{{ discipline.discipline_name }}</option>
-                                    {% endfor %}
-                                </select>
-                                <i class="fas fa-chevron-down select-arrow"></i>
+                            <div class="search-wrapper">
+                                <input type="text" id="discipline_search" placeholder="Введите название дисциплины..." autocomplete="off">
+                                <input type="hidden" id="id_discipline" name="id_discipline" required>
+                                <div class="search-results" id="discipline_results"></div>
                             </div>
                         </div>
 
@@ -782,13 +763,15 @@
     font-size: 14px;
 }
 
-.form-group input {
+.form-group input[type="number"],
+.form-group input[type="text"] {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid #dee2e6;
     border-radius: 6px;
     font-size: 14px;
     transition: all 0.2s;
+    background: white;
 }
 
 .form-group input:focus {
@@ -845,6 +828,95 @@
     border-top: 1px dashed #dee2e6;
 }
 
+/* Контейнер для поиска */
+.search-group {
+    position: relative;
+}
+
+.search-wrapper {
+    position: relative;
+}
+
+.search-wrapper input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
+    background: white;
+}
+
+.search-wrapper input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(77, 195, 240, 0.1);
+}
+
+/* Список результатов поиска */
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 1000;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-results .result-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.search-results .result-item:last-child {
+    border-bottom: none;
+}
+
+.search-results .result-item:hover {
+    background: #f0f7ff;
+}
+
+.search-results .result-item .highlight {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.search-results .result-item .sub-info {
+    font-size: 12px;
+    color: #6c757d;
+    margin-left: 8px;
+}
+
+.search-results .no-results {
+    padding: 10px 12px;
+    color: #6c757d;
+    text-align: center;
+    font-size: 14px;
+}
+
+.search-wrapper input[type="text"].valid {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.search-wrapper input[type="text"].invalid {
+    border-color: #dc3545;
+    background: #fff8f8;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
     .card-header {
@@ -876,11 +948,211 @@
         padding: 14px 20px;
         min-width: auto;
     }
+
+    .search-results {
+        max-height: 150px;
+    }
 }
 </style>
-
 <script>
-    // Функция обновления информации о неделях (только для отображения)
+    // Данные для поиска (передаются из Jinja)
+    const teachersData = [
+        {% for teacher in teachers %}
+            { id: "{{ teacher.id_user }}", name: "{{ teacher.full_name }}" },
+        {% endfor %}
+    ];
+
+    const groupsData = [
+        {% for group in groups %}
+            { id: "{{ group.id_group }}", name: "{{ group.id_group }}" },
+        {% endfor %}
+    ];
+
+    const disciplinesData = [
+        {% for discipline in disciplines %}
+            { id: "{{ discipline.id_discipline }}", name: "{{ discipline.discipline_name }}" },
+        {% endfor %}
+    ];
+
+    // Универсальная функция для поиска
+    function createSearchHandler(inputId, resultsId, hiddenId, data, displayField) {
+        const input = document.getElementById(inputId);
+        const results = document.getElementById(resultsId);
+        const hidden = document.getElementById(hiddenId);
+
+        if (!input || !results || !hidden) return;
+
+        let selectedIndex = -1;
+        let currentResults = [];
+
+        function renderResults(filteredData, searchTerm) {
+            results.innerHTML = '';
+            results.classList.remove('active');
+
+            if (filteredData.length === 0 && searchTerm.length > 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'no-results';
+                noResults.textContent = 'Ничего не найдено';
+                results.appendChild(noResults);
+                results.classList.add('active');
+                return;
+            }
+
+            if (searchTerm.length === 0) {
+                return;
+            }
+
+            filteredData.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                const displayValue = item[displayField];
+                const matchIndex = displayValue.toLowerCase().indexOf(searchTerm.toLowerCase());
+
+                if (matchIndex !== -1) {
+                    const before = displayValue.substring(0, matchIndex);
+                    const match = displayValue.substring(matchIndex, matchIndex + searchTerm.length);
+                    const after = displayValue.substring(matchIndex + searchTerm.length);
+                    div.innerHTML = `
+                        <span>${before}<span class="highlight">${match}</span>${after}</span>
+                        ${item.subInfo ? `<span class="sub-info">${item.subInfo}</span>` : ''}
+                    `;
+                } else {
+                    div.textContent = displayValue;
+                }
+
+                div.dataset.index = index;
+                div.addEventListener('click', function() {
+                    selectItem(index);
+                });
+
+                results.appendChild(div);
+            });
+
+            currentResults = filteredData;
+            results.classList.add('active');
+        }
+
+        function selectItem(index) {
+            const item = currentResults[index];
+            if (!item) return;
+
+            input.value = item[displayField];
+            hidden.value = item.id;
+            results.classList.remove('active');
+            input.classList.remove('invalid');
+            input.classList.add('valid');
+            selectedIndex = -1;
+        }
+
+        input.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            hidden.value = '';
+            input.classList.remove('valid', 'invalid');
+
+            if (searchTerm.length === 0) {
+                results.classList.remove('active');
+                return;
+            }
+
+            const filtered = data.filter(item =>
+                item[displayField].toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            renderResults(filtered, searchTerm);
+            selectedIndex = -1;
+        });
+
+        input.addEventListener('keydown', function(e) {
+            const items = results.querySelectorAll('.result-item');
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (items.length > 0) {
+                    selectedIndex = (selectedIndex + 1) % items.length;
+                    items.forEach((item, i) => {
+                        item.style.background = i === selectedIndex ? '#f0f7ff' : '';
+                    });
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (items.length > 0) {
+                    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                    items.forEach((item, i) => {
+                        item.style.background = i === selectedIndex ? '#f0f7ff' : '';
+                    });
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && selectedIndex < items.length) {
+                    items[selectedIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                results.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!results.contains(e.target) && e.target !== input) {
+                results.classList.remove('active');
+            }
+        });
+
+        // Сохраняем выбранное значение при потере фокуса
+        input.addEventListener('blur', function() {
+            setTimeout(() => {
+                if (hidden.value && input.value) {
+                    const isValid = data.some(item =>
+                        item[displayField] === input.value && item.id === hidden.value
+                    );
+                    if (isValid) {
+                        input.classList.add('valid');
+                        input.classList.remove('invalid');
+                    } else {
+                        input.classList.add('invalid');
+                        input.classList.remove('valid');
+                        hidden.value = '';
+                    }
+                } else if (input.value) {
+                    input.classList.add('invalid');
+                    input.classList.remove('valid');
+                    hidden.value = '';
+                }
+            }, 200);
+        });
+    }
+
+    // Инициализация поиска для каждого поля
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация поиска для преподавателей
+        createSearchHandler('teacher_search', 'teacher_results', 'id_teacher', teachersData, 'name');
+
+        // Инициализация поиска для групп
+        createSearchHandler('group_search', 'group_results', 'id_group', groupsData, 'name');
+
+        // Инициализация поиска для дисциплин
+        createSearchHandler('discipline_search', 'discipline_results', 'id_discipline', disciplinesData, 'name');
+
+        // Остальные функции из вашего кода
+        const yearSelect = document.getElementById('id_year');
+        if (yearSelect) {
+            yearSelect.addEventListener('change', updateWeeksInfo);
+            if (yearSelect.value) {
+                updateWeeksInfo();
+            }
+        }
+
+        const numberInputs = document.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.value < 0) this.value = 0;
+            });
+            input.addEventListener('input', function() {
+                if (this.value < 0) this.value = 0;
+            });
+        });
+    });
+
+    // Функция обновления информации о неделях
     function updateWeeksInfo() {
         const yearSelect = document.getElementById('id_year');
         const selectedOption = yearSelect.options[yearSelect.selectedIndex];
@@ -924,28 +1196,6 @@
 
         return true;
     }
-
-    // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', function() {
-        const yearSelect = document.getElementById('id_year');
-
-        if (yearSelect) {
-            yearSelect.addEventListener('change', updateWeeksInfo);
-            if (yearSelect.value) {
-                updateWeeksInfo();
-            }
-        }
-
-        const numberInputs = document.querySelectorAll('input[type="number"]');
-        numberInputs.forEach(input => {
-            input.addEventListener('change', function() {
-                if (this.value < 0) this.value = 0;
-            });
-            input.addEventListener('input', function() {
-                if (this.value < 0) this.value = 0;
-            });
-        });
-    });
 </script>
 {% endif %}
 

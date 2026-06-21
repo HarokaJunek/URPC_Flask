@@ -422,7 +422,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ url_for('edit_info', funck='edit_nagruzka', id_load=load.id_load) }}" class="edit-form">
+        <form method="POST" action="{{ url_for('edit_info', funck='edit_nagruzka', id_load=load.id_load) }}" class="edit-form" onsubmit="return validateForm()">
             <!-- Основная информация -->
             <div class="form-section">
                 <h3><i class="fas fa-info-circle"></i> Основная информация</h3>
@@ -438,11 +438,7 @@
                                     <option value="{{ year.id_year }}"
                                         data-winter-week="{{ year.winter_week }}"
                                         data-summer-week="{{ year.summer_week }}"
-                                        {% if form_data %}
-                                            {% if form_data.get('id_year')|int == year.id_year %}selected{% endif %}
-                                        {% else %}
-                                            {% if load.id_year == year.id_year %}selected{% endif %}
-                                        {% endif %}>
+                                        {% if form_data.id_year|int == year.id_year %}selected{% endif %}>
                                         {{ year.year_name }}
                                     </option>
                                 {% endfor %}
@@ -468,75 +464,48 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="id_teacher" class="required">
+                    <div class="form-group search-group">
+                        <label for="teacher_search" class="required">
                             <i class="fas fa-chalkboard-teacher"></i> Преподаватель
                         </label>
-                        <div class="select-wrapper">
-                            <select id="id_teacher" name="id_teacher" required>
-                                <option value="" disabled>Выберите преподавателя</option>
-                                {% for teacher in teachers %}
-                                    <option value="{{ teacher.id_user }}"
-                                        {% if form_data %}
-                                            {% if form_data.get('id_teacher')|int == teacher.id_user %}selected{% endif %}
-                                        {% else %}
-                                            {% if load.id_teacher == teacher.id_user %}selected{% endif %}
-                                        {% endif %}>
-                                        {{ teacher.full_name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
+                        <div class="search-wrapper">
+                            <input type="text" id="teacher_search" placeholder="Введите имя преподавателя..." autocomplete="off"
+                                   value="{{ form_data.teacher_name or '' }}">
+                            <input type="hidden" id="id_teacher" name="id_teacher"
+                                   value="{{ form_data.id_teacher or '' }}" required>
+                            <div class="search-results" id="teacher_results"></div>
                         </div>
-                        <div class="form-hint">Выберите преподавателя</div>
+                        <div class="form-hint">Начните вводить ФИО преподавателя</div>
                     </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_group" class="required">
+                    <div class="form-group search-group">
+                        <label for="group_search" class="required">
                             <i class="fas fa-users"></i> Группа
                         </label>
-                        <div class="select-wrapper">
-                            <select id="id_group" name="id_group" required>
-                                <option value="" disabled>Выберите группу</option>
-                                {% for group in groups %}
-                                    <option value="{{ group.id_group }}"
-                                        {% if form_data %}
-                                            {% if form_data.get('id_group') == group.id_group %}selected{% endif %}
-                                        {% else %}
-                                            {% if load.id_group == group.id_group %}selected{% endif %}
-                                        {% endif %}>
-                                        {{ group.id_group }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
+                        <div class="search-wrapper">
+                            <input type="text" id="group_search" placeholder="Введите номер группы..." autocomplete="off"
+                                   value="{{ form_data.group_name or '' }}">
+                            <input type="hidden" id="id_group" name="id_group"
+                                   value="{{ form_data.id_group or '' }}" required>
+                            <div class="search-results" id="group_results"></div>
                         </div>
-                        <div class="form-hint">Выберите группу</div>
+                        <div class="form-hint">Начните вводить номер группы</div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="id_discipline" class="required">
+                    <div class="form-group search-group">
+                        <label for="discipline_search" class="required">
                             <i class="fas fa-book"></i> Дисциплина
                         </label>
-                        <div class="select-wrapper">
-                            <select id="id_discipline" name="id_discipline" required>
-                                <option value="" disabled>Выберите дисциплину</option>
-                                {% for discipline in disciplines %}
-                                    <option value="{{ discipline.id_discipline }}"
-                                        {% if form_data %}
-                                            {% if form_data.get('id_discipline') == discipline.id_discipline %}selected{% endif %}
-                                        {% else %}
-                                            {% if load.id_discipline == discipline.id_discipline %}selected{% endif %}
-                                        {% endif %}>
-                                        {{ discipline.discipline_name }} ({{ discipline.id_discipline }})
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
+                        <div class="search-wrapper">
+                            <input type="text" id="discipline_search" placeholder="Введите название дисциплины..." autocomplete="off"
+                                   value="{{ form_data.discipline_name or '' }}">
+                            <input type="hidden" id="id_discipline" name="id_discipline"
+                                   value="{{ form_data.id_discipline or '' }}" required>
+                            <div class="search-results" id="discipline_results"></div>
                         </div>
-                        <div class="form-hint">Выберите дисциплину</div>
+                        <div class="form-hint">Начните вводить название дисциплины</div>
                     </div>
 
                     <div class="form-group">
@@ -548,11 +517,7 @@
                                 <option value="" disabled>Выберите ФГОС</option>
                                 {% for fgos in fgos_list %}
                                     <option value="{{ fgos.id_fgos }}"
-                                        {% if form_data %}
-                                            {% if form_data.get('id_fgos')|int == fgos.id_fgos %}selected{% endif %}
-                                        {% else %}
-                                            {% if load.id_fgos == fgos.id_fgos %}selected{% endif %}
-                                        {% endif %}>
+                                        {% if form_data.id_fgos|int == fgos.id_fgos %}selected{% endif %}>
                                         {{ fgos.name }}
                                     </option>
                                 {% endfor %}
@@ -567,19 +532,19 @@
                     <div class="form-group">
                         <label for="exam">Экзамен</label>
                         <input type="number" id="exam" name="exam"
-                               value="{{ form_data.get('exam', load.exam) if form_data else load.exam }}"
+                               value="{{ form_data.exam or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="credit">Зачёт</label>
                         <input type="number" id="credit" name="credit"
-                               value="{{ form_data.get('credit', load.credit) if form_data else load.credit }}"
+                               value="{{ form_data.credit or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="diff_credit">Дифференцированный зачёт</label>
                         <input type="number" id="diff_credit" name="diff_credit"
-                               value="{{ form_data.get('diff_credit', load.diff_credit) if form_data else load.diff_credit }}"
+                               value="{{ form_data.diff_credit or 0 }}"
                                min="0">
                     </div>
                 </div>
@@ -593,14 +558,13 @@
                     <div class="form-group">
                         <label for="independent_winter">Самостоятельная работа</label>
                         <input type="number" id="independent_winter" name="independent_winter"
-                               value="{{ form_data.get('independent_winter', load.independent_winter) if form_data else load.independent_winter }}"
+                               value="{{ form_data.independent_winter or 0 }}"
                                min="0">
-
                     </div>
                     <div class="form-group">
                         <label for="consultations_winter">Консультации</label>
                         <input type="number" id="consultations_winter" name="consultations_winter"
-                               value="{{ form_data.get('consultations_winter', load.consultations_winter) if form_data else load.consultations_winter }}"
+                               value="{{ form_data.consultations_winter or 0 }}"
                                min="0">
                     </div>
                 </div>
@@ -608,19 +572,19 @@
                     <div class="form-group">
                         <label for="lectures_winter">Лекции</label>
                         <input type="number" id="lectures_winter" name="lectures_winter"
-                               value="{{ form_data.get('lectures_winter', load.lectures_winter) if form_data else load.lectures_winter }}"
+                               value="{{ form_data.lectures_winter or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="practice_winter">Практические занятия</label>
                         <input type="number" id="practice_winter" name="practice_winter"
-                               value="{{ form_data.get('practice_winter', load.practice_winter) if form_data else load.practice_winter }}"
+                               value="{{ form_data.practice_winter or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="labs_winter">Лабораторные занятия</label>
                         <input type="number" id="labs_winter" name="labs_winter"
-                               value="{{ form_data.get('labs_winter', load.labs_winter) if form_data else load.labs_winter }}"
+                               value="{{ form_data.labs_winter or 0 }}"
                                min="0">
                     </div>
                 </div>
@@ -628,19 +592,19 @@
                     <div class="form-group">
                         <label for="seminars_winter">Семинарские занятия</label>
                         <input type="number" id="seminars_winter" name="seminars_winter"
-                               value="{{ form_data.get('seminars_winter', load.seminars_winter) if form_data else load.seminars_winter }}"
+                               value="{{ form_data.seminars_winter or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="course_project_winter">Курсовой проект</label>
                         <input type="number" id="course_project_winter" name="course_project_winter"
-                               value="{{ form_data.get('course_project_winter', load.course_project_winter) if form_data else load.course_project_winter }}"
+                               value="{{ form_data.course_project_winter or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="attestation_winter">Аттестация</label>
                         <input type="number" id="attestation_winter" name="attestation_winter"
-                               value="{{ form_data.get('attestation_winter', load.attestation_winter) if form_data else load.attestation_winter }}"
+                               value="{{ form_data.attestation_winter or 0 }}"
                                min="0">
                     </div>
                 </div>
@@ -654,13 +618,13 @@
                     <div class="form-group">
                         <label for="independent_summer">Самостоятельная работа</label>
                         <input type="number" id="independent_summer" name="independent_summer"
-                               value="{{ form_data.get('independent_summer', load.independent_summer) if form_data else load.independent_summer }}"
+                               value="{{ form_data.independent_summer or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="consultations_summer">Консультации</label>
                         <input type="number" id="consultations_summer" name="consultations_summer"
-                               value="{{ form_data.get('consultations_summer', load.consultations_summer) if form_data else load.consultations_summer }}"
+                               value="{{ form_data.consultations_summer or 0 }}"
                                min="0">
                     </div>
                 </div>
@@ -668,19 +632,19 @@
                     <div class="form-group">
                         <label for="lectures_summer">Лекции</label>
                         <input type="number" id="lectures_summer" name="lectures_summer"
-                               value="{{ form_data.get('lectures_summer', load.lectures_summer) if form_data else load.lectures_summer }}"
+                               value="{{ form_data.lectures_summer or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="practice_summer">Практические занятия</label>
                         <input type="number" id="practice_summer" name="practice_summer"
-                               value="{{ form_data.get('practice_summer', load.practice_summer) if form_data else load.practice_summer }}"
+                               value="{{ form_data.practice_summer or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="labs_summer">Лабораторные занятия</label>
                         <input type="number" id="labs_summer" name="labs_summer"
-                               value="{{ form_data.get('labs_summer', load.labs_summer) if form_data else load.labs_summer }}"
+                               value="{{ form_data.labs_summer or 0 }}"
                                min="0">
                     </div>
                 </div>
@@ -688,19 +652,19 @@
                     <div class="form-group">
                         <label for="seminars_summer">Семинарские занятия</label>
                         <input type="number" id="seminars_summer" name="seminars_summer"
-                               value="{{ form_data.get('seminars_summer', load.seminars_summer) if form_data else load.seminars_summer }}"
+                               value="{{ form_data.seminars_summer or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="course_project_summer">Курсовой проект</label>
                         <input type="number" id="course_project_summer" name="course_project_summer"
-                               value="{{ form_data.get('course_project_summer', load.course_project_summer) if form_data else load.course_project_summer }}"
+                               value="{{ form_data.course_project_summer or 0 }}"
                                min="0">
                     </div>
                     <div class="form-group">
                         <label for="attestation_summer">Аттестация</label>
                         <input type="number" id="attestation_summer" name="attestation_summer"
-                               value="{{ form_data.get('attestation_summer', load.attestation_summer) if form_data else load.attestation_summer }}"
+                               value="{{ form_data.attestation_summer or 0 }}"
                                min="0">
                     </div>
                 </div>
@@ -717,7 +681,7 @@
 </div>
 
 <style>
-/* Минималистичный стиль для информации о неделях */
+/* Существующие стили */
 .weeks-mini-info {
     display: flex;
     align-items: center;
@@ -760,6 +724,95 @@
     background: #dee2e6;
 }
 
+/* Новые стили для поиска */
+.search-group {
+    position: relative;
+}
+
+.search-wrapper {
+    position: relative;
+}
+
+.search-wrapper input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
+    background: white;
+}
+
+.search-wrapper input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(77, 195, 240, 0.1);
+}
+
+/* Список результатов поиска */
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 1000;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-results .result-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.search-results .result-item:last-child {
+    border-bottom: none;
+}
+
+.search-results .result-item:hover {
+    background: #f0f7ff;
+}
+
+.search-results .result-item .highlight {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.search-results .result-item .sub-info {
+    font-size: 12px;
+    color: #6c757d;
+    margin-left: 8px;
+}
+
+.search-results .no-results {
+    padding: 10px 12px;
+    color: #6c757d;
+    text-align: center;
+    font-size: 14px;
+}
+
+.search-wrapper input[type="text"].valid {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.search-wrapper input[type="text"].invalid {
+    border-color: #dc3545;
+    background: #fff8f8;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
     .weeks-mini-info {
@@ -770,10 +823,32 @@
     .week-divider {
         display: none;
     }
+    .search-results {
+        max-height: 150px;
+    }
 }
 </style>
 
 <script>
+    // Данные для поиска
+    const teachersData = [
+        {% for teacher in teachers %}
+            { id: "{{ teacher.id_user }}", name: "{{ teacher.full_name }}" },
+        {% endfor %}
+    ];
+
+    const groupsData = [
+        {% for group in groups %}
+            { id: "{{ group.id_group }}", name: "{{ group.id_group }}" },
+        {% endfor %}
+    ];
+
+    const disciplinesData = [
+        {% for discipline in disciplines %}
+            { id: "{{ discipline.id_discipline }}", name: "{{ discipline.discipline_name }}" },
+        {% endfor %}
+    ];
+
     function updateWeeksInfo() {
         const yearSelect = document.getElementById('id_year');
         const selectedOption = yearSelect.options[yearSelect.selectedIndex];
@@ -792,7 +867,216 @@
         }
     }
 
+    // Универсальная функция для поиска
+    function createSearchHandler(inputId, resultsId, hiddenId, data, displayField) {
+        const input = document.getElementById(inputId);
+        const results = document.getElementById(resultsId);
+        const hidden = document.getElementById(hiddenId);
+
+        if (!input || !results || !hidden) {
+            console.warn('Element not found:', inputId, resultsId, hiddenId);
+            return;
+        }
+
+        let selectedIndex = -1;
+        let currentResults = [];
+
+        function renderResults(filteredData, searchTerm) {
+            results.innerHTML = '';
+            results.classList.remove('active');
+
+            if (filteredData.length === 0 && searchTerm.length > 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'no-results';
+                noResults.textContent = 'Ничего не найдено';
+                results.appendChild(noResults);
+                results.classList.add('active');
+                return;
+            }
+
+            if (searchTerm.length === 0) {
+                return;
+            }
+
+            filteredData.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                const displayValue = item[displayField] || '';
+                const searchTermLower = searchTerm.toLowerCase();
+                const displayValueLower = displayValue.toLowerCase();
+                const matchIndex = displayValueLower.indexOf(searchTermLower);
+
+                if (matchIndex !== -1) {
+                    const before = displayValue.substring(0, matchIndex);
+                    const match = displayValue.substring(matchIndex, matchIndex + searchTerm.length);
+                    const after = displayValue.substring(matchIndex + searchTerm.length);
+                    div.innerHTML = `
+                        <span>${before}<span class="highlight">${match}</span>${after}</span>
+                        ${item.subInfo ? `<span class="sub-info">${item.subInfo}</span>` : ''}
+                    `;
+                } else {
+                    div.textContent = displayValue;
+                }
+
+                div.dataset.index = index;
+                div.addEventListener('click', function() {
+                    selectItem(index);
+                });
+
+                results.appendChild(div);
+            });
+
+            currentResults = filteredData;
+            results.classList.add('active');
+        }
+
+        function selectItem(index) {
+            const item = currentResults[index];
+            if (!item) return;
+
+            input.value = item[displayField];
+            hidden.value = item.id;
+            results.classList.remove('active');
+            input.classList.remove('invalid');
+            input.classList.add('valid');
+            selectedIndex = -1;
+        }
+
+        // Очищаем обработчики
+        input.removeEventListener('input', handleInput);
+        input.removeEventListener('keydown', handleKeydown);
+        input.removeEventListener('blur', handleBlur);
+
+        function handleInput() {
+            const searchTerm = this.value.trim();
+            hidden.value = '';
+            input.classList.remove('valid', 'invalid');
+
+            if (searchTerm.length === 0) {
+                results.classList.remove('active');
+                return;
+            }
+
+            const filtered = data.filter(item => {
+                const value = (item[displayField] || '').toLowerCase();
+                return value.includes(searchTerm.toLowerCase());
+            });
+
+            renderResults(filtered, searchTerm);
+            selectedIndex = -1;
+        }
+
+        function handleKeydown(e) {
+            const items = results.querySelectorAll('.result-item');
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (items.length > 0) {
+                    selectedIndex = (selectedIndex + 1) % items.length;
+                    items.forEach((item, i) => {
+                        item.style.background = i === selectedIndex ? '#f0f7ff' : '';
+                    });
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (items.length > 0) {
+                    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                    items.forEach((item, i) => {
+                        item.style.background = i === selectedIndex ? '#f0f7ff' : '';
+                    });
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && selectedIndex < items.length) {
+                    items[selectedIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                results.classList.remove('active');
+            }
+        }
+
+        function handleBlur() {
+            setTimeout(() => {
+                if (hidden.value && input.value) {
+                    const isValid = data.some(item =>
+                        (item[displayField] || '') === input.value && item.id === hidden.value
+                    );
+                    if (isValid) {
+                        input.classList.add('valid');
+                        input.classList.remove('invalid');
+                    } else {
+                        input.classList.add('invalid');
+                        input.classList.remove('valid');
+                        hidden.value = '';
+                    }
+                } else if (input.value) {
+                    input.classList.add('invalid');
+                    input.classList.remove('valid');
+                    hidden.value = '';
+                }
+            }, 200);
+        }
+
+        input.addEventListener('input', handleInput);
+        input.addEventListener('keydown', handleKeydown);
+        input.addEventListener('blur', handleBlur);
+
+        // Закрытие результатов при клике вне
+        document.addEventListener('click', function(e) {
+            if (!results.contains(e.target) && e.target !== input) {
+                results.classList.remove('active');
+            }
+        });
+    }
+
+    function validateForm() {
+        const id_teacher = document.getElementById('id_teacher').value;
+        const id_group = document.getElementById('id_group').value;
+        const id_discipline = document.getElementById('id_discipline').value;
+        const id_year = document.getElementById('id_year').value;
+        const id_fgos = document.getElementById('id_fgos').value;
+
+        let errors = [];
+
+        if (!id_year) errors.push('Выберите год обучения');
+        if (!id_teacher) errors.push('Выберите преподавателя');
+        if (!id_group) errors.push('Выберите группу');
+        if (!id_discipline) errors.push('Выберите дисциплину');
+        if (!id_fgos) errors.push('Выберите ФГОС');
+
+        if (errors.length > 0) {
+            alert('Пожалуйста, исправьте следующие ошибки:\n' + errors.join('\n'));
+            return false;
+        }
+
+        return true;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        // ✅ Инициализация поиска с восстановлением значений
+        createSearchHandler('teacher_search', 'teacher_results', 'id_teacher', teachersData, 'name');
+        createSearchHandler('group_search', 'group_results', 'id_group', groupsData, 'name');
+        createSearchHandler('discipline_search', 'discipline_results', 'id_discipline', disciplinesData, 'name');
+
+        // ✅ Проверяем, есть ли уже выбранные значения и помечаем их как валидные
+        const teacherInput = document.getElementById('teacher_search');
+        const teacherHidden = document.getElementById('id_teacher');
+        if (teacherHidden.value && teacherInput.value) {
+            teacherInput.classList.add('valid');
+        }
+
+        const groupInput = document.getElementById('group_search');
+        const groupHidden = document.getElementById('id_group');
+        if (groupHidden.value && groupInput.value) {
+            groupInput.classList.add('valid');
+        }
+
+        const disciplineInput = document.getElementById('discipline_search');
+        const disciplineHidden = document.getElementById('id_discipline');
+        if (disciplineHidden.value && disciplineInput.value) {
+            disciplineInput.classList.add('valid');
+        }
+
         // Инициализация информации о неделях при загрузке
         updateWeeksInfo();
 
@@ -807,8 +1091,12 @@
             });
         });
 
-        // Логирование для отладки
-        console.log('academic_years:', {{ academic_years|tojson|safe }});
+        // Отладка
+        console.log('=== EDIT FORM DATA ===');
+        console.log('Form data:', {{ form_data|tojson|safe }});
+        console.log('Teachers:', teachersData);
+        console.log('Groups:', groupsData);
+        console.log('Disciplines:', disciplinesData);
     });
 </script>
 {% endif %}
@@ -854,33 +1142,24 @@
         // Валидация названия учебного года
         const yearNameInput = document.getElementById('yearName');
         if (yearNameInput) {
-            // Валидация при вводе
             yearNameInput.addEventListener('input', function(e) {
-                // Ограничение длины
                 if (this.value.length > 50) {
                     this.value = this.value.substring(0, 50);
                 }
-
-                // Убираем красную рамку при начале ввода
                 this.style.borderColor = '';
                 this.setCustomValidity('');
             });
 
-            // Валидация при потере фокуса
             yearNameInput.addEventListener('blur', function(e) {
                 const value = this.value.trim();
-
-                // Проверка, что поле не пустое
                 if (value === '') {
                     this.style.borderColor = '#dc3545';
                     this.setCustomValidity('Название учебного года не может быть пустым');
                 }
-                // Проверка формата ГГГГ-ГГГГ
                 else if (!/^\d{4}-\d{4}$/.test(value)) {
                     this.style.borderColor = '#dc3545';
                     this.setCustomValidity('Формат должен быть: ГГГГ-ГГГГ (например, 2023-2024)');
                 }
-                // Проверка, что первый год меньше второго
                 else {
                     const years = value.split('-');
                     const startYear = parseInt(years[0]);
@@ -899,15 +1178,11 @@
                 }
             });
 
-            // Автоматическое форматирование при вводе
             yearNameInput.addEventListener('input', function(e) {
                 let value = this.value.replace(/[^\d-]/g, '');
-
-                // Автоматическая вставка дефиса
                 if (value.length === 4 && !value.includes('-')) {
                     value = value + '-';
                 }
-
                 this.value = value;
             });
         }
