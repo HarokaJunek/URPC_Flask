@@ -5150,7 +5150,7 @@ def edit_info():
                         conn.commit()
                         flash('Ведомость сдана!', 'success')
                         conn.close()
-                        return redirect(url_for('load_table', funck='edit_statement', id_statement=id_statement))
+                        return redirect(url_for('load_table', funck='edit_statement', id_statement=id_statement, status=1))
 
                     excused = request.form.get('excused', '')
                     unexcused = request.form.get('unexcused', '')
