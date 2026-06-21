@@ -825,14 +825,17 @@ def export_statement_pdf(id_statement):
     stats_table.drawOn(c, left_margin, y - len(stats_data) * 18)
     
     y -= len(stats_data) * 18 + 20  # сдвигаем ниже таблицы
-    c.drawString(left_margin,y, f"Дата сдачи: {format_date(statement['filled_at'])}")
+    if statement['filled_at']:
+        c.drawString(left_margin, y, f"Дата сдачи: {format_date(statement['filled_at'])}")
+    else:
+        c.drawString(left_margin, y, "Дата сдачи: «___» _____________ 20___г.")
     c.drawString(width/2 + 8,  y, "Преподаватель: ____________________")    
     c.save()
     buffer.seek(0)
     print("PDF сгенерирован, размер:", len(buffer.getvalue()), "байт")
     return send_file(buffer, mimetype='application/pdf',
                      as_attachment=True,
-                     download_name=f'statement_{id_statement}.pdf')
+                     download_name=f'{statement['semester']}_{statement['id_group']}_{statement['discipline_name']}_.pdf')
 
 # Успеваемость (экспорт в pdf)
 def export_report_pdf(group_filter, semester_filter, is_diploma=''):
