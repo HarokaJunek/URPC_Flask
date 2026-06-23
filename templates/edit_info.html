@@ -1125,6 +1125,34 @@
                         <div class="form-hint">Формат: ГГГГ-ГГГГ (например, 2023-2024)</div>
                     </div>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="winter_week" class="required">
+                            <i class="fas fa-snowflake"></i> Недель в 1 семестре
+                        </label>
+                        <input type="number" id="winter_week" name="winter_week"
+                               placeholder="Например: 17"
+                               min="1" max="30"
+                               value="{{ form_data.get('winter_week', academic_year.winter_week) if form_data else academic_year.winter_week }}"
+                               required>
+                        <div class="form-hint">Количество учебных недель в 1 семестре (от 1 до 30)</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="summer_week" class="required">
+                            <i class="fas fa-sun"></i> Недель во 2 семестре
+                        </label>
+                        <input type="number" id="summer_week" name="summer_week"
+                               placeholder="Например: 17"
+                               min="1" max="30"
+                               value="{{ form_data.get('summer_week', academic_year.summer_week) if form_data else academic_year.summer_week }}"
+                               required>
+                        <div class="form-hint">Количество учебных недель во 2 семестре (от 1 до 30)</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Кнопки действий -->
@@ -1141,6 +1169,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Валидация названия учебного года
         const yearNameInput = document.getElementById('yearName');
+        const winterWeekInput = document.getElementById('winter_week');
+        const summerWeekInput = document.getElementById('summer_week');
+        const submitBtn = document.querySelector('button[type="submit"]');
+
         if (yearNameInput) {
             yearNameInput.addEventListener('input', function(e) {
                 if (this.value.length > 50) {
@@ -1184,6 +1216,40 @@
                     value = value + '-';
                 }
                 this.value = value;
+            });
+        }
+
+        // Валидация для полей с неделями
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                const yearName = yearNameInput ? yearNameInput.value.trim() : '';
+                const winterWeek = winterWeekInput ? winterWeekInput.value : '';
+                const summerWeek = summerWeekInput ? summerWeekInput.value : '';
+
+                let errors = [];
+
+                if (!yearName) {
+                    errors.push('Пожалуйста, укажите учебный год');
+                } else if (!/^\d{4}-\d{4}$/.test(yearName)) {
+                    errors.push('Неверный формат учебного года. Пример: 2024-2025');
+                }
+
+                if (!winterWeek) {
+                    errors.push('Пожалуйста, укажите количество недель в 1 семестре');
+                } else if (parseInt(winterWeek) < 1 || parseInt(winterWeek) > 30) {
+                    errors.push('Количество недель в 1 семестре должно быть от 1 до 30');
+                }
+
+                if (!summerWeek) {
+                    errors.push('Пожалуйста, укажите количество недель во 2 семестре');
+                } else if (parseInt(summerWeek) < 1 || parseInt(summerWeek) > 30) {
+                    errors.push('Количество недель во 2 семестре должно быть от 1 до 30');
+                }
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    alert(errors.join('\n'));
+                }
             });
         }
     });

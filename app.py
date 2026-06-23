@@ -4444,7 +4444,7 @@ def edit_info():
 
                 conn = get_db_connection()
                 academic_year = conn.execute('''
-                    SELECT id_year, year_name
+                    SELECT id_year, year_name, winter_week, summer_week
                     FROM academic_year
                     WHERE id_year = ?
                 ''', (year_id,)).fetchone()
@@ -4457,10 +4457,13 @@ def edit_info():
                 # Обработка POST запроса
                 if request.method == 'POST':
                     year_name = request.form.get('yearName', '').strip()
+                    winter_week = request.form.get('winter_week', '').strip()
+                    summer_week = request.form.get('summer_week', '').strip()
 
                     # Валидация
                     errors = []
 
+                    # Валидация названия года
                     if not year_name:
                         errors.append('Название учебного года обязательно')
                     elif len(year_name) > 50:
@@ -4475,6 +4478,27 @@ def edit_info():
                             errors.append('Начальный год должен быть меньше конечного')
                         elif end_year - start_year != 1:
                             errors.append('Учебный год должен длиться 1 год (например, 2023-2024)')
+
+                    # Валидация недель
+                    if not winter_week:
+                        errors.append('Пожалуйста, укажите количество недель в 1 семестре')
+                    else:
+                        try:
+                            winter_week_int = int(winter_week)
+                            if winter_week_int < 1 or winter_week_int > 30:
+                                errors.append('Количество недель в 1 семестре должно быть от 1 до 30')
+                        except ValueError:
+                            errors.append('Количество недель в 1 семестре должно быть числом')
+
+                    if not summer_week:
+                        errors.append('Пожалуйста, укажите количество недель во 2 семестре')
+                    else:
+                        try:
+                            summer_week_int = int(summer_week)
+                            if summer_week_int < 1 or summer_week_int > 30:
+                                errors.append('Количество недель во 2 семестре должно быть от 1 до 30')
+                        except ValueError:
+                            errors.append('Количество недель во 2 семестре должно быть числом')
 
                     if errors:
                         for error in errors:
@@ -4502,13 +4526,13 @@ def edit_info():
                                                    is_specialist=session.get('is_specialist', False),
                                                    form_data=request.form)
 
-                        # Обновление записиlelele
+                        # Обновление записи с добавлением недель
                         conn.execute('BEGIN TRANSACTION')
                         conn.execute('''
                             UPDATE academic_year
-                            SET year_name = ?
+                            SET year_name = ?, winter_week = ?, summer_week = ?
                             WHERE id_year = ?
-                        ''', (year_name, year_id))
+                        ''', (year_name, winter_week_int, summer_week_int, year_id))
 
                         conn.commit()
                         flash('Изменения успешно сохранены!', 'success')

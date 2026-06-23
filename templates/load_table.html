@@ -189,6 +189,9 @@
                         <th>Действия</th>
                         <th>ID</th>
                         <th>Годы</th>
+                        <th>1 семестр (недель)</th>
+                        <th>2 семестр (недель)</th>
+                        <th>Всего недель</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -204,10 +207,19 @@
                         </td>
                         <td>{{ academic_year.id_year }}</td>
                         <td>{{ academic_year.year_name }}</td>
+                        <td>{{ academic_year.winter_week if academic_year.winter_week else '-' }}</td>
+                        <td>{{ academic_year.summer_week if academic_year.summer_week else '-' }}</td>
+                        <td>
+                            {% if academic_year.winter_week and academic_year.summer_week %}
+                                {{ academic_year.winter_week + academic_year.summer_week }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="3" style="text-align: center;">Нет данных для отображения</td>
+                        <td colspan="6" style="text-align: center;">Нет данных для отображения</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -659,6 +671,122 @@
 .export-btn i {
     font-size: 16px;
 }
+    .table-scroll-container {
+    max-height: 500px; /* Настройте под нужную высоту */
+    overflow-y: auto;
+    overflow-x: auto;
+    position: relative;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+/* Фиксация шапки таблицы */
+#readable-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Стили для ячеек шапки, чтобы они не меняли фон при прокрутке */
+#readable-table thead th {
+    background: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 101;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Для двойной шапки - фиксируем обе строки */
+#readable-table thead tr:first-child th {
+    top: 0;
+    z-index: 102;
+}
+
+#readable-table thead tr:last-child th {
+    top: 40px; /* Высота первой строки шапки, подстройте под свои значения */
+    z-index: 101;
+}
+
+/* Стили для ячеек с вертикальным текстом */
+#readable-table thead th[style*="writing-mode"] {
+    z-index: 103 !important; /* Чтобы вертикальные заголовки были поверх */
+}
+
+/* Альтернативный вариант с использованием класса для более надежной фиксации */
+.sticky-header th {
+    background: #f8f9fa !important;
+}
+
+/* Для объединенных ячеек (rowspan) */
+#readable-table thead th[rowspan] {
+    background: #f8f9fa;
+}
+
+/* Обертка для таблицы */
+.table-responsive {
+    overflow: visible; /* Убираем старый overflow */
+}
+
+/* Новый контейнер внутри .table-responsive */
+.table-scroll-wrapper {
+    max-height: 70vh; /* 70% от высоты экрана */
+    overflow: auto;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+/* Стили для скроллбара (опционально) */
+.table-scroll-wrapper::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: #c1c7cd;
+    border-radius: 4px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #f0f9ff;
+}
+    #readable-table tbody tr:hover {
+    background-color: #f0f9ff  !important;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* Альтернативный вариант с более заметным выделением */
+#readable-table tbody tr:hover td {
+    background-color: #f0f9ff  !important;
+}
+
+/* Если у строк есть чередование цветов (zebra), чтобы не ломалось */
+#readable-table tbody tr:nth-child(even):hover td {
+    background-color: #f0f9ff  !important;
+}
+
+#readable-table tbody tr:nth-child(odd):hover td {
+    background-color: #f0f9ff  !important;
+}
+
+/* Подсветка строки при клике (активная строка) */
+#readable-table tbody tr.active-row {
+    background-color: #f0f9ff  !important;
+}
+
+#readable-table tbody tr.active-row td {
+    background-color: #f0f9ff  !important;
+}
+
+/* Анимация для плавного перехода */
+#readable-table tbody tr td {
+    transition: background-color 0.15s ease;
+}
 </style>
 
 <div class="table-header">
@@ -685,7 +813,6 @@
                 <input type="hidden" name="discipline" value="{{ discipline_filter or '' }}">
                 <input type="hidden" name="fgos" value="{{ fgos_filter or '' }}">
                 <input type="hidden" name="semester" value="{{ semester_filter or '' }}">
-                <i class="fas fa-search"></i>
             </form>
             {% if search_query %}
                 <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="clear-search">
@@ -762,7 +889,8 @@
 
 <!-- Таблица -->
 <div class="table-responsive">
-    <table class="all-table1" id="readable-table">
+    <div class="table-scroll-wrapper">
+        <table class="all-table1" id="readable-table">
         <thead>
             <tr class="main-name-table">
                 {% if session.is_specialist %}
@@ -844,7 +972,7 @@
             {% endif %}
 
             {# Общая нагрузка преподавателя #}
-            {% set total_teacher_load = winter_with_teacher + summer_with_teacher %}
+            {% set total_teacher_load = (winter_total_hours - independent_winter)  + (summer_total_hours - independent_summer) %}
 
             {# Функция для отображения значения или пустой строки #}
             {% macro show_value(value) -%}
@@ -1328,6 +1456,33 @@ document.addEventListener('DOMContentLoaded', function() {
         discipline: disciplineHidden ? disciplineHidden.value : null,
         group: groupHidden ? groupHidden.value : null,
         year: document.getElementById('filter-year') ? document.getElementById('filter-year').value : null
+    });
+});
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('#readable-table tbody tr');
+
+    rows.forEach(row => {
+        // Подсветка при клике
+        row.addEventListener('click', function(e) {
+            // Убираем подсветку со всех строк
+            document.querySelectorAll('#readable-table tbody tr').forEach(r => {
+                r.classList.remove('active-row');
+            });
+
+            // Добавляем подсветку на текущую строку
+            this.classList.add('active-row');
+        });
+
+        // Подсветка при наведении (уже работает через CSS :hover)
+        // Дополнительно можно добавить эффект при двойном клике
+        row.addEventListener('dblclick', function() {
+            // Например, показать ID записи
+            const id = this.dataset.id;
+            if (id) {
+                console.log('Выбрана запись ID:', id);
+            }
+        });
     });
 });
 </script>
