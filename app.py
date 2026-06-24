@@ -2036,7 +2036,7 @@ def load_table():
                     conn.commit()
                     flash('Сдача ведомости отменена!', 'success')
                     conn.close()
-                    return redirect(url_for('load_table', funck='edit_statement',))
+                    return redirect(url_for('load_table', funck='edit_statement', status = 0))
                 
                 status = request.args.get('status', '')
                 conn = get_db_connection()
@@ -2119,12 +2119,15 @@ def load_table():
                     '''
                     params = [group_filter]
 
-                    if is_diploma:
+                    if is_diploma == "1":
                         query += ' AND statements.is_diploma = 1'
-
-                    if semester_filter:
-                        query += ' AND statements.semester = ?'
-                        params.append(semester_filter)
+                    else:
+                        if semester_filter:
+                            query += ' AND statements.semester = ?'
+                            params.append(semester_filter)
+                        else:
+                            flash('Для формирования отчёта необходимо выбрать группу и семестр.', 'danger')
+                            return redirect(url_for('load_table', funck='edit_report', is_diploma = 0))
 
                     table_info = conn.execute(query, params).fetchall()
                 else:
@@ -3577,8 +3580,8 @@ def add_info():
             try:
                 existing_statement = conn.execute(
                     '''SELECT id_statement FROM statements 
-                    WHERE id_discipline = ? AND id_type = ? AND semester = ?''',
-                    (id_load, id_typeved, semester)
+                    WHERE id_discipline = ? ''',
+                    (id_load, )
                 ).fetchone()
 
                 if existing_statement:
@@ -5372,6 +5375,33 @@ def edit_info():
                 # POST — сохраняем изменения
                 if request.method == 'POST':
                     if request.args.get('action') == 'submit':
+                        statement = conn.execute('''
+                            SELECT statements.id_statement, workload.id_group 
+                            FROM statements 
+                            INNER JOIN workload ON statements.id_discipline = workload.id_load 
+                            WHERE statements.id_statement = ?
+                        ''', (id_statement,)).fetchone()
+                        
+                        if not statement:
+                            flash('Ведомость не найдена.', 'danger')
+                            conn.close()
+                            return redirect(url_for('load_table', funck='edit_statement'))
+                        student_list = conn.execute('''
+                                SELECT students.id_student 
+                                FROM students 
+                                WHERE students.id_group = ?
+                            ''', (statement['id_group'],)).fetchall()
+                        all_filled = True
+                        for stud in student_list:
+                            grade = request.form.get(f'grade_{stud["id_student"]}', '')
+                            if grade == '':
+                                all_filled = False
+                                break
+                            
+                        if not all_filled:
+                            flash('Заполните все оценки перед сдачей ведомости!', 'danger')
+                            conn.close()
+                            return redirect(url_for('edit_info', funck='edit_statement', id_statement=id_statement))
                         filled_at = request.form.get('filled_at', '')
                         conn.execute('UPDATE statements SET status = 1, filled_at = ? WHERE id_statement = ?', (filled_at, id_statement,))
                         conn.commit()
@@ -5382,17 +5412,27 @@ def edit_info():
                     excused = request.form.get('excused', '')
                     unexcused = request.form.get('unexcused', '')
                     id_grade = request.form.get('id_grade', '')
+                    date = request.form.get('date', '')
                     errors = []
 
                     if not excused:
                         errors.append('Количество н/я по уважительной причине обязательно')
                     elif not re.match(r'^[\d]+$', excused):
-                        errors.append('Количество н/я по уважительной причине может содержать только цифры и числа')
+                        errors.append('Количество н/я по уважительной причине может содержать только положительные цифры и числа')
 
                     if not unexcused:
                         errors.append('Количество н/я по неуважительной причине обязательно')
                     elif not re.match(r'^[\d]+$', unexcused):
-                        errors.append('Количество н/я по неуважительной причине может содержать только цифры и числа')
+                        errors.append('Количество н/я по неуважительной причине может содержать только положительны цифры и числа')
+                    
+                    if not id_grade:
+                        errors.append('Проставьте все оценки или отметьте не явку')
+                    
+                    if not date:
+                        errors.append('Дата обязательна')
+                    elif not re.match(r'^[\d]+$', date):
+                        errors.append('Количество н/я по неуважительной причине может содержать только положительны цифры и числа')
+                        
                     
                     print("DEBUG: errors =", errors)
                     if errors:
@@ -5479,7 +5519,7 @@ def edit_info():
                     conn.commit()
                     conn.close()
                     flash('Ведомость успешно сохранена!', 'success')
-                return redirect(url_for('load_table', funck='edit_statement'))
+                return redirect(url_for('load_table', funck='edit_statement', status = 0))
 
             else:
                 flash('У вас нет прав доступа.', 'danger')
