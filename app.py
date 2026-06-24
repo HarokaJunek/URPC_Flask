@@ -2650,8 +2650,8 @@ def add_info():
             # Название дисциплины
             if not discipline_name:
                 errors.append('Название дисциплины обязательно')
-            elif len(discipline_name) > 50:
-                errors.append('Название дисциплины должно быть не более 50 символов')
+            elif len(discipline_name) > 100:
+                errors.append('Название дисциплины должно быть не более 100 символов')
 
             # Загружаем список PCK для проверки
             pck_list = get_pck()
