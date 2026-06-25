@@ -348,18 +348,16 @@ form label i {
     gap: 20px;
     width: 100%;
 }
-
 .checkbox-container {
-    display: block;
+    display: flex;
     align-items: center;
     cursor: pointer;
     font-size: 14px;
     color: var(--text-color);
     position: relative;
-    padding-left: 30px;
+    padding-right: 30px;
     margin-bottom: 12px;
     user-select: none;
-    align-content: center;
 }
 
 .checkbox-container input {
@@ -372,7 +370,7 @@ form label i {
 
 .checkmark {
     position: absolute;
-    left: 0;
+    right: 0;
     top: 2px;
     height: 18px;
     width: 18px;
@@ -402,7 +400,7 @@ form label i {
 }
 
 .checkbox-container .checkmark:after {
-    left: 5px;
+    right: 5px;
     top: 1px;
     width: 5px;
     height: 10px;

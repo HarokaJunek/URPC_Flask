@@ -148,12 +148,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- ИТОГОВАЯ ВЕДОМОСТЬ -->
                 <a href="{{ url_for('load_table', funck='edit_statement', status=1) }}" class="nav-link expandable">
                         <i class="fas fa-file" aria-hidden="true"></i>
-                        <span class="link-text">Оценочные ведомости</span>
+                        <span class="link-text">Сданные ведомости</span>
                 </a> 
                 <!-- УСПЕВАЕМОСТЬ -->
                 <a href="{{ url_for('load_table', funck='edit_report', is_diploma=0) }}" class="nav-link expandable">
                     <i class="fas fa-chart-bar" aria-hidden="true"></i>
-                    <span class="link-text">Итоговая успеваемость</span>
+                    <span class="link-text">Семестровая успеваемость</span>
                 </a> 
                 <!-- ПРИЛОЖЕНИЕ К ДИПЛОМУ -->
                 <a href="{{ url_for('load_table', funck='edit_report', is_diploma=1) }}" class="nav-link expandable">
@@ -163,10 +163,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- Здесь можно добавить другие ссылки для админа -->
             {% endif %}
              {% if session.is_prepod %}
-                <a href="{{ url_for('load_table', funck='edit_statement') }}" class="nav-link expandable">
+                <a href="{{ url_for('load_table', funck='edit_statement', status=0) }}" class="nav-link expandable">
                     <i class="fa fa-file-alt" aria-hidden="true"></i>
                     <span class="link-text">Ведомости</i></span>
                 </a>
+                <a href="{{ url_for('load_table', funck='edit_statement', status=1) }}" class="nav-link expandable">
+                        <i class="fas fa-file" aria-hidden="true"></i>
+                        <span class="link-text">Сданные ведомости</span>
+                </a> 
                 <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="nav-link expandable">
                     <i class="fa fa-table" aria-hidden="true"></i>
                     <span class="link-text">Нагрузка</i></span>

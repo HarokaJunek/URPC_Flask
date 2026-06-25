@@ -777,7 +777,7 @@ def export_statement_pdf(id_statement):
     c.drawString(left_margin + 100, y, statement['full_name'] or '')
     
     # ТАБЛИЦА
-    y -= 25
+    y -= 60
     table_data = [["№", "ФИО студента", "Оценка"]]  # заголовки
     for idx, student in enumerate(students, 1):
         grade = student['grade']
@@ -863,8 +863,11 @@ def export_report_pdf(group_filter, semester_filter, is_diploma=''):
     if semester_filter:
         query += ' AND statements.semester = ?'
         params.append(semester_filter)
-    if is_diploma:
+    if is_diploma == '1':
+        title = "Приложение к диплому"
         query += ' AND statements.is_diploma = 1'
+    else:
+        title = "Семестровая успеваемость"
     
     table_info = conn.execute(query, params).fetchall()
     conn.close()
@@ -940,16 +943,12 @@ def export_report_pdf(group_filter, semester_filter, is_diploma=''):
     c.drawCentredString(width/2, y, "«Уральский политехнический колледж - Межрегиональный центр компетенций»")
     y -= 30
     c.setFont("Arial", 14)
-    if is_diploma:
-        title = "Приложение к диплому" 
-    else: 
-        "Итоговая успеваемость"
     c.drawCentredString(width/2, y, title)
     c.setFont("Arial", 12)
     c.drawCentredString(width/2, y - 20, f"Группа: {group_filter}")
-    if is_diploma == 0:
+    if semester_filter:
         c.drawCentredString(width/2, y - 40, f"Семестр: {semester_filter}")
-    y -= 5
+    y -= 25
 
     wrap_style = ParagraphStyle(
         'WrapStyle',
@@ -961,14 +960,11 @@ def export_report_pdf(group_filter, semester_filter, is_diploma=''):
     )
     table_data = []
 
-    # пустые ячейки + типы контроля
-    header1 = ["", ""]
+    header1 = [Paragraph("", wrap_style), Paragraph("", wrap_style)]
     for type_item in control_types:
-        header1.append(type_item['name'] or '—')
-        # Добавляем пустые ячейки для остальных колонок этого типа
-        for _ in range(len(type_item['disciplines']) - 1):
-            header1.append("")
-    header1.append("")
+        for _ in range(len(type_item['disciplines'])):
+            header1.append(Paragraph(type_item['name'] or '—', wrap_style))
+    header1.append(Paragraph("", wrap_style))
     table_data.append(header1)
 
     #  №, ФИО, названия дисциплин
@@ -1000,7 +996,7 @@ def export_report_pdf(group_filter, semester_filter, is_diploma=''):
     # Создаём таблицу
     total_cols = len(header2)
     available_width = width - 40
-    fixed_cols = [30, 120]
+    fixed_cols = [50, 190]
     remaining_width = available_width - sum(fixed_cols)
     disc_cols = total_cols - 2
     disc_width = remaining_width / disc_cols
@@ -2027,7 +2023,10 @@ def load_table():
         # ВЕДОМОСТЬ
         case 'edit_statement':
             if (session.get('is_zav', False) or session.get('is_prepod', False)):
-
+                if session.get('is_zav', False):
+                    status = request.args.get('status', '0')
+                else:
+                    status = request.args.get('status', '')
                 id_statement = request.args.get('id_statement')
                 if request.args.get('action') == 'unsubmit':
                     conn = get_db_connection()
@@ -2037,8 +2036,7 @@ def load_table():
                     flash('Сдача ведомости отменена!', 'success')
                     conn.close()
                     return redirect(url_for('load_table', funck='edit_statement', status = 0))
-                
-                status = request.args.get('status', '')
+
                 conn = get_db_connection()
                 query = '''
                     SELECT 
@@ -2066,25 +2064,49 @@ def load_table():
                 if status_filter:
                     query += ' and statements.status = ?'
                     params.append(status_filter)
-                elif search_query:
+                
+                if search_query:
                     query += ' and (users.full_name LIKE ? OR disciplines.discipline_name LIKE ? OR workload.id_group LIKE ?)'
                     like_pattern = '%' + search_query + '%'
                     params.extend([like_pattern, like_pattern, like_pattern])
+
+                teacher_filter = request.args.get('teacher', '')
+                discipline_filter = request.args.get('discipline', '')
+                group_filter = request.args.get('group', '')
+
+                if teacher_filter:
+                    query += ' AND users.full_name LIKE ?'
+                    params.append('%' + teacher_filter + '%')
+
+                if discipline_filter:
+                    query += ' AND disciplines.discipline_name LIKE ?'
+                    params.append('%' + discipline_filter + '%')
+
+                if group_filter:
+                    query += ' AND workload.id_group LIKE ?'
+                    params.append('%' + group_filter + '%')    
 
                 # Добавляем сортировку
                 query += ' ORDER BY users.full_name ASC, disciplines.discipline_name ASC'
 
                 # Получаем данные для фильтров
                 groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
-                    
+                teachers = conn.execute('SELECT id_user, full_name FROM users WHERE id_role = 4 ORDER BY full_name').fetchall()
+                disciplines = conn.execute('SELECT id_discipline, discipline_name FROM disciplines ORDER BY discipline_name').fetchall()
+                
                 table_info = conn.execute(query, params).fetchall()
                 conn.close()
                 return render_template('load_table.html',
-                                       status = status,
-                                       table_info=table_info,
-                                       funck=funck,
-                                       groups=groups,
-                                       session=session)
+                                                    status = status,
+                                                    table_info=table_info,
+                                                    funck=funck,
+                                                    groups=groups,
+                                                    teachers=teachers,         
+                                                    disciplines=disciplines,
+                                                    teacher_filter=teacher_filter,
+                                                    discipline_filter=discipline_filter,
+                                                    group_filter=group_filter,   
+                                                    session=session)
             else:
                 flash('У вас нет прав доступа к этому разделу.', 'danger')
                 return redirect(url_for('index'))
@@ -2092,11 +2114,11 @@ def load_table():
         # УСПЕВАЕМОСТЬ
         case 'edit_report':
             if (session.get('is_zav', False)):
-                group_filter = request.args.get('group', '')
                 semester_filter = request.args.get('semester', '')
                 is_diploma = request.args.get('is_diploma', '')
                 table_info = []
-
+                group_filter = request.args.get('group', '')
+                print("DEBUG group_filter:", repr(group_filter))
                 conn = get_db_connection()
                 groups = conn.execute('SELECT id_group FROM groups ORDER BY id_group').fetchall()
                 if group_filter:
@@ -2389,7 +2411,7 @@ def delete_recording(id):
                 conn.execute('DELETE FROM statements WHERE id_statement = ?', (id,))
                 conn.commit()
                 flash(f'Запись успешно удалена!', 'success')
-                return redirect(url_for('load_table', funck='edit_statement'))
+                return redirect(url_for('load_table', funck='edit_statement', status = 0))
 
             # Обработка других значений funck (если есть)
             case _:
@@ -3508,14 +3530,15 @@ def add_info():
             def get_workload():
                 conn = get_db_connection()
                 rows = conn.execute('''
-                            SELECT w.id_load, 
-                                d.discipline_name || ', ' || g.id_group || ', ' || u.full_name AS description
-                            FROM workload w
-                            INNER JOIN disciplines d ON w.id_discipline = d.id_discipline
-                            INNER JOIN groups g ON w.id_group = g.id_group
-                            INNER JOIN users u ON w.id_teacher = u.id_user
-                            ORDER BY description
-                    ''').fetchall()
+                    SELECT w.id_load, 
+                        d.discipline_name || ', ' || g.id_group || ', ' || u.full_name AS description
+                    FROM workload w
+                    INNER JOIN disciplines d ON w.id_discipline = d.id_discipline
+                    INNER JOIN groups g ON w.id_group = g.id_group
+                    INNER JOIN users u ON w.id_teacher = u.id_user
+                    WHERE w.id_load NOT IN (SELECT id_discipline FROM statements)
+                    ORDER BY description
+                ''').fetchall()
                 conn.close()
                 return [{'id': row['id_load'], 'name': row['description']} for row in rows]
 
@@ -3562,8 +3585,8 @@ def add_info():
             else:
                 try:
                     sem = int(semester)
-                    if sem < 1 or sem > 8:
-                        errors.append('Семестр должен быть от 1 до 8')
+                    if sem < 1 or sem > 10:
+                        errors.append('Семестр должен быть от 1 до 10')
                 except ValueError:
                     errors.append('Семестр должен быть числом')
 
@@ -3596,12 +3619,12 @@ def add_info():
                 conn.execute('''
                         INSERT INTO statements 
                         (id_discipline, id_type, semester, is_diploma, created_at, status)
-                        VALUES (?, ?, ?, ?, DATE('now'), 1)
+                        VALUES (?, ?, ?, ?, DATE('now'), 0)
                     ''', (id_load, id_typeved, semester, is_diploma))
 
                 conn.commit()
                 flash(f'Ведомость успешно создана!', 'success')
-                return redirect(url_for('load_table', funck='edit_statement'))
+                return redirect(url_for('load_table', funck='edit_statement', status = 0))
 
             except sqlite3.Error as e:
                 conn.rollback()
@@ -5172,6 +5195,7 @@ def edit_info():
 
         case 'edit_spec':
             if session.get('is_zav', False):
+                
                 # Получаем ID из разных источников
                 id_specialty = request.args.get('id_specialty')
                 if not id_specialty:
@@ -5282,10 +5306,10 @@ def edit_info():
                 return redirect(url_for('index'))
 
         # ВЕДОМОСТЬ
-
         case 'edit_statement':
             if session.get('is_zav', False) or session.get('is_prepod', False):
                 # Получаем ID из разных источников
+                status = request.args.get('status', '')
                 id_statement = request.args.get('id_statement')
                 if not id_statement:
                     flash('Не указан ID ведомости', 'danger')
@@ -5350,14 +5374,20 @@ def edit_info():
                         elif stud['grade'] == 0:
                             not_been += 1
                     grades_all = grade_A + grade_B + grade_C + grade_D
+                    typeved_list = [{'id': row['id_type'], 'name': row['type_name']} 
+                                    for row in conn.execute('SELECT id_type, type_name FROM statement_types ORDER BY type_name').fetchall()]
 
+                    type_name = ''
+                    if 'id_type' in statement.keys() and statement['id_type']:
+                        t = conn.execute('SELECT type_name FROM statement_types WHERE id_type = ?', 
+                            (statement['id_type'],)).fetchone()
+                        type_name = t['type_name'] if t else ''
                     conn.close()
 
                     if not statement:
                         flash('Ведомость не найдена.', 'danger')
                         return redirect(url_for('load_table', funck='edit_statement'))
                     
-
                     return render_template('edit_info.html',
                                            funck=funck,
                                            statement=statement,
@@ -5368,6 +5398,8 @@ def edit_info():
                                            grade_D=grade_D,
                                            grades_all=grades_all,
                                            not_been=not_been,
+                                           typeved_list=typeved_list,
+                                           type_name=type_name,
                                            session=session)
 
                 conn = get_db_connection()
@@ -5389,19 +5421,8 @@ def edit_info():
                         student_list = conn.execute('''
                                 SELECT students.id_student 
                                 FROM students 
-                                WHERE students.id_group = ?
+                               WHERE students.id_group = ?
                             ''', (statement['id_group'],)).fetchall()
-                        all_filled = True
-                        for stud in student_list:
-                            grade = request.form.get(f'grade_{stud["id_student"]}', '')
-                            if grade == '':
-                                all_filled = False
-                                break
-                            
-                        if not all_filled:
-                            flash('Заполните все оценки перед сдачей ведомости!', 'danger')
-                            conn.close()
-                            return redirect(url_for('edit_info', funck='edit_statement', id_statement=id_statement))
                         filled_at = request.form.get('filled_at', '')
                         conn.execute('UPDATE statements SET status = 1, filled_at = ? WHERE id_statement = ?', (filled_at, id_statement,))
                         conn.commit()
@@ -5412,7 +5433,7 @@ def edit_info():
                     excused = request.form.get('excused', '')
                     unexcused = request.form.get('unexcused', '')
                     id_grade = request.form.get('id_grade', '')
-                    date = request.form.get('date', '')
+                    date = request.form.get('filled_at', '')
                     errors = []
 
                     if not excused:
@@ -5424,14 +5445,9 @@ def edit_info():
                         errors.append('Количество н/я по неуважительной причине обязательно')
                     elif not re.match(r'^[\d]+$', unexcused):
                         errors.append('Количество н/я по неуважительной причине может содержать только положительны цифры и числа')
-                    
-                    if not id_grade:
-                        errors.append('Проставьте все оценки или отметьте не явку')
-                    
+
                     if not date:
                         errors.append('Дата обязательна')
-                    elif not re.match(r'^[\d]+$', date):
-                        errors.append('Количество н/я по неуважительной причине может содержать только положительны цифры и числа')
                         
                     
                     print("DEBUG: errors =", errors)
@@ -5472,10 +5488,11 @@ def edit_info():
                         for error in errors:
                                 flash(error, 'danger')
                         return render_template('edit_info.html', 
-                                        funck=funck, 
-                                        statement=statement, 
-                                        students=student,
+                                        funck=funck,
+                                           statement=statement,
+                                           students=student,
                                         session=session)
+                    
                     else:
                         filled_at = request.form.get('filled_at', '')
                         statement = conn.execute('''
@@ -5514,8 +5531,13 @@ def edit_info():
                                 INSERT OR REPLACE INTO grades (id_student, id_statement, grade) VALUES (?, ?, ?)
                                 ''', (id_stud, id_statement, grade_value,))
 
-                    conn.execute(''' UPDATE statements SET excused = ?,  unexcused = ?, filled_at = ? WHERE id_statement = ?''',
-                                 (excused, unexcused, filled_at, id_statement,))
+                    id_typeved = request.form.get('id_typeved', '')
+                    is_diploma = request.form.get('is_diploma', '0')
+
+                    conn.execute('''UPDATE statements 
+                        SET excused = ?, unexcused = ?, filled_at = ?, id_type = ?, is_diploma = ? 
+                        WHERE id_statement = ?''',
+                        (excused, unexcused, filled_at, id_typeved, is_diploma, id_statement,))
                     conn.commit()
                     conn.close()
                     flash('Ведомость успешно сохранена!', 'success')

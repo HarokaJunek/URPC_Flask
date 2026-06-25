@@ -169,7 +169,7 @@
                         <i class="fas fa-file" aria-hidden="true"></i>
                     </div>
                     <div class="banner-content">
-                        <h3>Оценочные ведомости</h3>
+                        <h3>Сданные ведомости</h3>
                         <p>Просмотр ведомостей в системе</p>
                         <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
@@ -181,7 +181,7 @@
                         <i class="fas fa-chart-bar" aria-hidden="true"></i>
                     </div>
                     <div class="banner-content">
-                        <h3>Итоговая успеваемость</h3>
+                        <h3>Семестровая успеваемость</h3>
                         <p>Просмотр итоговой успеваемости в системе</p>
                         <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
@@ -211,7 +211,7 @@
         <h2> Добро пожаловать, преподаватель: {{ session.full_name }}!</h2>
             <div class="banner-grid">
                 <!-- ВЕДОМОСТЬ -->
-                <a href="{{ url_for('load_table', funck='edit_statement') }}" class="banner-card">
+                <a href="{{ url_for('load_table', funck='edit_statement', status=1) }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fa fa-users" aria-hidden="true"></i>
                     </div>
@@ -221,6 +221,19 @@
                         <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
                     </div>
                 </a>
+                <a href="{{ url_for('load_table', funck='edit_statement', status=1) }}" class="banner-card">
+                    <div class="banner-icon">
+                        <i class="fas fa-file" aria-hidden="true"></i>
+                    </div>
+                    <div class="banner-content">
+                        <h3>Сданные ведомости</h3>
+                        <p>Просмотр ведомостей в системе</p>
+                        <span class="banner-link">Перейти <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a> 
+
+            </div>
+            <div class="banner-grid">
                 <a href="{{ url_for('load_table', funck='edit_nagruzka') }}" class="banner-card">
                     <div class="banner-icon">
                         <i class="fa fa-table" aria-hidden="true"></i>

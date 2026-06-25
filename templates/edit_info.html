@@ -1955,6 +1955,7 @@
 
 <!-- ВЕДОМОСТИ -->
         {% if funck == 'edit_statement' %}
+        
             <div class="blocks">
                 <div class="edit-form-container">
                     <div class="form-header">
@@ -1976,17 +1977,30 @@
                             <h3 class="section-title">
                                 <i class="fas fa-info-circle"></i> Основные параметры ведомости
                             </h3>
-                            <div class="form-row">
+                                <br>
+                                <div>
+                                    <!-- флаг диплома -->
+                                    <label for="is_diploma" class="checkbox-container" class="required">Оценка идёт в диплом
+                                        <input type="checkbox" id="is_diploma" name="is_diploma" value="1" 
+                                            {% if statement.is_diploma == 1 %}checked{% endif %}>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>   
+                                <br>
+                                <br>
+                                
+                                <div class="form-row">                      
                                 <div class="form-group col-6">
                                     <label for="date" class="required">
-                                        <i class="fas fa-calendar-alt"></i> Дата:
+                                        <i class="fas fa-calendar-alt"></i> Дата заполнения:
                                     </label>
-                                    {% if status == '0' %}
-                                    <input type="date" id="date" name="filled_at" value="{{ statement.filled_at }}">
+                                    {% if statement.status == 1 %}
+                                        <input type="date" id="date" value="{{ statement.filled_at }}" disabled>
+                                        <input type="hidden" name="filled_at" value="{{ statement.filled_at }}">
                                     {% else %}
-                                    <input type="text" id="date" name="filled_at" value="{{ statement.filled_at }}" readonly>
+                                        <input type="date" id="date" name="filled_at" value="{{ statement.filled_at }}">
                                     {% endif %}
-                                </div>
+                                </div>                                
                                 <div class="form-group col-6">
                                 </div>
                             </div>
@@ -2128,14 +2142,14 @@
                                     <div class="form-row">
                                         <div class="form-group col-6">
                                             {% if statement.status == 1 %}                                
-                                            <label for="excused">
+                                            <label for="excused" class="required">
                                                 По уважительной причине
                                             </label>
                                             <input type="text" id="full_name" name="excused"
                                                 value="{{ statement.excused }}" readonly>
                                             {% endif %}
                                             {% if statement.status == 0 %}
-                                            <label for="excused">
+                                            <label for="excused" class="required">
                                                 По уважительной причине
                                             </label>
                                             <input type="text" 
@@ -2156,14 +2170,14 @@
                                     <div class="form-row">
                                         <div class="form-group col-6">
                                             {% if statement.status == 1 %}                                
-                                            <label for="unexcused">
+                                            <label for="unexcused" class="required">
                                                 По неуважительной причине
                                             </label>
                                             <input type="text" id="full_name" name="unexcused"
                                                 value="{{ statement.unexcused }}" readonly>
                                             {% endif %}
                                             {% if statement.status == 0 %}
-                                            <label for="unexcused">
+                                            <label for="unexcused" class="required">
                                                 По неуважительной причине
                                             </label>
                                             <input type="text" 
@@ -2204,7 +2218,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- Кнопки действий -->
                         {% if statement.status != 1 %}
                             <div class="form-actions">
@@ -2218,8 +2231,9 @@
                                 </button>
                             </div>
                         {% else %}
-                            <div class="table-footer"></div>
-                                <div class="export-buttons">
+                        <br>
+                        <br>
+                                <div class="export-buttons" style="float: right;">
                                     <a href="{{ url_for('edit_info', funck='edit_statement', id_statement=statement.id_statement, export='pdf') }}" 
                                     class="export-btn" style="float: right; position: relative; top: -35px;">
                                         <i class="fas fa-file-pdf"></i>PDF

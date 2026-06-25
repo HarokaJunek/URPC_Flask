@@ -1855,6 +1855,394 @@
 <!-- ВЕДОМОСТЬ -->
 
 {% if funck == 'edit_statement' %}
+        <style>
+/* Стили для кнопок фильтров */
+.filters-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.apply-filters-btn {
+    background: var(--primary-color);
+    border: none;
+    padding: 10px 28px;
+    border-radius: 30px;
+    font-weight: 500;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(77, 195, 240, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.apply-filters-btn:hover {
+    background: #2a8eb5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(77, 195, 240, 0.4);
+}
+
+.reset-filters-btn {
+    background: #dc3545;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 30px;
+    font-weight: 500;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.reset-filters-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+}
+
+.apply-filters-btn:active,
+.reset-filters-btn:active {
+    transform: translateY(0);
+}
+
+/* Стили для панели фильтров */
+.filters-wrapper {
+    margin: 20px 0;
+}
+
+.filters-header {
+    margin-bottom: 10px;
+}
+
+.filters-toggle-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.filters-toggle-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.toggle-icon {
+    transition: transform 0.2s;
+}
+
+#toggle-filters:checked + .filters-header .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.filters-panel {
+    background: #fdfdfd;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 12px;
+    display: none;
+}
+
+#toggle-filters:checked ~ .filters-panel {
+    display: block;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.filter-item {
+    position: relative;
+}
+
+.filter-item label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-item label i {
+    color: var(--primary-color);
+    width: 16px;
+}
+
+.filter-select, .filter-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+}
+
+.filter-select:focus, .filter-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(77, 195, 240, 0.1);
+}
+
+/* Стили для поиска в фильтрах */
+.filter-search-wrapper {
+    position: relative;
+}
+
+.filter-search-wrapper input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    transition: all 0.2s;
+}
+
+.filter-search-wrapper input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(77, 195, 240, 0.1);
+}
+
+.filter-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 150px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 1000;
+}
+
+.filter-search-results.active {
+    display: block;
+}
+
+.filter-search-results .result-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f8f9fa;
+    font-size: 14px;
+}
+
+.filter-search-results .result-item:last-child {
+    border-bottom: none;
+}
+
+.filter-search-results .result-item:hover {
+    background: #f0f7ff;
+}
+
+.filter-search-results .result-item .highlight {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.filter-search-results .no-results {
+    padding: 8px 12px;
+    color: #6c757d;
+    text-align: center;
+    font-size: 13px;
+}
+
+.filter-search-wrapper input[type="text"].valid {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.filter-search-wrapper input[type="text"].invalid {
+    border-color: #dc3545;
+    background: #fff8f8;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-actions {
+        flex-direction: column;
+    }
+
+    .apply-filters-btn, .reset-filters-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Стили для кнопок экспорта */
+.export-btn {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #2c3e50;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.export-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.export-btn i {
+    font-size: 16px;
+}
+    .table-scroll-container {
+    max-height: 500px; /* Настройте под нужную высоту */
+    overflow-y: auto;
+    overflow-x: auto;
+    position: relative;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+/* Фиксация шапки таблицы */
+#readable-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Стили для ячеек шапки, чтобы они не меняли фон при прокрутке */
+#readable-table thead th {
+    background: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 101;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Для двойной шапки - фиксируем обе строки */
+#readable-table thead tr:first-child th {
+    top: 0;
+    z-index: 102;
+}
+
+#readable-table thead tr:last-child th {
+    top: 40px; /* Высота первой строки шапки, подстройте под свои значения */
+    z-index: 101;
+}
+
+/* Стили для ячеек с вертикальным текстом */
+#readable-table thead th[style*="writing-mode"] {
+    z-index: 103 !important; /* Чтобы вертикальные заголовки были поверх */
+}
+
+/* Альтернативный вариант с использованием класса для более надежной фиксации */
+.sticky-header th {
+    background: #f8f9fa !important;
+}
+
+/* Для объединенных ячеек (rowspan) */
+#readable-table thead th[rowspan] {
+    background: #f8f9fa;
+}
+
+/* Обертка для таблицы */
+.table-responsive {
+    overflow: visible; /* Убираем старый overflow */
+}
+
+/* Новый контейнер внутри .table-responsive */
+.table-scroll-wrapper {
+    max-height: 70vh; /* 70% от высоты экрана */
+    overflow: auto;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+/* Стили для скроллбара (опционально) */
+.table-scroll-wrapper::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: #c1c7cd;
+    border-radius: 4px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #f0f9ff;
+}
+    #readable-table tbody tr:hover {
+    background-color: #f0f9ff  !important;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* Альтернативный вариант с более заметным выделением */
+#readable-table tbody tr:hover td {
+    background-color: #f0f9ff  !important;
+}
+
+/* Если у строк есть чередование цветов (zebra), чтобы не ломалось */
+#readable-table tbody tr:nth-child(even):hover td {
+    background-color: #f0f9ff  !important;
+}
+
+#readable-table tbody tr:nth-child(odd):hover td {
+    background-color: #f0f9ff  !important;
+}
+
+/* Подсветка строки при клике (активная строка) */
+#readable-table tbody tr.active-row {
+    background-color: #f0f9ff  !important;
+}
+
+#readable-table tbody tr.active-row td {
+    background-color: #f0f9ff  !important;
+}
+
+/* Анимация для плавного перехода */
+#readable-table tbody tr td {
+    transition: background-color 0.15s ease;
+}
+</style>
 <div class="blocks">
     <div class="edit-form-container">
         <div class="form-header">
@@ -1863,111 +2251,251 @@
             {% endif %}
         </div>
         <form method="POST" action="{{ url_for('add_info', funck='edit_statement') }}" class="edit-form">
-
-            <!-- выпадающий список: нагрузка -->
-            <div class="form-group">
-                <label for="id_load" class="required">
-                    <i class="fas fa-chalkboard-teacher"></i> Нагрузка
+            <div style="display: flex; justify-content: flex-end; width: 100%;"  >
+            <!-- флаг диплома -->
+                <label for="is_diploma" class="checkbox-container">Оценка идёт в диплом
+                    <input type="checkbox" id="is_diploma" name="is_diploma" value="1">
+                    <span class="checkmark"></span>
                 </label>
-                <div class="select-wrapper">
-                    <select id="id_load" name="id_load" required>
-                        <option value="" disabled {% if not form_data or not form_data.get('id_load') %}selected{% endif %}>Выберите нагрузку</option>
-                        {% if workload_list %}
-                            {% for load in workload_list %}
-                                <option value="{{ load.id }}"
-                                    {% if form_data and form_data.get('id_load')|int == load.id %}selected{% endif %}>
-                                    {{ load.name }}
-                                </option>
-                            {% endfor %}
-                        {% else %}
-                            <option value="" disabled>Нет доступных нагрузок</option>
-                        {% endif %}
-                    </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
-                </div>
-                <div class="form-hint">Выберите нагрузку, к которой относится ведомость</div>
             </div>
-
-                <!-- выпадающий список: тип ведомости -->
+                <br>
+                
+                <!-- автодополнение: нагрузка -->
                 <div class="form-group">
-                    <label for="id_typeved" class="required">
-                        <i class="fas fa-chalkboard-teacher"></i> Тип ведомости
+                    <label for="id_load_search" class="required">
+                        <i class="fas fa-chalkboard-teacher"></i> Нагрузка
                     </label>
-                    <div class="select-wrapper">
-                        <select id="id_typeved" name="id_typeved" required>
-                            <option value="" disabled {% if not form_data or not form_data.get('id_typeved') %}selected{% endif %}>Выберите тип ведомости</option>
-                            {% if typeved_list %}
-                                {% for typeved in typeved_list %}
-                                    <option value="{{ typeved.id }}"
-                                        {% if form_data and form_data.get('id_typeved')|int == typeved.id %}selected{% endif %}>
-                                        {{ typeved.name }}
-                                    </option>
-                                {% endfor %}
-                            {% else %}
-                                <option value="" disabled>Нет доступных типов ведомости</option>
-                            {% endif %}
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
+                    <div class="filter-search-wrapper">
+                        <input type="text" class="filter-input" id="id_load_search"
+                            placeholder="Введите дисциплину, группу или ФИО..." autocomplete="off"
+                            value="">
+                        <input type="hidden" id="id_load" name="id_load" value="">
+                        <div class="filter-search-results" id="id_load-results"></div>
                     </div>
-                    <div class="form-hint">Выберите тип ведомости, к которой относится ведомость</div>
+                    <div class="form-hint">Выберите нагрузку, к которой относится ведомость</div>
                 </div>
 
+                <!-- автодополнение: тип ведомости -->
+                <div class="form-group">
+                    <label for="id_typeved_search" class="required">
+                        <i class="fas fa-list-alt"></i> Тип зачета
+                    </label>
+                    <div class="filter-search-wrapper">
+                        <input type="text" class="filter-input" id="id_typeved_search"
+                            placeholder="Введите тип..." autocomplete="off"
+                            value="">
+                        <input type="hidden" id="id_typeved" name="id_typeved" value="">
+                        <div class="filter-search-results" id="id_typeved-results"></div>
+                    </div>
+                    <div class="form-hint">Выберите тип зачета, к которой относится ведомость</div>
+                </div>
                 <!-- семестр -->
                 <div class="form-group">
                     <label for="id_semester" class="required">
                         <i class="fas fa-chalkboard-teacher"></i> Семестр
                     </label>
-                    <input type="number" id="id_semester" name="semester" min="1" max="8" value="" required>
-                    <div class="form-hint">Укажите семестр (от 1 до 8), к которому относится ведомость</div>
+                    <input type="number" id="id_semester" name="semester" min="1" max="10" value="" required>
+                    <div class="form-hint">Укажите семестр (от 1 до 10), к которому относится ведомость</div>
                 </div>
-
-                <!-- флаг диплома -->
-                <div>
-                    <label for="is_diploma">
-                        <i class="fas fa-check-circle"></i> Оценка идёт в диплом    
-                        <input type="checkbox" id="is_diploma" name="is_diploma" value="1">
-                    </label>
-                </div>
-                <div class="form-hint" style="margin-top: 5px;">Отметьте, если оценки из этой ведомости будут учитываться в приложении к диплому</div>
 
             <button type="submit" id="submitBtn">Создать ведомость</button>
         </form>
     </div>
 </div>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const submitBtn = document.getElementById('submitBtn');
+// Данные для автодополнения
+const filterLoadData = [
+    {% for load in workload_list %}
+        { id: "{{ load.id }}", name: "{{ load.name }}" },
+    {% endfor %}
+];
 
-        if (submitBtn) {
-            submitBtn.addEventListener('click', function(e) {
-                const idWorkload = document.getElementById('id_load');
-                const idTypeved = document.getElementById('id_typeved');
-                const semester = document.getElementById('semester');
+const filterTypevedData = [
+    {% for typeved in typeved_list %}
+        { id: "{{ typeved.id }}", name: "{{ typeved.name }}" },
+    {% endfor %}
+];
 
-                let errors = [];
+// Функция автодополнения
+function createFilterSearchHandler(inputId, resultsId, hiddenId, data, displayField) {
+    const input = document.getElementById(inputId);
+    const results = document.getElementById(resultsId);
+    const hidden = document.getElementById(hiddenId);
 
-                if (!idWorkload || !idWorkload.value) {
-                    errors.push('Пожалуйста, выберите нагрузку');
-                }
+    if (!input || !results || !hidden) {
+        console.warn('Element not found:', inputId, resultsId, hiddenId);
+        return;
+    }
 
-                if (!idTypeved || !idTypeved.value) {
-                    errors.push('Пожалуйста, выберите тип ведомости');
-                }
+    let selectedIndex = -1;
+    let currentResults = [];
 
-                if (!semester || !semester.value) {
-                    errors.push('Пожалуйста, укажите семестр');
-                } else if (semester.value < 1 || semester.value > 8) {
-                    errors.push('Семестр должен быть от 1 до 8');
-                }
+    function renderResults(filteredData, searchTerm) {
+        results.innerHTML = '';
+        results.classList.remove('active');
 
-                if (errors.length > 0) {
-                    e.preventDefault();
-                    alert(errors.join('\n'));
-                }
+        if (filteredData.length === 0 && searchTerm.length > 0) {
+            results.innerHTML = '<div class="no-results">Ничего не найдено</div>';
+            results.classList.add('active');
+            return;
+        }
+
+        if (searchTerm.length === 0) {
+            return;
+        }
+
+        filteredData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            const displayValue = item[displayField] || '';
+            const searchTermLower = searchTerm.toLowerCase();
+            const displayValueLower = displayValue.toLowerCase();
+            const matchIndex = displayValueLower.indexOf(searchTermLower);
+
+            if (matchIndex !== -1) {
+                const before = displayValue.substring(0, matchIndex);
+                const match = displayValue.substring(matchIndex, matchIndex + searchTerm.length);
+                const after = displayValue.substring(matchIndex + searchTerm.length);
+                div.innerHTML = `<span>${before}<span class="highlight">${match}</span>${after}</span>`;
+            } else {
+                div.textContent = displayValue;
+            }
+
+            div.dataset.index = index;
+            div.addEventListener('click', function() {
+                const item = currentResults[index];
+                if (!item) return;
+                input.value = item[displayField];
+                hidden.value = item.id;
+                results.classList.remove('active');
+                input.classList.remove('invalid');
+                input.classList.add('valid');
+                selectedIndex = -1;
             });
+
+            results.appendChild(div);
+        });
+
+        currentResults = filteredData;
+        results.classList.add('active');
+    }
+
+    function handleInput() {
+        const searchTerm = this.value.trim();
+        hidden.value = '';
+        input.classList.remove('valid', 'invalid');
+
+        if (searchTerm.length === 0) {
+            results.classList.remove('active');
+            return;
+        }
+
+        const filtered = data.filter(item => {
+            const value = (item[displayField] || '').toLowerCase();
+            return value.includes(searchTerm.toLowerCase());
+        });
+
+        renderResults(filtered, searchTerm);
+        selectedIndex = -1;
+    }
+
+    function handleKeydown(e) {
+        const items = results.querySelectorAll('.result-item');
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (items.length > 0) {
+                selectedIndex = (selectedIndex + 1) % items.length;
+                items.forEach((item, i) => {
+                    item.style.background = i === selectedIndex ? '#f0f7ff' : '';
+                });
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (items.length > 0) {
+                selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                items.forEach((item, i) => {
+                    item.style.background = i === selectedIndex ? '#f0f7ff' : '';
+                });
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (selectedIndex >= 0 && selectedIndex < items.length) {
+                items[selectedIndex].click();
+            }
+        } else if (e.key === 'Escape') {
+            results.classList.remove('active');
+        }
+    }
+
+    function handleBlur() {
+        setTimeout(() => {
+            if (hidden.value && input.value) {
+                const isValid = data.some(item =>
+                    (item[displayField] || '') === input.value && item.id === hidden.value
+                );
+                if (isValid) {
+                    input.classList.add('valid');
+                    input.classList.remove('invalid');
+                } else {
+                    input.classList.add('invalid');
+                    input.classList.remove('valid');
+                    hidden.value = '';
+                }
+            } else if (input.value) {
+                input.classList.add('invalid');
+                input.classList.remove('valid');
+                hidden.value = '';
+            }
+        }, 200);
+    }
+
+    input.addEventListener('input', handleInput);
+    input.addEventListener('keydown', handleKeydown);
+    input.addEventListener('blur', handleBlur);
+
+    document.addEventListener('click', function(e) {
+        if (!results.contains(e.target) && e.target !== input) {
+            results.classList.remove('active');
         }
     });
+}
+
+// Инициализация всего при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    createFilterSearchHandler('id_load_search', 'id_load-results', 'id_load', filterLoadData, 'name');
+    createFilterSearchHandler('id_typeved_search', 'id_typeved-results', 'id_typeved', filterTypevedData, 'name');
+
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+            const idWorkload = document.getElementById('id_load');
+            const idTypeved = document.getElementById('id_typeved');
+            const semester = document.getElementById('id_semester');
+
+            let errors = [];
+
+            if (!idWorkload || !idWorkload.value) {
+                errors.push('Пожалуйста, выберите нагрузку');
+            }
+
+            if (!idTypeved || !idTypeved.value) {
+                errors.push('Пожалуйста, выберите тип ведомости');
+            }
+
+            if (!semester || !semester.value) {
+                errors.push('Пожалуйста, укажите семестр');
+            } else if (semester.value < 1 || semester.value > 10) {
+                errors.push('Семестр должен быть от 1 до 10');
+            }
+
+            if (errors.length > 0) {
+                e.preventDefault();
+                alert(errors.join('\n'));
+            }
+        });
+    }
+});
 </script>
 {% endif %}
 
